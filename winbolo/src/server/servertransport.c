@@ -71,7 +71,11 @@ static unsigned long getaddrbyany(char *sp_name)  {
   for(i=0;i<100;i++) {                       
     sp_he = gethostbyname(sp_name);
     if(!(sp_he)) {
+#ifdef _WIN32
+      Sleep(1000);
+#else
       sleep(1);
+#endif
      if(i>=3) {
        return(0);
      }
@@ -138,7 +142,12 @@ bool serverTransportCreate(unsigned short port, char *addrToUse) {
   /* Set to non blocking */
   if (returnValue == TRUE) {
     noBlock = NO_BLOCK_SOCK;
+#ifdef _WIN32
+    u_long ioctl_arg = 1;
+    ret = ioctlsocket(sockUdp, FIONBIO, &ioctl_arg);
+#else
     ret = fcntl(sockUdp, F_SETFL, O_NONBLOCK | fcntl(sockUdp, F_GETFL));
+#endif
     if (ret == SOCKET_ERROR) {
       returnValue = FALSE;
     }

@@ -31,7 +31,7 @@
 #include "brain.h"
 #include  <windows.h>
 #include <ddraw.h>
-#define DIRECTINPUT_VERSION 0x0300
+#define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 #include "resource.h"
 #include "DirectXAVI.h"
@@ -121,8 +121,8 @@ Boolean saving, opt1, opt2;
 
 
 /* Direct Input Stuff */
-LPDIRECTINPUT lpDI = NULL;
-LPDIRECTINPUTDEVICE lpDIDKeyboard = NULL;
+LPDIRECTINPUT8 lpDI = NULL;
+LPDIRECTINPUTDEVICE8 lpDIDKeyboard = NULL;
 keyItems keys;
 
 
@@ -463,7 +463,7 @@ Boolean brainOpen(keyItems *keys) {
 
   /* Direct Input Setup */
   if (returnValue == TRUE) {
-    if (FAILED(DirectInputCreate(brainInst, DIRECTINPUT_VERSION, &lpDI, NULL))) {
+    if (FAILED(DirectInput8Create(brainInst, DIRECTINPUT_VERSION, &IID_IDirectInput8, &lpDI, NULL))) {
 	    returnValue = FALSE;
   	}
   }

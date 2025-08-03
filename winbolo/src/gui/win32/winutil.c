@@ -26,7 +26,7 @@
 *********************************************************/
 
 #include <windows.h>
-#define DIRECTINPUT_VERSION 0x0300
+#define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 #include "..\..\bolo\global.h"
 #include "..\winbolo.h"
@@ -610,7 +610,7 @@ void winUtilOpenHelpFile(HINSTANCE appInst, HWND hWnd) {
     strcpy(file, "file://");
     strcat(file, path);
     strcat(file, "/Manual.pdf");
-    if (ShellExecute(NULL, "open", file, NULL, NULL, SW_SHOW) <= 32) {
+    if ((INT_PTR)ShellExecute(NULL, "open", file, NULL, NULL, SW_SHOW) <= 32) {
       MessageBoxA(hWnd, langGetText(STRERR_HELPFILE), DIALOG_BOX_TITLE, MB_ICONINFORMATION); 
     }
   } else {

@@ -25,9 +25,10 @@
 *  Keyboard and mouse routines (ie Direct Input routines)
 *********************************************************/
 
-#define DIRECTINPUT_VERSION 0x0300
+#define DIRECTINPUT_VERSION 0x0800
 
 #include <windows.h>
+#include <initguid.h>
 #include <dinput.h>
 #include "..\input.h"
 #include "..\lang.h"
@@ -41,8 +42,8 @@
 
 
 tankButton tb;
-LPDIRECTINPUT lpDI = NULL;
-LPDIRECTINPUTDEVICE lpDIDKeyboard = NULL;
+LPDIRECTINPUT8 lpDI = NULL;
+LPDIRECTINPUTDEVICE8 lpDIDKeyboard = NULL;
 static BYTE scrollKeyCount = 0; /* Used for screen scrolling */
 
 
@@ -65,7 +66,7 @@ bool inputSetup(HINSTANCE appInst, HWND appWnd) {
   returnValue = TRUE;
   scrollKeyCount = 0;
 
-  if (FAILED(DirectInputCreate(appInst, DIRECTINPUT_VERSION, &lpDI, NULL))) {
+  if (FAILED(DirectInput8Create(appInst, DIRECTINPUT_VERSION, &IID_IDirectInput8, &lpDI, NULL))) {
     MessageBoxA(NULL, langGetText(STR_GAMEFRONT_INPUTERR_CREATE), DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);
     returnValue = FALSE;
   }

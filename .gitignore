@@ -1,2 +1,6 @@
 *.o
 winbolo/src/server/linbolods
+.vs/
+BoloSounds.aps
+out/
+CMakeSettings.json

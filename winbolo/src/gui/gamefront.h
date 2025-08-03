@@ -29,7 +29,7 @@
 #define GAMEFRONT_H
 
 #include <windows.h>
-#define DIRECTINPUT_VERSION 0x0300
+#define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 #include "..\bolo\global.h"
 #include "..\bolo\backend.h"
