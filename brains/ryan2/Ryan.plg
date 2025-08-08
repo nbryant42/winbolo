@@ -1,0 +1,191 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: StdAutoPilot - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating command line "rc.exe /l 0x409 /fo"Release/BRAIN.res" /d "NDEBUG" "D:\linbolo\sample_code\Ryan\BRAIN.RC"" 
+Creating temporary file "C:\WINDOWS\TEMP\RSPB085.TMP" with contents
+[
+/nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /Fo"Release/" /Fd"Release/" /FD /c 
+"D:\linbolo\sample_code\Ryan\actionqueue.c"
+"D:\linbolo\sample_code\Ryan\attackpill.c"
+"D:\linbolo\sample_code\Ryan\attacktank.c"
+"D:\linbolo\sample_code\Ryan\baseguard.c"
+"D:\linbolo\sample_code\Ryan\getman.c"
+"D:\linbolo\sample_code\Ryan\gettrees.c"
+"D:\linbolo\sample_code\Ryan\heap.c"
+"D:\linbolo\sample_code\Ryan\issort.c"
+"D:\linbolo\sample_code\Ryan\laypill.c"
+"D:\linbolo\sample_code\Ryan\pickup.c"
+"D:\linbolo\sample_code\Ryan\pointtank.c"
+"D:\linbolo\sample_code\Ryan\qksort.c"
+"D:\linbolo\sample_code\Ryan\refuel.c"
+"D:\linbolo\sample_code\Ryan\repair.c"
+"D:\linbolo\sample_code\Ryan\Ryan.c"
+"D:\linbolo\sample_code\Ryan\scout.c"
+"D:\linbolo\sample_code\Ryan\setgui.c"
+"D:\linbolo\sample_code\Ryan\settings.c"
+"D:\linbolo\sample_code\Ryan\travelto.c"
+"D:\linbolo\sample_code\Ryan\update.c"
+]
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSPB085.TMP" 
+Creating temporary file "C:\WINDOWS\TEMP\RSPB090.TMP" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /dll /incremental:no /pdb:"Release/Ryan2.pdb" /machine:I386 /out:"Release/Ryan2.brn" /implib:"Release/Ryan2.lib" 
+.\Release\actionqueue.obj
+.\Release\attackpill.obj
+.\Release\attacktank.obj
+.\Release\baseguard.obj
+.\Release\getman.obj
+.\Release\gettrees.obj
+.\Release\heap.obj
+.\Release\issort.obj
+.\Release\laypill.obj
+.\Release\pickup.obj
+.\Release\pointtank.obj
+.\Release\qksort.obj
+.\Release\refuel.obj
+.\Release\repair.obj
+.\Release\Ryan.obj
+.\Release\scout.obj
+.\Release\setgui.obj
+.\Release\settings.obj
+.\Release\travelto.obj
+.\Release\update.obj
+.\Release\BRAIN.res
+]
+Creating command line "link.exe @C:\WINDOWS\TEMP\RSPB090.TMP"
+<h3>Output Window</h3>
+Compiling resources...
+Compiling...
+actionqueue.c
+attackpill.c
+attacktank.c
+baseguard.c
+getman.c
+gettrees.c
+heap.c
+issort.c
+laypill.c
+pickup.c
+pointtank.c
+qksort.c
+refuel.c
+repair.c
+Ryan.c
+scout.c
+setgui.c
+settings.c
+travelto.c
+update.c
+Generating Code...
+D:\linbolo\sample_code\Ryan\travelto.c(220) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\travelto.c(302) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\travelto.c(302) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\travelto.c(531) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\travelto.c(531) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\travelto.c(877) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\travelto.c(877) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\scout.c(95) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\scout.c(95) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\scout.c(95) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\scout.c(95) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\scout.c(99) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\scout.c(99) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\scout.c(99) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\scout.c(99) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\scout.c(110) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\scout.c(110) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\repair.c(115) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\repair.c(115) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\repair.c(115) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\repair.c(115) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\repair.c(136) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\repair.c(136) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\refuel.c(184) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\refuel.c(184) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\refuel.c(184) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\refuel.c(184) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\refuel.c(202) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\refuel.c(202) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\pickup.c(124) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\pickup.c(124) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\pickup.c(124) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\pickup.c(124) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\pickup.c(168) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\pickup.c(168) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\laypill.c(141) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\laypill.c(141) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\laypill.c(144) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\laypill.c(144) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\laypill.c(208) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\laypill.c(208) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\laypill.c(208) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\laypill.c(208) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\laypill.c(226) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\laypill.c(226) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\laypill.c(244) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\laypill.c(244) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\laypill.c(244) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\laypill.c(244) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\laypill.c(288) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\laypill.c(288) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\laypill.c(364) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\laypill.c(364) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\laypill.c(364) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\laypill.c(364) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\laypill.c(389) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\laypill.c(389) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\gettrees.c(66) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\gettrees.c(66) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\gettrees.c(83) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\gettrees.c(83) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\gettrees.c(83) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\gettrees.c(83) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\gettrees.c(94) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\gettrees.c(94) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\getman.c(58) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\getman.c(58) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\getman.c(58) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\getman.c(58) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\getman.c(80) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\getman.c(80) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\baseguard.c(61) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\baseguard.c(61) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\baseguard.c(61) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\baseguard.c(61) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\baseguard.c(76) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\baseguard.c(76) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\attacktank.c(98) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\attacktank.c(98) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\attackpill.c(86) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\attackpill.c(86) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\attackpill.c(86) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\attackpill.c(86) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\attackpill.c(108) : warning C4761: integral size mismatch in argument; conversion supplied
+D:\linbolo\sample_code\Ryan\attackpill.c(108) : warning C4761: integral size mismatch in argument; conversion supplied
+Linking...
+   Creating library Release/Ryan2.lib and object Release/Ryan2.exp
+Creating temporary file "C:\WINDOWS\TEMP\RSPB133.BAT" with contents
+[
+@echo off
+install.bat
+]
+Creating command line "C:\WINDOWS\TEMP\RSPB133.BAT"
+
+"Installing..."
+Path not found
+Invalid directory
+File not found
+Invalid directory
+
+
+
+<h3>Results</h3>
+Ryan2.brn - 0 error(s), 85 warning(s)
+</pre>
+</body>
+</html>

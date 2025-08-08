@@ -1,0 +1,5 @@
+echo "Installing..."
+del "C:\WinBolo9\Brains\Ryan2.brn"
+copy "Release\Ryan2.brn" "C:\WinBolo9\Brains\"
+del "C:\WinBolo\Brains\Ryan2.brn"
+copy "Release\Ryan2.brn" "C:\WinBolo\Brains\"

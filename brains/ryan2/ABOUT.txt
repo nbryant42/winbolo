@@ -1,0 +1,21 @@
+Ryan2   2.4.3
+http://ryan2.servehttp.com
+
+	I am currently trying to keep up with my studies at Montana State University.  Hopefully I should get some time to work on the project over christmas break, but we'll just have to see.
+	Please e-mail me with any bugs you may find in the program. (rstout@cybernet1.com)  Please send me details about what causes these bugs and if possible how to duplicate it.  Thanks for your help.
+
+	Ryan2 is a project that I started about a year ago.  Programming is something that I really enjoy doing, and I also enjoy bolo, so I knew that this would be a fun project to do.
+     At the moment, the project is still in development, and you may knotice some bugs.  The autopilot uses many different techniques to achieve its task.  The basic path finding algorithum it uses is called an A* (star) algorithum.  It has been somewhat modified, but works quite well.  The autopilot also uses a very advanced priority queue system to determine what action to take next.  At this moment, the tank can:
+- Attack Pills
+- Attack Tanks
+- Retrieve Lost Builders
+- Lay Pills/Build Bases
+- Pickup Pills
+- Refuel
+- Explore
+- Repair Pillboxes
+- Get Trees
+- Build Roads in some cases
+     In the next version, the tank should be able to build roads a little better, build walls, and it will have an improved priority system.  I am also working on trying to get all of the bugs out of the basic traveling algorithum.  Ryan2 was origionally written in Linux using the gcc compiler.  However recently I have managed to port it to windows.  It was actually a fairly easy port.  I use Visual C++ 6 to compile the brain on Windows.  If you are interested in the source, it can be downloaded from http://ryan2.servehttp.com
+
+     About Me:  I have enjoyed programming for what seems like forever.  I also enjoy snowboarding, playing guitar and drums, and putting on retreats.  I just finished with a year of traveling retreat ministry with the catholoc church.  It was an amazing and incredible experence, from which I learned a lot.

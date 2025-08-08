@@ -1,0 +1,262 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DIALOGUPDATE DIALOG DISCARDABLE  0, 0, 275, 145
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Check for Updates"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,113,124,50,14
+    EDITTEXT        IDC_MAIN,7,19,164,104,ES_MULTILINE | ES_AUTOVSCROLL | 
+                    ES_READONLY | ES_WANTRETURN | NOT WS_BORDER
+    CTEXT           "Ryan 2.4.2",IDC_STATIC,7,7,261,12
+    CONTROL         108,IDC_STATIC,"Static",SS_BITMAP,172,19,96,118
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_DIALOGUPDATE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 268
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 138
+        HORZGUIDE, 19
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_RYAN1               BITMAP  DISCARDABLE     "mvc-020s.bmp"
+IDB_RYAN2               BITMAP  DISCARDABLE     "mvc-030s.bmp"
+IDB_RYAN3               BITMAP  DISCARDABLE     "mvc-032s.bmp"
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (Australia) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENA)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUT DIALOG DISCARDABLE  0, 0, 303, 227
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About Ryan2"
+FONT 8, "MS Sans Serif"
+BEGIN
+    PUSHBUTTON      "OK",IDOK,26,206,50,14
+    CONTROL         106,IDC_STATIC,"Static",SS_BITMAP,168,131,128,89
+    CONTROL         107,IDC_STATIC,"Static",SS_BITMAP,7,7,96,118
+    EDITTEXT        IDC_EDIT_MAIN,107,7,189,118,ES_MULTILINE | ES_READONLY | 
+                    ES_WANTRETURN | WS_VSCROLL
+    LTEXT           "     If you have any questions, feel free to e-mail me at rstout@cybernet1.com.  I will be happy to answer any questions you might have.\n\nThanks,\n     Ryan Stout",
+                    IDC_STATIC,7,131,155,73
+    PUSHBUTTON      "View Change Log",ID_CHANGE,79,206,68,14
+END
+
+IDD_DEBUGWINDOW DIALOG DISCARDABLE  0, 0, 240, 194
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Ryan2"
+FONT 8, "MS Sans Serif"
+BEGIN
+    PUSHBUTTON      "OK",IDOK,92,173,50,14
+    LTEXT           "Debug output:",IDC_STATIC,7,7,226,10
+    EDITTEXT        IDC_EDIT_MAIN,7,20,226,147,ES_MULTILINE | ES_AUTOHSCROLL | 
+                    WS_VSCROLL
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_ABOUT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 296
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 220
+        HORZGUIDE, 125
+        HORZGUIDE, 131
+    END
+
+    IDD_DEBUGWINDOW, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 233
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 187
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_BRAIN_MENU MENU DISCARDABLE 
+BEGIN
+    MENUITEM "&About",                      ID_BRAINTEMPLATE_ABOUT
+    POPUP "Restrictions"
+    BEGIN
+        MENUITEM "Attack Pillboxes",            ID_RESTRICTIONS_ATTACKPILLBOXES
+
+        MENUITEM "Build Pillboxes",             ID_RESTRICTIONS_BUILDPILLBOXES
+
+        MENUITEM "Pickup Pillboxes",            ID_RESTRICTIONS_PICKUPPILLBOXES
+
+        MENUITEM "Lay Mines",                   ID_RESTRICTIONS_LAYMINES
+        , GRAYED
+        MENUITEM "Build Roads",                 ID_RESTRICTIONS_CLEARMINES
+        MENUITEM "Attack Tanks",                ID_RESTRICTIONS_ATTACKTANKS
+    END
+    MENUITEM SEPARATOR
+    MENUITEM "Assasin",                     ID_ASSASIN, GRAYED
+    MENUITEM "Base Guard",                  ID_BASEGUARD
+    MENUITEM "Architech",                   ID_ARCHITECH, GRAYED
+    MENUITEM "Pillbox Hunter",              ID_PILLBOXHUNTER, GRAYED
+    MENUITEM "Explorer",                    ID_EXPLORER, GRAYED
+    MENUITEM SEPARATOR
+    MENUITEM "DebugWindow",                 ID_DEBUGWINDOW
+    MENUITEM "Check for Update",            ID_CHECKFORUPDATE
+END
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 2,4,1,0
+ PRODUCTVERSION 2,4,1,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "Ryan2 -- Ryan Stouts Autopilot\0"
+            VALUE "CompanyName", "none\0"
+            VALUE "FileDescription", "WinBolo Autopilot.\0"
+            VALUE "FileVersion", "2.4.1\0"
+            VALUE "InternalName", "Ryan2\0"
+            VALUE "LegalCopyright", "\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "Ryan2.brn\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "\0"
+            VALUE "ProductVersion", "2.4.1\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+#endif    // English (Australia) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

@@ -1,0 +1,25 @@
+Change Log
+
+Version 2.4.3
+
+** Ok, so I got a little free time over thanksgiving break to work on a new versoin, expect a better version over christmas break.
+11/29/02 - Fixed the bug where tank drives off after getting guy
+11/29/02 - Added the ability to build roads
+11/29/02 - Rebuild priority system and changed many values
+11/29/02 - Made pillbox pickup more aggresive
+11/29/02 - Fixed the update function
+
+
+Version 2.4.2
+08/29/02 - Fixed get man only once bug.
+08/29/02 - Added Base Guard function.
+08/29/02 - Fixed Menu options in windows.
+08/28/02 - Added Repair Pillbox function.
+08/28/02 - Fixed (somewhat) tank flondering when getting on boats.
+08/28/02 - Fixed tank killing allies bug.
+08/28/02 - Added function to get trees.
+08/28/02 - Fixed Base Laying Algorithum.
+08/28/02 - Added Check for Update feature.
+08/28/02 - Changed About Box - now includes changelog under windows
+08/28/02 - Improved Base Building algorithum.  Will now pick base to build pills around based on how much grass/road, if you already have pills there, and if a non-ally has pills there.
+08/28/02 - Fixed bug that caused tank to get stuck on walls along water.

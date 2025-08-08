@@ -1,0 +1,208 @@
+<file>
+filename=/home/ryan/libcu30-1.0/src/coder.cpp
+over_ride=0
+bracketmatch=1
+highlight=1
+use_spaces=0
+tab_stop=4
+line=0
+directory=file:///home/ryan/libcu30-1.0/src/
+compiler=glimmerout g++ -g %2 -o %3 2>&1
+debugger=%term% gdb %3
+execution=%term% %1/%3
+</file>
+<file>
+filename=/home/ryan/libcu30-1.0/src/decoder.cpp
+over_ride=0
+bracketmatch=1
+highlight=1
+use_spaces=0
+tab_stop=4
+line=159
+directory=file:///home/ryan/libcu30-1.0/src/
+compiler=glimmerout g++ -g %2 -o %3 2>&1
+debugger=%term% gdb %3
+execution=%term% %1/%3
+</file>
+<file>
+filename=/home/ryan/libcu30-1.0/src/encoder.cpp
+over_ride=0
+bracketmatch=1
+highlight=1
+use_spaces=0
+tab_stop=4
+line=362
+directory=file:///home/ryan/libcu30-1.0/src/
+compiler=glimmerout g++ -g %2 -o %3 2>&1
+debugger=%term% gdb %3
+execution=%term% %1/%3
+</file>
+<file>
+filename=/home/ryan/libcu30-1.0/src/HuffBuf.cpp
+over_ride=0
+bracketmatch=1
+highlight=1
+use_spaces=0
+tab_stop=4
+line=131
+directory=file:///home/ryan/libcu30-1.0/src/
+compiler=glimmerout g++ -g %2 -o %3 2>&1
+debugger=%term% gdb %3
+execution=%term% %1/%3
+</file>
+<file>
+filename=/home/ryan/libcu30-1.0/src/HuffCodeDe.cpp
+over_ride=0
+bracketmatch=1
+highlight=1
+use_spaces=0
+tab_stop=4
+line=72
+directory=file:///home/ryan/libcu30-1.0/src/
+compiler=glimmerout g++ -g %2 -o %3 2>&1
+debugger=%term% gdb %3
+execution=%term% %1/%3
+</file>
+<file>
+filename=/home/ryan/libcu30-1.0/src/HuffCodeEn.cpp
+over_ride=0
+bracketmatch=1
+highlight=1
+use_spaces=0
+tab_stop=4
+line=71
+directory=file:///home/ryan/libcu30-1.0/src/
+compiler=glimmerout g++ -g %2 -o %3 2>&1
+debugger=%term% gdb %3
+execution=%term% %1/%3
+</file>
+<file>
+filename=/home/ryan/libcu30-1.0/src/HuffNode.cpp
+over_ride=0
+bracketmatch=1
+highlight=1
+use_spaces=0
+tab_stop=4
+line=81
+directory=file:///home/ryan/libcu30-1.0/src/
+compiler=glimmerout g++ -g %2 -o %3 2>&1
+debugger=%term% gdb %3
+execution=%term% %1/%3
+</file>
+<file>
+filename=/home/ryan/libcu30-1.0/src/HuffStat.cpp
+over_ride=0
+bracketmatch=1
+highlight=1
+use_spaces=0
+tab_stop=4
+line=93
+directory=file:///home/ryan/libcu30-1.0/src/
+compiler=glimmerout g++ -g %2 -o %3 2>&1
+debugger=%term% gdb %3
+execution=%term% %1/%3
+</file>
+<file>
+filename=/home/ryan/libcu30-1.0/src/HuffTree.cpp
+over_ride=0
+bracketmatch=1
+highlight=1
+use_spaces=0
+tab_stop=4
+line=674
+directory=file:///home/ryan/libcu30-1.0/src/
+compiler=glimmerout g++ -g %2 -o %3 2>&1
+debugger=%term% gdb %3
+execution=%term% %1/%3
+</file>
+<file>
+filename=/home/ryan/libcu30-1.0/src/interface.cpp
+over_ride=0
+bracketmatch=1
+highlight=1
+use_spaces=0
+tab_stop=4
+line=0
+directory=file:///home/ryan/libcu30-1.0/src/
+compiler=glimmerout g++ -g %2 -o %3 2>&1
+debugger=%term% gdb %3
+execution=%term% %1/%3
+</file>
+<file>
+filename=/home/ryan/libcu30-1.0/src/MotionCompensation.cpp
+over_ride=0
+bracketmatch=1
+highlight=1
+use_spaces=0
+tab_stop=4
+line=535
+directory=file:///home/ryan/libcu30-1.0/src/
+compiler=glimmerout g++ -g %2 -o %3 2>&1
+debugger=%term% gdb %3
+execution=%term% %1/%3
+</file>
+<file>
+filename=/home/ryan/libcu30-1.0/src/Plane.cpp
+over_ride=0
+bracketmatch=1
+highlight=1
+use_spaces=0
+tab_stop=4
+line=0
+directory=file:///home/ryan/libcu30-1.0/src/
+compiler=glimmerout g++ -g %2 -o %3 2>&1
+debugger=%term% gdb %3
+execution=%term% %1/%3
+</file>
+<file>
+filename=/home/ryan/libcu30-1.0/src/Quantizer.cpp
+over_ride=0
+bracketmatch=1
+highlight=1
+use_spaces=0
+tab_stop=4
+line=143
+directory=file:///home/ryan/libcu30-1.0/src/
+compiler=glimmerout g++ -g %2 -o %3 2>&1
+debugger=%term% gdb %3
+execution=%term% %1/%3
+</file>
+<file>
+filename=/home/ryan/libcu30-1.0/src/RunRec.cpp
+over_ride=0
+bracketmatch=1
+highlight=1
+use_spaces=0
+tab_stop=4
+line=0
+directory=file:///home/ryan/libcu30-1.0/src/
+compiler=glimmerout g++ -g %2 -o %3 2>&1
+debugger=%term% gdb %3
+execution=%term% %1/%3
+</file>
+<file>
+filename=/home/ryan/libcu30-1.0/src/CodecDefaults.h
+over_ride=0
+bracketmatch=1
+highlight=1
+use_spaces=0
+tab_stop=4
+line=0
+directory=file:///home/ryan/libcu30-1.0/src/
+compiler=glimmerout gcc -g %2 -o %3 2>&1
+debugger=%term% gdb %3
+execution=%term% %1/%3
+</file>
+<file>
+filename=/home/ryan/libcu30-1.0/src/coder.h
+over_ride=0
+bracketmatch=1
+highlight=1
+use_spaces=0
+tab_stop=4
+line=0
+directory=file:///home/ryan/libcu30-1.0/src/
+compiler=glimmerout gcc -g %2 -o %3 2>&1
+debugger=%term% gdb %3
+execution=%term% %1/%3
+</file>
