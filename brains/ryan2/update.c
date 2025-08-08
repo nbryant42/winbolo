@@ -36,6 +36,10 @@ int doUpdateCheck(char *buf, int maxdatasize) {
 	a.sin_family = AF_INET;
 	a.sin_port = htons(PORT);
 	h = gethostbyname(ADDRESS);
+
+	if (!h)
+		return 0;
+
 	a.sin_addr.s_addr = *((unsigned long *) h->h_addr);
 	
 	d = connect(s, (struct sockaddr *)&a, sizeof(a));
