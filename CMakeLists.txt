@@ -92,7 +92,7 @@ target_link_libraries(winbolo PRIVATE
     ${ZLIB_LIB}
 )
 
-# Braaaaaains
+# Brain Template.brn
 
 file(GLOB BRAINTEMPLATE_SOURCES
     brains/braintemplate/*.c
@@ -108,6 +108,40 @@ set_target_properties(BrainTemplate PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Brains"
     SUFFIX ".brn"
 )
+
+# make default calling conv stdcall, and keep undecorated export name
+if (MSVC)
+  target_compile_options(BrainTemplate PRIVATE /Gz)
+  target_link_options(BrainTemplate PRIVATE "/EXPORT:BrainMain=_BrainMain@4")
+endif()
+
+# Ryan2.brn
+
+file(GLOB RYAN2_SOURCES
+    brains/ryan2/*.c
+)
+
+add_library(Ryan2 MODULE
+    ${RYAN2_SOURCES}
+)
+target_sources(Ryan2 PRIVATE brains/ryan2/brain.rc)
+
+set_target_properties(Ryan2 PROPERTIES
+    OUTPUT_NAME "Ryan2"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Brains"
+    SUFFIX ".brn"
+)
+
+target_link_libraries(Ryan2 PRIVATE
+    ws2_32
+)
+
+# make default calling conv stdcall, and keep undecorated export name
+if (MSVC)
+  target_compile_options(Ryan2 PRIVATE /Gz)
+  target_link_options(Ryan2 PRIVATE "/EXPORT:BrainMain=_BrainMain@4")
+endif()
+
 
 # BoloSounds.bsd (DLL containing only WAV resources)
 

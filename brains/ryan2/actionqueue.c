@@ -16,7 +16,6 @@
 	/* brain.h -- needed to interact with linbolo */
 	#include "brain.h"
 #endif
-#include "actionqueue.h"
 #include "scout.h"
 #include <stdlib.h>
 #include <string.h>
@@ -30,6 +29,8 @@
 	#include "resource.h"
 
 #endif
+
+#include "actionqueue.h" // must include after any system headers that define printf
 
 const BrainInfo *outinfo;
 

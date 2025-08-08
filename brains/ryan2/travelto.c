@@ -7,12 +7,12 @@
 #include "travelto.h"
 #include "pointtank.h"
 #include "pqueue.h"
-#include "actionqueue.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
 #include "settings.h"
+#include "actionqueue.h" // must include after any system headers that define printf
 
 WORLD_X subtargetx, oldx, lastpositionx, lastshootx, lastbuildx = 0;
 WORLD_Y subtargety, oldy, lastpositiony, lastshooty, lastbuildy = 0;

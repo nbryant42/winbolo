@@ -1,6 +1,5 @@
 #include "update.h"
 #include "brain.h"
-#include "actionqueue.h"
 
 /* Update.c is a function that checks for updates to the program. **/
 
@@ -16,6 +15,7 @@
 
 #include <windows.h>
 #include <stdio.h>
+#include "actionqueue.h" // must include after any system headers that define printf
 
 
 
@@ -69,6 +69,7 @@ int doUpdateCheck(char *buf, int maxdatasize) {
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <stdarg.h>
+#include "actionqueue.h" // must include after any system headers that define printf
 
 
 
