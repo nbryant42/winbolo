@@ -8,6 +8,8 @@
 // It's poorly structured and it uses far too many global variables.
 //
 // Version history:
+// 0.9w1 9th Aug 2025 ported to WinBolo (Menus currently disabled, so s_default settings only)
+//       - Nathan Bryant nbryant nospamdeletethis at optonline dot net
 // 0.9 12th May 1995. Updated to new version 3 Brain interface.
 //     Made it prefer building slightly ahead, rather than under the tank,
 //     when moving at a reasonable speed (speeds >= forest speed)
@@ -24,24 +26,72 @@
 // 0.2 26th May 1993. Released with Bolo 0.99.
 // 0.1 21st Feb 1993. Built into Bolo 0.98 as "Autopilot"
 
-#define AUTO_DEBUG 0
+#define IMPLEMENTED 0 // #if IMPLEMENTED for things that are not yet ported from MacOS, mainly menus
+#define AUTO_DEBUG 0 // also now being used to disable debug windows that are not ported and do not compile
 
 // ****************************************************************************
 
 // Define an integer square root routine
-#include <FixMath.h>
-#define sqrt(X) (FracSqrt(X) >> 15)
+#include "FixMath.h"
+#include <math.h>
 
 // ****************************************************************************
 
-#include "vsprintf.h"
-#include "Brain.h"
+//#include "vsprintf.h"
+#include "brain.h"
+
+#include <stdint.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include <stdlib.h>
+
+// wrappers/stubs/fakes for quick'n'dirty MacOS porting
+typedef void* Ptr;
+typedef size_t Size;
+typedef uint32_t UInt32;
+
+static inline Ptr NewPtr(Size byteCount) {
+	return malloc(byteCount);
+}
+
+static inline void DisposPtr(Ptr p) {
+	free(p);
+}
+
+static inline void BlockMove(void* src, void* dest, size_t n) {
+	memmove(dest, src, n);
+}
+
+// 60 ticks / second, i.e. 1 tick = 16.666... ms
+static inline UInt32 TickCount(void)
+{
+	static ULONGLONG s_base_ms = 0;
+	ULONGLONG now_ms = GetTickCount64();
+	if (s_base_ms == 0) {
+		srand((unsigned int)now_ms);
+		s_base_ms = now_ms - rand() - rand();
+	}
+
+	ULONGLONG rel_ms = now_ms - s_base_ms;
+
+	// exact integer conversion: ticks = floor(ms * 60 / 1000) == floor(ms * 3 / 50)
+	// use 64-bit intermediates, return 32-bit (wraps after ~828 days of relative time)
+	return (UInt32)((rel_ms * 3) / 50);
+}
+
+static inline void SysBeep(int _ignored) {
+	MessageBeep(0xFFFFFFFF);
+}
+
+static inline void Alert(int _ignored, void *_ignored2) {
+	MessageBeep(0xFFFFFFFF);
+}
 
 // ****************************************************************************
 
-#define abs(X) (((X) < 0 ) ? -(X) : (X))
-#define max(X,Y) ((X) > (Y) ? (X) : (Y))
-#define min(X,Y) ((X) < (Y) ? (X) : (Y))
+//#define abs(X) (((X) < 0 ) ? -(X) : (X))
+//#define max(X,Y) ((X) > (Y) ? (X) : (Y))
+//#define min(X,Y) ((X) < (Y) ? (X) : (Y))
 
 // pillpickup_x and y are used to record the location of the last
 // pillbox picked up in case it turns out to be fatal deep sea underneath
@@ -82,10 +132,14 @@ local u_long keys, taps, last_keys, last_taps;
 
 // Menu handling variables and mode settings
 #define MyMenuID 1000
+#if IMPLEMENTED
 local MenuHandle MyMenu;
+#endif
+#if AUTO_DEBUG
 local WindowPtr debugwindow, routewindow;
+#endif
 
-local Boolean do_explain   = AUTO_DEBUG;
+local Boolean do_explain   = 1;
 local Boolean do_showroute = AUTO_DEBUG;
 
 enum
@@ -154,6 +208,7 @@ local const SURROUNDING_SQUARES surrounding =
 // Debugging message routines
 
 #define EXPLAIN_WITH_MESSAGES 0
+#define EXPLAIN_WITH_DEBUG 1
 
 local void sendmessage(u_char *msg)
 	{
@@ -193,6 +248,11 @@ local void explain(char *format, ...)
 #if EXPLAIN_WITH_MESSAGES
 		if (info->sendmessage[0] == 0 && !SameString(buffer, old_buffer))
 			{ sendmessage(buffer); BlockMove(buffer, old_buffer, 1+buffer[0]); }
+#elif EXPLAIN_WITH_DEBUG
+		if (info->sendmessage[0] == 0 && !SameString(buffer, old_buffer))
+		{
+			OutputDebugString(buffer+1); OutputDebugString("\n"); BlockMove(buffer, old_buffer, 1 + buffer[0]);
+		}
 #else
 		if (!SameString(buffer, old_buffer))
 			{
@@ -391,6 +451,7 @@ local short heap_size=0;
 
 local void showroute(CostPoint c, u_short colour, u_short shotpoint)
 	{
+#if AUTO_DEBUG
 	RGBColor col = { 0, 0, 0 };
 	Rect r;
 	u_short lowbits = (colour & 0x7F) * 0x180 + 0x4000;
@@ -405,6 +466,7 @@ local void showroute(CostPoint c, u_short colour, u_short shotpoint)
 	if (shotpoint) InsetRect(&r, 1, 1);
 	PaintRect(&r);
 	//debug("%d,%d Cost %X Realcost %X", c.x, c.y, c.cost, colour);
+#endif
 	}
 
 local void addtoheap(int place, CostPoint new)
@@ -734,6 +796,7 @@ local u_short make_costarray(OBJECT ttype, MAP_X tx, MAP_Y ty, BYTE shells, BYTE
 
 	if (do_showroute && 0)		// This is to show the pillbox fire coverage array
 		{
+#if AUTO_DEBUG
 		static const Pattern grey = { 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA };
 		static const Rect tanklocation = { 112, 112, 120, 120 };
 		CostPoint c;
@@ -745,6 +808,7 @@ local u_short make_costarray(OBJECT ttype, MAP_X tx, MAP_Y ty, BYTE shells, BYTE
 		ForeColor(blackColor);
 		FillRect(&routewindow->portRect, &qd.gray);
 		PaintOval(&tanklocation);
+#endif
 		}
 
 	// Start from (sub)target(s), with zero cost
@@ -817,25 +881,33 @@ local Boolean find_best_route(OBJECT ttype, MAP_X tx, MAP_Y ty, BYTE shells, BYT
 		ca_tankx < 7 || ca_tankx >= COST_ARRAY_SIZE-7 ||
 		ca_tanky < 7 || ca_tanky >= COST_ARRAY_SIZE-7)
 		{
+#if AUTO_DEBUG
 		static const Pattern grey = { 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA };
 		static const Rect tanklocation = { 112, 112, 120, 120 };
+#endif
 		u_short cost;
+#if AUTO_DEBUG
 		GrafPtr old;
+#endif
 		if (do_showroute)
 			{
+#if AUTO_DEBUG
 			GetPort(&old);
 			SetPort(routewindow);
 			ForeColor(blackColor);
 			FillRect(&routewindow->portRect, &qd.gray);
 			PaintOval(&tanklocation);
+#endif
 			}
 		cost = make_costarray(ttype,tx,ty,shells,armour);
 		if (do_showroute)
 			{
+#if AUTO_DEBUG
 			if (costarray_boat) ForeColor(whiteColor);
 			else ForeColor(blackColor);
 			PaintOval(&tanklocation);
 			SetPort(old);
+#endif
 			}
 		// Don't want to spend more than 5% of our time calculating cost arrays
 		max_costarray_age = (TickCount() - costarray_time) * 20;
@@ -844,6 +916,7 @@ local Boolean find_best_route(OBJECT ttype, MAP_X tx, MAP_Y ty, BYTE shells, BYT
 		if (cost == MAX_COST) return(FALSE);
 		}
 
+	Boolean foundBest = FALSE;
 	for (i=0; i<8; i+=step)
 		{
 		BYTE x = ca_tankx+surrounding.s.s8[i].x;
@@ -853,8 +926,13 @@ local Boolean find_best_route(OBJECT ttype, MAP_X tx, MAP_Y ty, BYTE shells, BYT
 				bestcost = squarecost[y][x];
 				bestx = ((WORLD_X)(x + costarray_left)<<8) + 0x80;
 				besty = ((WORLD_Y)(y + costarray_top )<<8) + 0x80;
+				foundBest = TRUE;
 				}
 		}
+	if (!foundBest) {
+		explain("BUG? find_best_route fell through");
+		return FALSE;
+	}
 	i = aim(bestx - (long)info->tankx, besty - (long)info->tanky);
 	i = i + 8 >> 4 & 0xF;
 	direction_votes[i] += 100;
@@ -1020,7 +1098,7 @@ local u_long check_objects(void)
 							reset_progress(&pillprogress[ob->idnum], 6*60*60*60);
 						else if (dist < pilld) { nearest_pill = ob; pilld = dist; }
 						}
-					else if (ob->info & OBJECT_HOSTILE)		// Hostile pillboxes
+					else if (ob->info & OBJECT_HOSTILE || ob->info & OBJECT_NEUTRAL)	// Hostile pillboxes
 						{
 						dist += strength*256;
 						if (dist < pilld) { nearest_pill = ob; pilld = dist; }
@@ -1394,7 +1472,7 @@ local void cast_votes(void)
 local Boolean decide_building(MAP_X x, MAP_Y y)
 	{
 	TERRAIN raw = raw_getmapcell(x, y);
-	if (raw & TERRAIN_MINE) return;
+	if (raw & TERRAIN_MINE) return FALSE;
 	info->build->x = x;
 	info->build->y = y;
 	switch (raw & TERRAIN_MASK)
@@ -1595,7 +1673,7 @@ local void count_votes(void)
 				// Get slightly closer when shooting a tank, in case it tries to run away
 				}
 			}
-		}
+	}
 
 	// 1. If tank facing in wrong direction by more than +/- 45 degrees,
 	//    or if speed is too high, then slow down.
@@ -1765,6 +1843,7 @@ local void brain_think(void)
 
 local void set_brain_menu(short majormode)
 	{
+#if IMPLEMENTED
 	CheckItem(MyMenu, m_default,    (majormode == m_default   ));
 	CheckItem(MyMenu, m_assassin,   (majormode == m_assassin  ));
 	CheckItem(MyMenu, m_pillhunter, (majormode == m_pillhunter));
@@ -1784,6 +1863,7 @@ local void set_brain_menu(short majormode)
 
 	CheckItem(MyMenu, m_explain,      do_explain    );
 	CheckItem(MyMenu, m_route,        do_showroute  );
+#endif
 	}
 
 local short brain_menu(short item)
@@ -1810,13 +1890,17 @@ local short brain_menu(short item)
 		case m_ppoffensive: s.ppoffensive  ^= 1; break;
 		
 		case m_explain    : do_explain     ^= 1;
+#if AUTO_DEBUG
 							if (do_explain) ShowWindow(debugwindow);
 							else HideWindow(debugwindow);
+#endif
 							break;
 		
 		case m_route      : do_showroute   ^= 1;
+#if AUTO_DEBUG
 							if (do_showroute) ShowWindow(routewindow);
 							else HideWindow(routewindow);
+#endif
 							break;
 		
 		default: return(-1);
@@ -1827,19 +1911,27 @@ local short brain_menu(short item)
 
 local Boolean brain_open(void)
 	{
+#if AUTO_DEBUG
 	static Rect debugrect = { 40, 4, 340, 200 };
 	static Rect routerect = { 40, 220, 40+COST_ARRAY_SIZE*8, 220+COST_ARRAY_SIZE*8 };
+#endif
 	Boolean ok;
 	tankprogress = (ProgressInfo *)NewPtr(sizeof(ProgressInfo) * info->max_players);
 	pillprogress = (ProgressInfo *)NewPtr(sizeof(ProgressInfo) * info->max_pillboxes);
 	baseprogress = (ProgressInfo *)NewPtr(sizeof(ProgressInfo) * info->max_refbases);
 
+#if IMPLEMENTED
 	MyMenu = GetMenu(MyMenuID);
 	InsertMenu(MyMenu, 0);
+#endif
 	s = s_default;
+
 	set_brain_menu(m_default);
+#if IMPLEMENTED
 	DrawMenuBar();
-	
+#endif
+
+#if AUTO_DEBUG
 	debugwindow = NewWindow(NULL, &debugrect, info->playernames[info->player_number]->c,
 								FALSE, documentProc, (WindowPtr)(-1), FALSE, 0);
 	
@@ -1857,6 +1949,9 @@ local Boolean brain_open(void)
 		if (do_showroute) ShowWindow(routewindow);
 		}
 	return(ok);
+#else
+	return TRUE;
+#endif
 	}
 
 local void brain_close(void)
@@ -1864,26 +1959,22 @@ local void brain_close(void)
 	if (tankprogress) { DisposPtr((Ptr)tankprogress); tankprogress = NULL; }
 	if (pillprogress) { DisposPtr((Ptr)pillprogress); pillprogress = NULL; }
 	if (baseprogress) { DisposPtr((Ptr)baseprogress); baseprogress = NULL; }
+#if AUTO_DEBUG
 	if (debugwindow)  { DisposeWindow(debugwindow);   debugwindow  = NULL; } 
 	if (routewindow)  { DisposeWindow(routewindow);   routewindow  = NULL; }
+#endif
+#if IMPLEMENTED
 	DeleteMenu(MyMenuID);
 	ReleaseResource((Handle)MyMenu);
 	DrawMenuBar();
+#endif
 	}
 
-// If the Brain is being compiled as an application (ie with BrainFrame) instead
-// of as a standalone code resource (a BBRN) then the symbol "main" is redefined
-// as a subroutine for the BrainFrame to call.
-#if !__option(a4_globals)
-#define main BrainMain
-BoloBrain BrainMain;
-#endif
-
-pascal short main(const BrainInfo *braininfo)
+__declspec(dllexport) short BrainMain(const BrainInfo* brainInfo)
 	{
-	if (braininfo->InfoVersion != CURRENT_BRAININFO_VERSION) return(-1);
+	if (brainInfo->InfoVersion != CURRENT_BRAININFO_VERSION) return(-1);
 
-	info = braininfo;			// copy parameter into global variable
+	info = brainInfo;			// copy parameter into global variable
 	TimeNow = TickCount();		// so we know how long we have been in this call
 
 	switch (info->operation)

@@ -146,6 +146,7 @@ endif()
 
 file(GLOB STANDARD_AUTOPILOT_SOURCES
     brains/standardautopilot/standardAutopilot.c
+    brains/standardautopilot/FixMath.c
 )
 
 add_library(StandardAutopilot MODULE
