@@ -142,6 +142,29 @@ if (MSVC)
   target_link_options(Ryan2 PRIVATE "/EXPORT:BrainMain=_BrainMain@4")
 endif()
 
+# Standard Autopilo.brn
+
+file(GLOB STANDARD_AUTOPILOT_SOURCES
+    brains/standardautopilot/standardAutopilot.c
+)
+
+add_library(StandardAutopilot MODULE
+    ${STANDARD_AUTOPILOT_SOURCES}
+)
+target_sources(StandardAutopilot PRIVATE brains/standardautopilot/brain.rc)
+
+set_target_properties(StandardAutopilot PROPERTIES
+    OUTPUT_NAME "Standard Autopilot"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Brains"
+    SUFFIX ".brn"
+)
+
+# make default calling conv stdcall, and keep undecorated export name
+if (MSVC)
+  target_compile_options(StandardAutopilot PRIVATE /Gz)
+  target_link_options(StandardAutopilot PRIVATE "/EXPORT:BrainMain=_BrainMain@4")
+endif()
+
 
 # BoloSounds.bsd (DLL containing only WAV resources)
 
