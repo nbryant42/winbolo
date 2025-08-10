@@ -28,6 +28,7 @@
 
 #define IMPLEMENTED 0 // #if IMPLEMENTED for things that are not yet ported from MacOS, mainly menus
 #define AUTO_DEBUG 0 // also now being used to disable debug windows that are not ported and do not compile
+#define VERBOSE 0
 
 // ****************************************************************************
 
@@ -853,7 +854,7 @@ local Boolean find_best_route(OBJECT ttype, MAP_X tx, MAP_Y ty, BYTE shells, BYT
 	MAP_X subtarg_x = tx;
 	MAP_Y subtarg_y = ty;
 	int i, step = 1;
-	long bestx, besty;
+	long bestx = -1, besty;
 	u_short bestcost = MAX_COST;
 	TERRAIN best_terrain;
 	static MAP_X nodiagx;		// Don't consider diagonal movement
@@ -916,7 +917,6 @@ local Boolean find_best_route(OBJECT ttype, MAP_X tx, MAP_Y ty, BYTE shells, BYT
 		if (cost == MAX_COST) return(FALSE);
 		}
 
-	Boolean foundBest = FALSE;
 	for (i=0; i<8; i+=step)
 		{
 		BYTE x = ca_tankx+surrounding.s.s8[i].x;
@@ -926,11 +926,10 @@ local Boolean find_best_route(OBJECT ttype, MAP_X tx, MAP_Y ty, BYTE shells, BYT
 				bestcost = squarecost[y][x];
 				bestx = ((WORLD_X)(x + costarray_left)<<8) + 0x80;
 				besty = ((WORLD_Y)(y + costarray_top )<<8) + 0x80;
-				foundBest = TRUE;
 				}
 		}
-	if (!foundBest) {
-		explain("BUG? find_best_route fell through");
+	if (bestx == -1) {
+		//explain("BUG? find_best_route fell through");
 		return FALSE;
 	}
 	i = aim(bestx - (long)info->tankx, besty - (long)info->tanky);
@@ -1205,14 +1204,22 @@ local u_long check_objects(void)
 				if (wants_fight)
 					{
 					shells = 20; armour = required_armour;
+#if VERBOSE
 					explain("Attacking tank: %lu, %lu (%ld, %ld)",
 						tx>>8, ty>>8, (tx-info->tankx)>>8, (ty-info->tanky)>>8);
+#else
+					explain("Attacking tank: %lu, %lu", tx >> 8, ty >> 8);
+#endif
 					decide_shooting(OBJECT_TANK, dist, tx, ty, 9);
 					}
 				else
 					{
+#if VERBOSE
 					explain("Fleeing tank: %lu, %lu (%ld, %ld)",
 						tx>>8, ty>>8, (tx-info->tankx)>>8, (ty-info->tanky)>>8);
+#else
+					explain("Fleeing tank: %lu, %lu", tx >> 8, ty >> 8);
+#endif
 					runaway = TRUE;
 					}
 				}
@@ -1246,8 +1253,12 @@ local u_long check_objects(void)
 				if (wants_fight)
 					{
 					shells = 20; armour = required_armour;
+#if VERBOSE
 					explain("Attacking pill: %lu, %lu (%ld, %ld)",
 						tx>>8, ty>>8, (tx-info->tankx)>>8, (ty-info->tanky)>>8);
+#else
+					explain("Attacking pill: %lu, %lu", tx >> 8, ty >> 8);
+#endif
 					if (strength > 0) decide_shooting(OBJECT_PILLBOX, dist, tx, ty, strength);
 					if (shootit) register_progress(progresstarget, strength);
 					// If we are going to shoot the pillbox, then our criterion of
@@ -1255,8 +1266,12 @@ local u_long check_objects(void)
 					}
 				else
 					{
+#if VERBOSE
 					explain("Fleeing pill: %lu, %lu (%ld, %ld)",
 						tx>>8, ty>>8, (tx-info->tankx)>>8, (ty-info->tanky)>>8);
+#else
+					explain("Fleeing pill: %lu, %lu", tx >> 8, ty >> 8);
+#endif
 					runaway = TRUE;
 					}
 				}
@@ -1271,8 +1286,12 @@ local u_long check_objects(void)
 		ty = nearest_base->y;
 		progresstarget = &baseprogress[nearest_base->idnum];
 		decided = TRUE;
+#if VERBOSE
 		explain("Attack Base: %lu, %lu (%ld, %ld)",
 			tx>>8, ty>>8, (tx-info->tankx)>>8, (ty-info->tanky)>>8);
+#else
+		explain("Attack Base: %lu, %lu", tx >> 8, ty >> 8);
+#endif
 		shells = 20; armour = 0;	// Don't need armour, but do need lots of shells
 		if (nearest_base->refbase_strength) decide_shooting(OBJECT_REFBASE, dist, tx, ty, 30);
 		}
@@ -1291,8 +1310,12 @@ local u_long check_objects(void)
 			for (i=0; i<16; i++) target_distances[i] = 0;
 			}
 		decided = TRUE;
+#if VERBOSE
 		explain("Refuel: %lu, %lu (%ld, %ld)",
 			tx>>8, ty>>8, (tx-info->tankx)>>8, (ty-info->tanky)>>8);
+#else
+		explain("Refuel: %lu, %lu", tx >> 8, ty >> 8);
+#endif
 		shells = 0; armour = 0;	// Don't care what we arrive with, just get us there
 		}
 
@@ -1626,6 +1649,7 @@ local void count_votes(void)
 	Boolean panic = (getmapcellM(nearx,neary) == RIVER || /*info->inboat || */runaway);
 	Boolean gofaster = FALSE, goslower = FALSE;
 	Boolean fullstop = FALSE, killmine = FALSE;
+	static u_long lastFuelTick = 0;
 
 	for (i=1; i<16; i++) if (direction_votes[best] < direction_votes[i]) best = i;
 
@@ -1704,13 +1728,28 @@ local void count_votes(void)
 			if (target_distance < desired_dist + (info->speed<<3)) goslower = TRUE;
 			}
 
-		// 3. If tank is facing in the correct direction, and moving forwards,
-		//    see if it would be helpful to build road or bridge in front of us
+		// 3a. If we want to go, but we are obstructed, then shoot our way out
+		// (avoid shooting friendly pills/bases)
+		if (correction > -8 && correction < 8 && !info->inboat && info->tankobstructed
+			&& t != PILLBOX_T && t != REFBASE_T && info->shells > 0)
+			{
+			// prevent building/etc while blasting
+			shootsoon = TRUE;
+
+			// pick a short range so the range adjuster converges
+			u_long d = findrange((WORLD_X)examinex << 8, (WORLD_Y)examiney << 8, info->tankx, info->tanky);
+			chosen_gunrange = (d < 0x280) ? 2 : 3;
+
+			if (info->man_status == 0 || man_clear_of_shot())
+				{
+				setkey(keys, KEY_shoot);
+				}
+			}
+
+		// 3b. If tank is facing in the correct direction, and moving forwards,
+		//     see if it would be helpful to build road or bridge in front of us
 		if (correction > -8 && correction < 8 && (gofaster || panic))
 			{
-			// If we want to go, but we are obstructed, then shoot our way out
-			if (info->tankobstructed && info->speed < 1) setkey(keys, KEY_shoot);
-
 			if (s.dobuilding && CAN_DO_BUILDING && !shootsoon)
 				{
 				int closest = 1, farthest = 3;
