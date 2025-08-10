@@ -52,7 +52,7 @@ typedef size_t Size;
 typedef uint32_t UInt32;
 
 static inline Ptr NewPtr(Size byteCount) {
-	return malloc(byteCount);
+	return calloc(byteCount, 1);
 }
 
 static inline void DisposPtr(Ptr p) {
@@ -1838,9 +1838,10 @@ local void brain_think(void)
 		{
 		explain("");
 		explain("New tank");
-		for (i=0; i<info->max_players;   i++) reset_progress(&tankprogress[i], 0);
-		for (i=0; i<info->max_pillboxes; i++) reset_progress(&pillprogress[i], 0);
-		for (i=0; i<info->max_refbases;  i++) reset_progress(&baseprogress[i], 0);
+		// Danger, Will Robinson! brains.h falsely claims that indexes are 0..n-1!
+		for (i=0; i<=info->max_players;   i++) reset_progress(&tankprogress[i], 0);
+		for (i=0; i<=info->max_pillboxes; i++) reset_progress(&pillprogress[i], 0);
+		for (i=0; i<=info->max_refbases;  i++) reset_progress(&baseprogress[i], 0);
 		reset_progress(&manrescueprogress, 0);
 		if (s.explore) setscout();
 		still_on_boat  = TRUE;					// Tank starts on boat
@@ -1968,9 +1969,10 @@ local Boolean brain_open(void)
 	static Rect routerect = { 40, 220, 40+COST_ARRAY_SIZE*8, 220+COST_ARRAY_SIZE*8 };
 #endif
 	Boolean ok;
-	tankprogress = (ProgressInfo *)NewPtr(sizeof(ProgressInfo) * info->max_players);
-	pillprogress = (ProgressInfo *)NewPtr(sizeof(ProgressInfo) * info->max_pillboxes);
-	baseprogress = (ProgressInfo *)NewPtr(sizeof(ProgressInfo) * info->max_refbases);
+	// Danger, Will Robinson! brains.h falsely claims that indexes are 0..n-1!
+	tankprogress = (ProgressInfo *)NewPtr(sizeof(ProgressInfo) * (info->max_players + 1));
+	pillprogress = (ProgressInfo *)NewPtr(sizeof(ProgressInfo) * (info->max_pillboxes + 1));
+	baseprogress = (ProgressInfo *)NewPtr(sizeof(ProgressInfo) * (info->max_refbases + 1));
 
 #if IMPLEMENTED
 	MyMenu = GetMenu(MyMenuID);
@@ -2002,7 +2004,7 @@ local Boolean brain_open(void)
 		}
 	return(ok);
 #else
-	return TRUE;
+	return tankprogress && pillprogress && baseprogress;
 #endif
 	}
 
