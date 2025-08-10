@@ -593,6 +593,15 @@ local void examine(CostPoint c)
 				ObjectInfo *ob = find_object(OBJECT_REFBASE,x,y);
 				if (ob && ob->info & OBJECT_HOSTILE) newcost = MAX_COST;
 				}
+			else if (t == PILLBOX_T)
+				{
+				ObjectInfo* pb = find_object(OBJECT_PILLBOX, x, y);
+				if (pb && pb->pillbox_strength > 0) {
+					// Live pillboxes are solid. Don't route "through" them.
+					newcost = MAX_COST;
+				}
+				// else dead pill: leave traversable so pickup works
+				}
 		
 			if (raw & TERRAIN_MINE)
 				{
