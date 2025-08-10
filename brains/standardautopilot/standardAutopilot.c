@@ -1317,7 +1317,12 @@ local u_long check_objects(void)
 		{
 		target_distances[shoot_dir_vote] = dist;
 		// If shooting or VERY close to target then lock on directly
-		if (shootit || dist < 0x100) direction_votes[shoot_dir_vote] += 100;
+		if (shootit || dist < 0x100)
+			{
+			direction_votes[shoot_dir_vote] += 100;
+			return(0);
+			// Return zero to override normal terrain evaluation
+			}
 		else
 			{
 			// find best route to target, if possible
@@ -1325,12 +1330,11 @@ local u_long check_objects(void)
 				{
 				explain("No route");
 				reset_progress(progresstarget, boredomtime);
+				return(MAX_VIS_RANGE);      // let terrain/scouting take over
 				}
-			return(0);
-			// Return zero to override normal terrain evaluation
 			}
+			return(dist); // keep momentum; don't trigger early-exit in cast_votes()
 		}
-	return(dist);
 	}
 
 // ****************************************************************************
