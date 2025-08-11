@@ -8,6 +8,7 @@
 // It's poorly structured and it uses far too many global variables.
 //
 // Version history:
+// 0.9w3 11th Aug 2025 fix trigger-happy behavior in mazes and along walls
 // 0.9w2 11th Aug 2025 various fixes
 // 0.9w1 9th Aug 2025 ported to WinBolo (Menus currently disabled, so s_default settings only)
 //       - Nathan Bryant nbryant nospamdeletethis at optonline dot net
@@ -341,19 +342,51 @@ local inline Boolean has_live_pill_at(MAP_X x, MAP_Y y)
 	return pb && pb->pillbox_strength > 0;
 }
 
-local inline Boolean has_live_pill_adjacent(void) {
-	MAP_X x = info->tankx >> 8;
-	MAP_Y y = info->tanky >> 8;
+local inline Boolean has_base_at(MAP_X x, MAP_Y y)
+{
+	return getmapcellM(x, y) == REFBASE_T;
+}
 
-	for (int x1 = max(0, x - 1); x1 <= min(x + 1, 0xFF); x1++) {
-		for (int y1 = max(0, y - 1); y1 <= min(y + 1, 0xFF); y1++) {
-			if (has_live_pill_at(x1, y1)) {
-				return TRUE;
-			}
-		}
+static WORLD_X last_tx = -1;
+static WORLD_Y last_ty = -1;
+
+static inline Boolean moving(void) {
+	return info->tankx != last_tx || info->tanky != last_ty;
+}
+
+static inline Boolean facing_diagonally(void) {
+	int diff = info->direction & 0x3F;
+	return diff >= 16 && diff <= 48;
+}
+
+// angles are [0..255], not [0..360), this rounds to the nearest 64 ticks=90 degrees,
+// so clamps to the nearest N/S/East/West
+static inline u_char clamp_to_cardinal(u_char a) {
+	// round to nearest multiple of 64 (add 32 then zero lower 6 bits)
+	return (u_char)((a + 32) & 0xC0);
+}
+
+static inline void cardinal_step(u_char dir, int* dx, int* dy) {
+	switch (clamp_to_cardinal(dir)) {
+	case 0x00: *dx = 0; *dy = -1; break; // N
+	case 0x40: *dx = 1; *dy = 0; break; // E
+	case 0x80: *dx = 0; *dy = 1; break; // S
+	default: *dx = -1; *dy = 0; break; // W
 	}
+}
 
-	return FALSE;
+static inline Boolean is_blastable_obstruction(MAP_X x, MAP_Y y) {
+	TERRAIN t = getmapcellM(x, y);
+	//explain("Blastable? %d", t);
+	return (t == BUILDING || t == HALFBUILDING);
+}
+
+static inline Boolean solid_ahead(void) {
+	int dx, dy; cardinal_step(info->direction, &dx, &dy);
+	int x = (int)nearx + dx;
+	int y = (int)neary + dy;
+	if (x < 0 || x > 0xFF || y < 0 || y > 0xFF) return FALSE;
+	return is_blastable_obstruction((MAP_X)x, (MAP_Y)y);
 }
 
 // ****************************************************************************
@@ -1768,27 +1801,19 @@ local void count_votes(void)
 			if (target_distance < desired_dist + (info->speed<<3)) goslower = TRUE;
 			}
 
-		// 3a. If we want to go, but we are obstructed, then shoot our way out (avoid shooting friendly pills/bases)
-		// note there are known issues here with shooting out the diagonal when cornered;
-		// you need to shoot out two or three tiles, not one, but at least this eliminates some basic bugs in
-		// the original version.
+		// 3a. If we want to go, but we are obstructed, then shoot our way out (avoid shooting friendly pills)
 		if (correction > -8 && correction < 8 && !info->inboat && info->tankobstructed
-			&& !has_live_pill_adjacent() && t != REFBASE_T && info->shells > 0)
-			{
+			&& !moving() && !facing_diagonally() && solid_ahead())
+		{
 			// prevent building/etc while blasting
 			shootsoon = TRUE;
 
-			// pick a short range so the range adjuster converges
-			// (this logic causes problems with failing to destroy stuff)
-			//u_long d = findrange((WORLD_X)examinex << 8, (WORLD_Y)examiney << 8, info->tankx, info->tanky);
-			//chosen_gunrange = (d < 0x280) ? 2 : 3;
-
 			if (info->man_status == 0 || man_clear_of_shot())
-				{
+			{
 				setkey(taps, KEY_shoot);
-				//explain("shooting; line 1780");
-				}
+				//explain("yup, shooting.");
 			}
+		}
 
 		// 3b. If tank is facing in the correct direction, and moving forwards,
 		//     see if it would be helpful to build road or bridge in front of us
@@ -1920,6 +1945,9 @@ local void brain_think(void)
 
 	*(info->holdkeys) = keys;
 	*(info->tapkeys ) = taps;
+
+	last_tx = info->tankx;
+	last_ty = info->tanky;
 	
 	thinktime = TickCount() - TimeNow;
 	if (thinktime > 30)
