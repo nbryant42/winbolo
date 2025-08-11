@@ -8,6 +8,7 @@
 // It's poorly structured and it uses far too many global variables.
 //
 // Version history:
+// 0.9w2 11th Aug 2025 various fixes
 // 0.9w1 9th Aug 2025 ported to WinBolo (Menus currently disabled, so s_default settings only)
 //       - Nathan Bryant nbryant nospamdeletethis at optonline dot net
 // 0.9 12th May 1995. Updated to new version 3 Brain interface.
@@ -306,7 +307,15 @@ local u_long findrange(WORLD_X x1, WORLD_Y y1, WORLD_X x2, WORLD_Y y2)
 	return(sqrt(xdiff*xdiff + ydiff*ydiff));
 	}
 
-#define objectrange_to_me(OB) findrange((OB)->x, (OB)->y, info->tankx, info->tanky)
+#define center(w) ( ((w) & 0xFF00) | 0x80 )
+
+local inline u_long objectrange_to_me(ObjectInfo* OB) {
+	if (OB->object == OBJECT_PILLBOX || OB->object == OBJECT_REFBASE) {
+		// these are always centered, but the brain.h convention appears to differ from MacBolo
+		return findrange(center((OB)->x), center((OB)->y), info->tankx, info->tanky);
+	}
+	return findrange((OB)->x, (OB)->y, info->tankx, info->tanky);
+}
 
 // For Mac fixed point trig routines, full circle is 2 * PI * 0x10000
 // We want full circle to be 0x100, so divide by (2 * PI * 0x10000 / 0x100)
@@ -321,12 +330,31 @@ local u_long findrange(WORLD_X x1, WORLD_Y y1, WORLD_X x2, WORLD_Y y2)
 local ObjectInfo *find_object(OBJECT obtype, MAP_X x, MAP_Y y)
 	{
 	ObjectInfo *ob;
-	WORLD_X wx = (WORLD_X)x << 8;
-	WORLD_Y wy = (WORLD_Y)y << 8;
 	for (ob=&info->objects[0]; ob<&info->objects[info->num_objects]; ob++)
-		if (ob->object == obtype && ob->x == wx && ob->y == wy) return(ob);
+		if (ob->object == obtype && (ob->x >> 8) == x && (ob->y >> 8) == y) return(ob);
 	return(NULL);
 	}
+
+local inline Boolean has_live_pill_at(MAP_X x, MAP_Y y)
+{
+	ObjectInfo* pb = find_object(OBJECT_PILLBOX, x, y);
+	return pb && pb->pillbox_strength > 0;
+}
+
+local inline Boolean has_live_pill_adjacent(void) {
+	MAP_X x = info->tankx >> 8;
+	MAP_Y y = info->tanky >> 8;
+
+	for (int x1 = max(0, x - 1); x1 <= min(x + 1, 0xFF); x1++) {
+		for (int y1 = max(0, y - 1); y1 <= min(y + 1, 0xFF); y1++) {
+			if (has_live_pill_at(x1, y1)) {
+				return TRUE;
+			}
+		}
+	}
+
+	return FALSE;
+}
 
 // ****************************************************************************
 
@@ -593,14 +621,10 @@ local void examine(CostPoint c)
 				ObjectInfo *ob = find_object(OBJECT_REFBASE,x,y);
 				if (ob && ob->info & OBJECT_HOSTILE) newcost = MAX_COST;
 				}
-			else if (t == PILLBOX_T)
+			else if (has_live_pill_at(x, y))
 				{
-				ObjectInfo* pb = find_object(OBJECT_PILLBOX, x, y);
-				if (pb && pb->pillbox_strength > 0) {
-					// Live pillboxes are solid. Don't route "through" them.
-					newcost = MAX_COST;
-				}
-				// else dead pill: leave traversable so pickup works
+				// Live pillboxes are solid regardless of allegiance.
+				newcost = MAX_COST;
 				}
 		
 			if (raw & TERRAIN_MINE)
@@ -998,11 +1022,15 @@ local void decide_shooting(OBJECT what, u_long dist, long tx, long ty, short str
 		// Shootsoon is a safety so that the man does not
 		// leave the tank just as we are about to engage an enemy
 		if (dist < 0x900) shootsoon = TRUE;
-		if (dist < 0x200) shootit = TRUE;
+		if (dist < 0x200) { shootit = TRUE; /*explain("shooting; line 1018");*/ }
 		else if (dist < 0x780)
 			{
 			short cost = path_cost(info->tankx, info->tanky, shoot_path_costs, tx, ty, 0x7FFF);
-			if (cost == 0 || strength + 2 * cost < info->shells) shootit = TRUE;
+			if (cost == 0 || strength + 2 * cost < info->shells)
+				{
+				shootit = TRUE;
+				//explain("shooting; line 1025");
+				}
 			}
 		}
 	}
@@ -1309,8 +1337,8 @@ local u_long check_objects(void)
 	if (!decided && refueld < limit_dist)
 		{
 		dist = refueld;
-		tx = nearest_refuel->x;
-		ty = nearest_refuel->y;
+		tx = center(nearest_refuel->x);
+		ty = center(nearest_refuel->y);
 		progresstarget = &baseprogress[nearest_refuel->idnum];
 		// If we're on base; don't get bored
 		if (dist < 0x80)
@@ -1365,8 +1393,9 @@ local u_long check_objects(void)
 				return(MAX_VIS_RANGE);      // let terrain/scouting take over
 				}
 			}
-			return(dist); // keep momentum; don't trigger early-exit in cast_votes()
 		}
+
+	return(dist); // keep momentum; don't trigger early-exit in cast_votes()
 	}
 
 // ****************************************************************************
@@ -1568,7 +1597,7 @@ local void minesweep(Boolean *foundmine, Boolean *doshoot)
 			TERRAIN t = raw & TERRAIN_MASK;
 			
 			// Don't try to shoot through buildings or pillboxes
-			if (t == BUILDING || t == HALFBUILDING || t == PILLBOX_T) break;
+			if (t == BUILDING || t == HALFBUILDING || has_live_pill_at(x, y)) break;
 			
 			if (raw & TERRAIN_MINE)		// If there is a mine on this square...
 				{
@@ -1697,6 +1726,7 @@ local void count_votes(void)
 					{
 					// Tap shoot key, to fire ONE shot at the mine
 					setkey(taps, KEY_shoot);
+					//explain("shooting; line 1721");
 					shotminex = currentminex;
 					shotminey = currentminey;
 					shotminetime = TimeNow;
@@ -1705,6 +1735,7 @@ local void count_votes(void)
 			else				// else shooting tank or pillbox; do this:
 				{
 				setkey(keys, KEY_shoot);
+				//explain("shooting; line 1730");
 				if (shootwhat == OBJECT_PILLBOX) desired_dist = 0x700;
 				else desired_dist = 0x400;
 				// Get slightly closer when shooting a tank, in case it tries to run away
@@ -1737,21 +1768,25 @@ local void count_votes(void)
 			if (target_distance < desired_dist + (info->speed<<3)) goslower = TRUE;
 			}
 
-		// 3a. If we want to go, but we are obstructed, then shoot our way out
-		// (avoid shooting friendly pills/bases)
+		// 3a. If we want to go, but we are obstructed, then shoot our way out (avoid shooting friendly pills/bases)
+		// note there are known issues here with shooting out the diagonal when cornered;
+		// you need to shoot out two or three tiles, not one, but at least this eliminates some basic bugs in
+		// the original version.
 		if (correction > -8 && correction < 8 && !info->inboat && info->tankobstructed
-			&& t != PILLBOX_T && t != REFBASE_T && info->shells > 0)
+			&& !has_live_pill_adjacent() && t != REFBASE_T && info->shells > 0)
 			{
 			// prevent building/etc while blasting
 			shootsoon = TRUE;
 
 			// pick a short range so the range adjuster converges
-			u_long d = findrange((WORLD_X)examinex << 8, (WORLD_Y)examiney << 8, info->tankx, info->tanky);
-			chosen_gunrange = (d < 0x280) ? 2 : 3;
+			// (this logic causes problems with failing to destroy stuff)
+			//u_long d = findrange((WORLD_X)examinex << 8, (WORLD_Y)examiney << 8, info->tankx, info->tanky);
+			//chosen_gunrange = (d < 0x280) ? 2 : 3;
 
 			if (info->man_status == 0 || man_clear_of_shot())
 				{
-				setkey(keys, KEY_shoot);
+				setkey(taps, KEY_shoot);
+				//explain("shooting; line 1780");
 				}
 			}
 
