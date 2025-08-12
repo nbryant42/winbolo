@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(winbolo_client C)
 
-set(CMAKE_C_STANDARD 23) # Seems to work.
+set(CMAKE_C_STANDARD 17) # Seems to work.
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(FATAL_ERROR "This project is currently 32-bit only.")
