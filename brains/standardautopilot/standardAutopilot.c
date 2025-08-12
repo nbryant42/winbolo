@@ -485,14 +485,14 @@ typedef struct			// Used to find best route through cost array
 // above, below and to either side of it
 
 #define COST_ARRAY_SIZE (COST_SEARCH_RANGE + 1 + COST_SEARCH_RANGE)
-#define IN_COSTARRAY(X) ((BYTE)(X) < (BYTE)(COST_ARRAY_SIZE))
+#define IN_COSTARRAY(X) ((unsigned)(X) < (unsigned)(COST_ARRAY_SIZE))
 
-typedef u_char     u_char32   [32];				// Row of 32 unsigned char values
-typedef u_short    u_short32  [32];				// Row of 32 unsigned short values
+typedef u_char     u_charN   [COST_ARRAY_SIZE];				// Row of COST_ARRAY_SIZE unsigned char values
+typedef u_short    u_shortN  [COST_ARRAY_SIZE];				// Row of COST_ARRAY_SIZE unsigned short values
 
-local u_char32  pillcoverage[COST_ARRAY_SIZE];	// Array of rows of pillbox fire coverage
-local u_short32 squarecost  [COST_ARRAY_SIZE];	// Array of rows of cost values
-local u_short32 CPCost      [COST_ARRAY_SIZE];
+local u_charN  pillcoverage[COST_ARRAY_SIZE];	// Array of rows of pillbox fire coverage
+local u_shortN squarecost  [COST_ARRAY_SIZE];	// Array of rows of cost values
+local u_shortN CPCost      [COST_ARRAY_SIZE];
 
 local long costarray_time;		// time array was created
 // position of array on map, position of target on map, and
@@ -507,9 +507,9 @@ local u_char costarray_tankhits;
 // looks quite desirable
 local BYTE ca_tankx, ca_tanky;	// Position of tank in costarray coordinates
 
-#define MAX_HEAP_SIZE 200
+#define MAX_HEAP_SIZE (COST_ARRAY_SIZE * COST_ARRAY_SIZE >> 2)
 local CostPoint cost_heap[MAX_HEAP_SIZE];	// Sorted heap of CostPoints
-local short heap_size=0;
+local int heap_size=0;
 
 local void showroute(CostPoint c, u_short colour, u_short shotpoint)
 	{
@@ -737,9 +737,9 @@ local void examine(CostPoint c)
 
 // ****************************************************************************
 
-typedef void PAINT_FUNCTION(char x1, char x2, u_char32 row);
+typedef void PAINT_FUNCTION(int x1, int x2, u_charN row);
 
-local void p_increment(char x1, char x2, u_char32 row)
+local void p_increment(int  x1, int  x2, u_charN row)
 	{
 	if (x1 > COST_ARRAY_SIZE-1 || x2 < 0) return;
 	if (x1 < 0                ) x1 = 0;					// clip to left edge
@@ -747,13 +747,15 @@ local void p_increment(char x1, char x2, u_char32 row)
 	while (x1<=x2) row[x1++]++;							// increment hit counts in this row
 	}
 
-local void p_clear(char x1, char x2, u_char32 row)
+#if 0
+local void p_clear(int x1, int x2, u_charN row)
 	{
 	if (x1 > COST_ARRAY_SIZE-1 || x2 < 0) return;
 	if (x1 < 0                ) x1 = 0;					// clip to left edge
 	if (x2 > COST_ARRAY_SIZE-1) x2 = COST_ARRAY_SIZE-1;	// clip to right edge
 	while (x1<=x2) row[x1++] = 0;						// clear hit counts in this row
 	}
+#endif
 
 local void paint_circle(PAINT_FUNCTION p, BYTE cx, BYTE cy, BYTE radius)
 	{
@@ -776,12 +778,12 @@ local void paint_circle(PAINT_FUNCTION p, BYTE cx, BYTE cy, BYTE radius)
 		}
 	}
 
-local void scan_boundary(CostPoint c, short direction)
+local void scan_boundary(CostPoint c, int direction)
 	{
 	int i;
 	BYTE *x = &c.x, *y = &c.y;
 	if (direction<0) { x = &c.y; y = &c.x; }
-	for (i=0; i<14; i++)
+	for (i=0; i<COST_SEARCH_RANGE; i++)
 		{
 		if ((*x) == 0 && (*y) > 0) (*y)--;
 		else if ((*y) == COST_ARRAY_SIZE-1) (*x)--;
