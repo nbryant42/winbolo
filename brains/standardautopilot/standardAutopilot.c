@@ -8,6 +8,7 @@
 // It's poorly structured and it uses far too many global variables.
 //
 // Version history:
+// 0.9w4 12th Aug 2025 improve A* gradient descent and base-ignore logic
 // 0.9w3 11th Aug 2025 fix trigger-happy behavior in mazes and along walls
 // 0.9w2 11th Aug 2025 various fixes
 // 0.9w1 9th Aug 2025 ported to WinBolo (Menus currently disabled, so s_default settings only)
@@ -122,7 +123,8 @@ typedef struct
 	} ProgressInfo;
 #define MAX_PROGRESS 0xFFFFFFFF
 local long boredomtime = ATTENTION_SPAN;
-local ProgressInfo *tankprogress, *pillprogress, *baseprogress;
+local ProgressInfo* tankprogress, * pillprogress;
+local ProgressInfo (*baseprogress)[256]; // base idnums are unstable on WinBolo, so we track by [x][y]
 local ProgressInfo scoutingprogress, manrescueprogress;
 //local u_long previous_closest_dist = MAX_VIS_RANGE;
 //local long current_attempt_time;
@@ -1070,6 +1072,10 @@ local void decide_shooting(OBJECT what, u_long dist, long tx, long ty, short str
 		}
 	}
 
+local inline ProgressInfo* getBaseProgress(ObjectInfo* ob) {
+	return &baseprogress[ob->x >> 8][ob->y >> 8];
+}
+
 // Note: mustn't set "shells" (the target requirement) greater than 20 (wanted_shells)
 // or the tank may decide that it doesn't want to refuel because it has > 20 shells
 // but decides it cannot attack its target because it has < (say) 30 shells
@@ -1103,7 +1109,7 @@ local u_long check_objects(void)
 		{ wanted_shells = 40; useful_shells = 1; }
 	
 	// If we have some information about a nearby base (which we are not ignoring)
-	if (info->base && TimeNow - baseprogress[info->base->idnum].ignore_until >= 0)
+	if (info->base && TimeNow - getBaseProgress(info->base)->ignore_until >= 0)
 		{
 		dist = objectrange_to_me(info->base);
 
@@ -1113,12 +1119,12 @@ local u_long check_objects(void)
 			// If we are losing armour (being shot somehow) then ditch this base
 			if (info->armour < last_armour_value)
 				{
-				reset_progress(&baseprogress[info->base->idnum], boredomtime);
+				reset_progress(getBaseProgress(info->base), boredomtime);
 				explain("Abandon base! %d, %d", info->armour, last_armour_value);
 				}
 			// If base has just fully refuelled us, mark it is "not boring"
 			if (info->shells == 40 && info->armour == 8)
-				reset_progress(&baseprogress[info->base->idnum], 0);
+				reset_progress(getBaseProgress(info->base), 0);
 			}
 		
 		// Do we WANT to refuel?
@@ -1131,7 +1137,7 @@ local u_long check_objects(void)
 			else
 				{
 				explain("Refuelling base exhausted");
-				reset_progress(&baseprogress[info->base->idnum], boredomtime);
+				reset_progress(getBaseProgress(info->base), boredomtime);
 				}
 			// else if base can't supply the requirements, mark it boring, so that
 			// after we go far enough away to lose status reporting from it,
@@ -1182,7 +1188,7 @@ local u_long check_objects(void)
 					}
 				break;
 			case OBJECT_REFBASE:
-				if (TimeNow - baseprogress[ob->idnum].ignore_until >= 0 && ob != info->base)
+				if (TimeNow - getBaseProgress(ob)->ignore_until >= 0 && ob != info->base)
 					{
 					if (ob->info & OBJECT_HOSTILE)
 						{
@@ -1356,7 +1362,7 @@ local u_long check_objects(void)
 		dist = based;
 		tx = nearest_base->x;
 		ty = nearest_base->y;
-		progresstarget = &baseprogress[nearest_base->idnum];
+		progresstarget = getBaseProgress(nearest_base);
 		decided = TRUE;
 #if VERBOSE
 		explain("Attack Base: %lu, %lu (%ld, %ld)",
@@ -1374,7 +1380,7 @@ local u_long check_objects(void)
 		dist = refueld;
 		tx = center(nearest_refuel->x);
 		ty = center(nearest_refuel->y);
-		progresstarget = &baseprogress[nearest_refuel->idnum];
+		progresstarget = getBaseProgress(nearest_refuel);
 		// If we're on base; don't get bored
 		if (dist < 0x80)
 			{
@@ -1903,7 +1909,7 @@ local void brain_think(void)
 		// Danger, Will Robinson! brains.h falsely claims that indexes are 0..n-1!
 		for (i=0; i<=info->max_players;   i++) reset_progress(&tankprogress[i], 0);
 		for (i=0; i<=info->max_pillboxes; i++) reset_progress(&pillprogress[i], 0);
-		for (i=0; i<=info->max_refbases;  i++) reset_progress(&baseprogress[i], 0);
+		for (int x = 0; x <= 255; x++) for (int y=0; y<=255; y++) reset_progress(&baseprogress[x][y], 0);
 		reset_progress(&manrescueprogress, 0);
 		if (s.explore) setscout();
 		still_on_boat  = TRUE;					// Tank starts on boat
@@ -2035,9 +2041,9 @@ local Boolean brain_open(void)
 #endif
 	Boolean ok;
 	// Danger, Will Robinson! brains.h falsely claims that indexes are 0..n-1!
-	tankprogress = (ProgressInfo *)NewPtr(sizeof(ProgressInfo) * (info->max_players + 1));
-	pillprogress = (ProgressInfo *)NewPtr(sizeof(ProgressInfo) * (info->max_pillboxes + 1));
-	baseprogress = (ProgressInfo *)NewPtr(sizeof(ProgressInfo) * (info->max_refbases + 1));
+	tankprogress = NewPtr(sizeof(ProgressInfo) * (info->max_players + 1));
+	pillprogress = NewPtr(sizeof(ProgressInfo) * (info->max_pillboxes + 1));
+	baseprogress = NewPtr(sizeof(ProgressInfo) * 256 * 256);
 
 #if IMPLEMENTED
 	MyMenu = GetMenu(MyMenuID);
