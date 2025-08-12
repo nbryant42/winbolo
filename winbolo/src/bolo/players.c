@@ -678,7 +678,8 @@ tankAlliance playersScreenAllience(players *plrs, BYTE playerNum) {
       returnValue = tankNone;
     } else if (playerNum == (*plrs)->myPlayerNum) {
       returnValue = tankSelf;
-    } else if (allienceExist(&((*plrs)->item[(*plrs)->myPlayerNum].allie), playerNum) == TRUE) {
+    } else if ((*plrs)->myPlayerNum < MAX_TANKS &&
+        allienceExist(&((*plrs)->item[(*plrs)->myPlayerNum].allie), playerNum) == TRUE) {
       returnValue = tankAllie;
     } else {
       returnValue = tankEvil;

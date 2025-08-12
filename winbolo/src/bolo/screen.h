@@ -740,7 +740,7 @@ bool screenTankScroll();
 *ARGUMENTS:
 *
 *********************************************************/
-void screenSmoothScrollUpdate();
+//void screenSmoothScrollUpdate();
 
 /*********************************************************
 *NAME:          screenMakeBrainViewData

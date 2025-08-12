@@ -36,6 +36,7 @@
 #include "..\dnsLookups.h"
 #include "..\..\bolo\players.h"
 #include "..\..\bolo\backend.h"
+#include "..\..\bolo\screen.h"
 
 /* There are 1000 miliseconds in a second */ 
 #define SECOND 1000

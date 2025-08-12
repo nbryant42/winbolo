@@ -98,7 +98,7 @@ int netRetransmissions = 0;     /* Number of network Retransmissions */
 int netTotPacketsPerSecond = 0; /* Number of packets per second */
 
 long netLastTokenTime = 0;
-long tknTime;                              /* Time since last token */
+time_t tknTime;                              /* Time since last token */
 
 bool netUseTracker; /* Do we use the tracker or not */
 bool inNetShutdown; /* Are we shutting down - Don't send packets */
