@@ -1002,7 +1002,7 @@ local Boolean find_best_route(OBJECT ttype, MAP_X tx, MAP_Y ty, BYTE shells, BYT
 	}
 	i = aim(bestx - (long)info->tankx, besty - (long)info->tanky);
 	i = i + 8 >> 4 & 0xF;
-	direction_votes[i] += 100;
+	direction_votes[i] += 150;
 	best_terrain = getmapcellW(bestx,besty);
 	if (!info->inboat)
 		{
