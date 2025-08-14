@@ -8,6 +8,8 @@
 // It's poorly structured and it uses far too many global variables.
 //
 // Version history:
+// 0.9w5 14th Aug 2025 revert to ignoring terrain when planning succeeds
+//                     trim boat throttle to avoid rapid unscheduled beaching
 // 0.9w4 12th Aug 2025 improve A* gradient descent and base-ignore logic
 // 0.9w3 11th Aug 2025 fix trigger-happy behavior in mazes and along walls
 // 0.9w2 11th Aug 2025 various fixes
@@ -114,6 +116,11 @@ local BYTE land_direction;		// Initial guess at where the land is
 #define ATTENTION_SPAN (60*20)
 #define MAX_VIS_RANGE 0x7FFF
 #define DEFENSIVE_RANGE 0xA00
+
+// If driving the boat on a diagonal, and not TRYING to beach, we throttle
+// back a hair to prevent clipping a corner for a rapid unscheduled beaching.
+// (max speed is 64, speeds are in 4-increments, and a hair under max prevents beaching.)
+#define BOAT_TURN_MAX_SPEED 60
 
 typedef struct
 	{
@@ -1006,7 +1013,11 @@ local Boolean find_best_route(OBJECT ttype, MAP_X tx, MAP_Y ty, BYTE shells, BYT
 	i = i + 8 >> 4 & 0xF;
 	direction_votes[i] += 100;
 	best_terrain = getmapcellW(bestx,besty);
-	if (!info->inboat)
+	if (info->inboat)
+		{
+		if ((i & 3) && (best_terrain == RIVER || best_terrain == DEEPSEA)) direction_maxspeeds[i] = BOAT_TURN_MAX_SPEED;
+		}
+	else
 		{
 		if (best_terrain == BOAT) direction_maxspeeds[i] = 32;
 		// if (best_terrain == RIVER && info->trees > ?) build a bridge, or a boat??
@@ -1720,8 +1731,9 @@ local void count_votes(void)
 	u_long desired_dist = 0x20;	// Approach bases gently, and don't overshoot
 	BYTE max_speed;
 	char correction = 0;
-	Boolean panic = (getmapcellM(nearx,neary) == RIVER || /*info->inboat || */runaway);
+	Boolean panic = (getmapcellM(nearx,neary) == RIVER && !info->inboat || runaway);
 	Boolean gofaster = FALSE, goslower = FALSE;
+	Boolean tapfaster = FALSE;
 	Boolean fullstop = FALSE, killmine = FALSE;
 	static u_long lastFuelTick = 0;
 
@@ -1779,6 +1791,8 @@ local void count_votes(void)
 			}
 	}
 
+	if (info->inboat && abs(correction) > 4) max_speed = min(max_speed, BOAT_TURN_MAX_SPEED);
+
 	// 1. If tank facing in wrong direction by more than +/- 45 degrees,
 	//    or if speed is too high, then slow down.
 	//    Also, consider building road or bridge under the tank, if necessary
@@ -1797,7 +1811,11 @@ local void count_votes(void)
 		TERRAIN t = getmapcellM(examinex, examiney);
 		if (!info->inboat && t == DEEPSEA) fullstop = TRUE;
 		
-		if (info->inboat) gofaster = TRUE;
+		if (info->inboat) {
+			if (info->speed < max_speed - 8) gofaster = TRUE;
+			else if (info->speed < max_speed) tapfaster = TRUE;
+			else if (abs(correction) <= 4 && !facing_diagonally()) gofaster = TRUE;
+		}
 		else
 			{
 			if (target_distance > desired_dist + (info->speed<<4)) gofaster = TRUE;
@@ -1857,7 +1875,7 @@ local void count_votes(void)
 	else if (panic) setkey(keys, KEY_faster);
 	else
 		{
-		if (gofaster) setkey(keys, KEY_faster);
+		if (gofaster) setkey(keys, KEY_faster); else if (tapfaster) setkey(taps, KEY_faster);
 		if (goslower) setkey(keys, KEY_slower);
 		}
 
