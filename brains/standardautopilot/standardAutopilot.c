@@ -103,7 +103,7 @@ static inline void Alert(int _ignored, void* _ignored2) {
 // pillbox picked up in case it turns out to be fatal deep sea underneath
 
 static const BrainInfo* info;
-static long TimeNow;
+static int TimeNow;
 static MAP_X nearx, pillpickup_x, fatal_x;
 static MAP_Y neary, pillpickup_y, fatal_y;
 static MAP_X tankleftx, tankrightx;
@@ -124,12 +124,12 @@ static BYTE land_direction;		// Initial guess at where the land is
 
 typedef struct
 {
-	u_long remaining_progress;	// Current 'best' point so far
-	long last_progress;			// Last time progress was made
-	long ignore_until;			// when we are bored with something
+	unsigned remaining_progress;	// Current 'best' point so far
+	int last_progress;			// Last time progress was made
+	int ignore_until;			// when we are bored with something
 } ProgressInfo;
 #define MAX_PROGRESS 0xFFFFFFFF
-static long boredomtime = ATTENTION_SPAN;
+static int boredomtime = ATTENTION_SPAN;
 static ProgressInfo* tankprogress, * pillprogress;
 static ProgressInfo(*baseprogress)[256]; // base idnums are unstable on WinBolo, so we track by [x][y]
 static ProgressInfo scoutingprogress, manrescueprogress;
@@ -140,7 +140,7 @@ static ProgressInfo scoutingprogress, manrescueprogress;
 static Boolean can_build_pillbox[NUM_TERRAINS] = { 0,0,1,1, 1,0,1,1, 0,0,0,0, 0,0 };
 
 // Keyboard Control variables
-static u_long keys, taps, last_keys, last_taps;
+static unsigned keys, taps, last_keys, last_taps;
 
 // Menu handling variables and mode settings
 #define MyMenuID 1000
@@ -188,8 +188,8 @@ static BYTE shoot_dir_vote;		// shoot_direction converted to range 0-15
 static BYTE chosen_direction;
 static BYTE flying_shells;		// total number of shells in flight at the moment
 static BYTE incoming_shells;		// total number of shells heading towards us
-static long direction_votes[16];
-static u_long target_distances[16];
+static int direction_votes[16];
+static unsigned target_distances[16];
 static BYTE direction_maxspeeds[16];
 
 static MAP_X scoutx;
@@ -215,6 +215,181 @@ static const SURROUNDING_SQUARES surrounding =
 0,2, -1,2, -2,2, -2,1, -2,0, -2,-1, -2,-2, -1, -2
 };
 
+// goal-hysteresis support structures
+#define GOAL_HOLD_TICKS 60    // ~1 second at 60Hz
+#define SWITCH_ABS_DELTA (12*256) // require ~12 “range units” better to switch (tune)
+#define SWITCH_REL_PCT   10        // or 10% better
+
+typedef enum { GOAL_NONE = 0, GOAL_ATTACK_TANK, GOAL_ATTACK_PILL, GOAL_ATTACK_BASE, GOAL_REFUEL, GOAL_RESCUE_MAN }
+GoalKind;
+
+typedef struct {
+	GoalKind kind;
+	int      id;        // tank/pill idnum if available, else -1
+	MAP_X    x;         // fallback for bases/pills if id unstable
+	MAP_Y    y;
+	uint32_t score;     // last selection score in same units as dist
+	int     lock_until;
+} CurrentGoal;
+
+static CurrentGoal g_goal = { 0 };
+
+static Boolean same_goal_xy(GoalKind k, MAP_X x, MAP_Y y) {
+	return g_goal.kind == k && g_goal.x == x && g_goal.y == y;
+}
+static Boolean same_goal_id(GoalKind k, int id) {
+	return g_goal.kind == k && g_goal.id == id && id >= 0;
+}
+static inline Boolean same_goal(ObjectInfo* candidate, GoalKind kind) {
+	return kind == GOAL_ATTACK_BASE || kind == GOAL_REFUEL ?
+		same_goal_xy(kind, candidate->x >> 8, candidate->y >> 8) :
+		same_goal_id(kind, candidate->idnum);
+}
+static inline Boolean same_goal2(int id, MAP_X x, MAP_Y y, GoalKind kind) {
+	return kind == GOAL_ATTACK_BASE || kind == GOAL_REFUEL ? same_goal_xy(kind, x, y) : same_goal_id(kind, id);
+}
+static void set_goal(GoalKind k, int id, MAP_X x, MAP_Y y, uint32_t score) {
+	if (!same_goal2(id, x, y, k)) g_goal.lock_until = TimeNow + GOAL_HOLD_TICKS;
+	g_goal.kind = k; g_goal.id = id; g_goal.x = x; g_goal.y = y;
+	g_goal.score = score;
+}
+static inline void clear_goal(void) { memset(&g_goal, 0, sizeof(g_goal)); }
+
+static inline Boolean ignored(ProgressInfo* progress) {
+	return TimeNow - progress->ignore_until < 0;
+}
+
+static Boolean want_refuel(BYTE wanted_shells) {
+	return info->shells < wanted_shells || info->armour < 8;
+}
+
+static BYTE pb_required_armor(ObjectInfo* pb) {
+	return (incoming_shells + pb->pillbox_strength) ? (2 + (pb->pillbox_strength + 2) / 3) : 0;
+}
+
+static Boolean wants_pillbox_fight(ObjectInfo* pb) {
+	if (pb == NULL) return FALSE;
+
+	// ???? required_armour USED to say this:
+	// (pilld > DEFENSIVE_RANGE) ? 6 : incoming_shells + 1 + strength/4;
+	// but this made it afraid to pick up dead pillboxes if tank had no armour!
+
+	return info->shells >= pb->pillbox_strength && info->armour >= pb_required_armor(pb);
+}
+
+#define center(w) ( ((w) & 0xFF00) | 0x80 )
+
+static unsigned findrange(WORLD_X x1, WORLD_Y y1, WORLD_X x2, WORLD_Y y2)
+{
+	register int xdiff = (int)x1 - (int)x2;
+	register int ydiff = (int)y1 - (int)y2;
+	return(sqrt(xdiff * xdiff + ydiff * ydiff));
+}
+
+static unsigned objectrange_to_me(ObjectInfo* OB) {
+	if (OB->object == OBJECT_PILLBOX || OB->object == OBJECT_REFBASE) {
+		// these are always centered, but the brain.h convention appears to differ from MacBolo
+		return findrange(center((OB)->x), center((OB)->y), info->tankx, info->tanky);
+	}
+	return findrange((OB)->x, (OB)->y, info->tankx, info->tanky);
+}
+
+static BYTE tank_required_armor(ObjectInfo* tank) {
+	return (objectrange_to_me(tank) > DEFENSIVE_RANGE) ? 6 : incoming_shells;
+}
+
+static Boolean wants_tank_fight(ObjectInfo* tank) {
+	return tank != NULL && info->shells > 5 && info->armour > tank_required_armor(tank);
+}
+
+static ObjectInfo* find_object(OBJECT obtype, MAP_X x, MAP_Y y)
+{
+	ObjectInfo* ob;
+	for (ob = &info->objects[0]; ob < &info->objects[info->num_objects]; ob++)
+		if (ob->object == obtype && (ob->x >> 8) == x && (ob->y >> 8) == y) return(ob);
+	return(NULL);
+}
+
+static ObjectInfo* find_object_id(OBJECT obtype, WORD id)
+{
+	ObjectInfo* ob;
+	for (ob = &info->objects[0]; ob < &info->objects[info->num_objects]; ob++)
+		if (ob->object == obtype && ob->idnum == id) return(ob);
+	return(NULL);
+}
+
+static unsigned calc_max_dist() {
+	return (s.explore || s.attacktanks || s.attackpills || s.attackbases) ? MAX_VIS_RANGE : DEFENSIVE_RANGE;
+}
+
+// limit_dist is to limit our search, so we don't go to
+// the other side of the map for a dead pillbox when
+// there is something more important right next to us.
+static unsigned calc_limit_dist(unsigned max_dist, unsigned based, unsigned refueld) {
+	unsigned limit_dist = max_dist;
+	if (limit_dist > based) limit_dist = based;
+	if (limit_dist > refueld) limit_dist = refueld;
+	limit_dist = (limit_dist * 2) + DEFENSIVE_RANGE;
+	if (limit_dist > max_dist) limit_dist = max_dist;
+	return limit_dist;
+}
+
+// check whether the locked goal from previous tick is no longer valid
+static Boolean goal_is_invalid(BYTE wanted_shells, unsigned limit_dist) {
+	switch (g_goal.kind) {
+
+	case GOAL_ATTACK_PILL: {
+		ObjectInfo* pb = find_object(OBJECT_PILLBOX, g_goal.x, g_goal.y);
+		if (!pb) return TRUE;
+		if (ignored(&pillprogress[g_goal.id])) return TRUE;
+		if (objectrange_to_me(pb) > limit_dist) return TRUE;
+		return !wants_pillbox_fight(pb);
+	}
+
+	case GOAL_ATTACK_TANK: {
+		ObjectInfo* tank = find_object_id(OBJECT_TANK, g_goal.id);
+		if (!tank) return TRUE;
+		if (ignored(&tankprogress[g_goal.id])) return TRUE;
+		if (objectrange_to_me(tank) > limit_dist) return TRUE;
+		return !wants_tank_fight(tank);
+	}
+
+	case GOAL_ATTACK_BASE: {
+		ObjectInfo* base = find_object(OBJECT_REFBASE, g_goal.x, g_goal.y);
+		if (!base) return TRUE;
+		if (ignored(&baseprogress[g_goal.x][g_goal.y])) return TRUE;
+		if (objectrange_to_me(base) > limit_dist) return TRUE;
+		// must still be hostile to keep the goal
+		if ((base->info & OBJECT_HOSTILE) == 0) return TRUE;
+		if (!base->refbase_strength) return TRUE;
+		// need shells to prosecute the attack
+		return !info->shells;
+	}
+
+	case GOAL_REFUEL: {
+		ObjectInfo* base = find_object(OBJECT_REFBASE, g_goal.x, g_goal.y);
+		if (!base) return TRUE;
+		if (ignored(&baseprogress[g_goal.x][g_goal.y])) return TRUE;
+		if (objectrange_to_me(base) > limit_dist) return TRUE;
+		// must be friendly or neutral (or zero-strength hostile) for refuel
+		if ((base->info & OBJECT_HOSTILE) && base->refbase_strength) return TRUE;
+		// still need refuel?
+		return !want_refuel(wanted_shells);
+	}
+
+	case GOAL_RESCUE_MAN: {
+		if (ignored(&manrescueprogress)) return TRUE;
+		if (info->man_status <= 1) return TRUE;
+		unsigned md = findrange(info->man_x, info->man_y, info->tankx, info->tanky);
+		// invalid if close AND not obstructed (i.e., rescue not needed anymore)
+		return (!info->manobstructed) && (md <= 0x200);
+	}
+
+	default:
+		return TRUE;
+	}
+}
+
 // ****************************************************************************
 
 // Debugging message routines
@@ -222,6 +397,7 @@ static const SURROUNDING_SQUARES surrounding =
 #define EXPLAIN_WITH_MESSAGES 0
 #define EXPLAIN_WITH_DEBUG 1
 
+#if 0
 static void sendmessage(u_char* msg)
 {
 	int i;	// Setting player bits to all zero makes this a debugger message
@@ -238,6 +414,7 @@ static void debug(char* format, ...)
 	va_end(ptr);
 	DebugStr(buffer);
 }
+#endif
 
 static Boolean SameString(const unsigned char* a, const unsigned char* b)
 {
@@ -287,6 +464,24 @@ static void explain(char* format, ...)
 	}
 }
 
+static Boolean want_goalswitch(ObjectInfo* candidate, GoalKind kind, uint32_t score) {
+	// If the "new" target is actually the same as current, don't treat as a switch
+	if (g_goal.kind == GOAL_NONE || same_goal(candidate, kind)) return TRUE;
+
+	// Hard debounce during hold window
+	if (TimeNow < g_goal.lock_until) return FALSE;
+
+	// Require a meaningful improvement to switch
+	uint32_t cur = g_goal.score ? g_goal.score : 0xFFFFFFFF;
+	Boolean better_abs = (score + SWITCH_ABS_DELTA < cur);
+	Boolean better_pct = (score * 100 + 1 < cur * (100 - SWITCH_REL_PCT));
+	Boolean result = better_abs || better_pct;
+
+	//if (result) explain("Goal switch: %u beats %u", score, g_goal.score);
+
+	return result;
+}
+
 // ****************************************************************************
 
 // General utility routines
@@ -312,23 +507,6 @@ static TERRAIN raw_getmapcell(MAP_X x, MAP_Y y)
 #define getmapcellW(X,Y) getmapcellM((X)>>8, (Y)>>8)
 #define checkmineW(X,Y)  checkmineM((X)>>8, (Y)>>8)
 
-static u_long findrange(WORLD_X x1, WORLD_Y y1, WORLD_X x2, WORLD_Y y2)
-{
-	register long xdiff = (long)x1 - (long)x2;
-	register long ydiff = (long)y1 - (long)y2;
-	return(sqrt(xdiff * xdiff + ydiff * ydiff));
-}
-
-#define center(w) ( ((w) & 0xFF00) | 0x80 )
-
-static inline u_long objectrange_to_me(ObjectInfo* OB) {
-	if (OB->object == OBJECT_PILLBOX || OB->object == OBJECT_REFBASE) {
-		// these are always centered, but the brain.h convention appears to differ from MacBolo
-		return findrange(center((OB)->x), center((OB)->y), info->tankx, info->tanky);
-	}
-	return findrange((OB)->x, (OB)->y, info->tankx, info->tanky);
-}
-
 // For Mac fixed point trig routines, full circle is 2 * PI * 0x10000
 // We want full circle to be 0x100, so divide by (2 * PI * 0x10000 / 0x100)
 // which is 1608 in decimal
@@ -338,14 +516,6 @@ static inline u_long objectrange_to_me(ObjectInfo* OB) {
 // and return return values in the range +/-128
 #define sin(X) ((short)(FracSin((u_char)(X)*1608L) >> 23))
 #define cos(X) ((short)(FracCos((u_char)(X)*1608L) >> 23))
-
-static ObjectInfo* find_object(OBJECT obtype, MAP_X x, MAP_Y y)
-{
-	ObjectInfo* ob;
-	for (ob = &info->objects[0]; ob < &info->objects[info->num_objects]; ob++)
-		if (ob->object == obtype && (ob->x >> 8) == x && (ob->y >> 8) == y) return(ob);
-	return(NULL);
-}
 
 static inline Boolean has_live_pill_at(MAP_X x, MAP_Y y)
 {
@@ -417,7 +587,7 @@ static BYTE running_man_path[NUM_TERRAINS] = { 99, 99, 4,  4,  1,  2,  4,  1, 99
 static short path_cost(WORLD_X x, WORLD_Y y, Boolean* terraincosts,
 	WORLD_X tx, WORLD_Y ty, WORD maxsteps)
 {
-	BYTE direction = aim(tx - (long)x, ty - (long)y);
+	BYTE direction = aim(tx - (int)x, ty - (int)y);
 	MAP_X lastx = 0, targx = tx >> 8;
 	MAP_Y lasty = 0, targy = ty >> 8;
 	short steps = findrange(tx, ty, x, y) >> 7;	// count in half-square steps
@@ -505,7 +675,7 @@ static u_charN  pillcoverage[COST_ARRAY_SIZE];	// Array of rows of pillbox fire 
 static u_shortN squarecost[COST_ARRAY_SIZE];	// Array of rows of cost values
 static u_shortN CPCost[COST_ARRAY_SIZE];
 
-static long costarray_time;		// time array was created
+static int costarray_time;		// time array was created
 // position of array on map, position of target on map, and
 // subtarget (target, or closest point if target is outside costarray)
 static MAP_X costarray_left, costtarget_x, subtarget_x;
@@ -621,18 +791,18 @@ static void examine(CostPoint c)
 		//Boolean examining_tanksquare = (c.x == ca_tankx && c.y == ca_tanky);
 		MAP_X x = costarray_left + c.x;
 		MAP_Y y = costarray_top + c.y;
-		u_long dx = abs((long)x - (long)nearx);
-		u_long dy = abs((long)y - (long)neary);
-		u_long cpcost, heuristic = max(dx, dy) + min(dx, dy) / 2;
+		unsigned dx = abs((int)x - (int)nearx);
+		unsigned dy = abs((int)y - (int)neary);
+		unsigned cpcost, heuristic = max(dx, dy) + min(dx, dy) / 2;
 		TERRAIN raw = raw_getmapcell(x, y);
 		TERRAIN t = raw & TERRAIN_MASK;
 		short tankshells = info->shells;
 		short tankarmour = info->armour * ARMOUR_UNIT_COST;
 		short hits = pillcoverage[c.y][c.x];
-		long  new_timecost = c.time + route_square_time_costs[t];
+		int  new_timecost = c.time + route_square_time_costs[t];
 		short new_shellcost = c.shells;
 		short new_armourcost = c.armour;
-		long newcost = 0;
+		int newcost = 0;
 		Boolean count_cost = TRUE;
 
 		// The following part of the cost evaluation is skipped if we are:
@@ -643,7 +813,7 @@ static void examine(CostPoint c)
 		// from, the cost of going further is irrelevant
 		if (costarray_targ != SHOOT_NOTHING && (!costarray_boat || !is_wet(t)))
 		{
-			long cost = path_cost((WORLD_X)x << 8, (WORLD_Y)y << 8, shoot_path_costs,
+			int cost = path_cost((WORLD_X)x << 8, (WORLD_Y)y << 8, shoot_path_costs,
 				(WORLD_X)costtarget_x << 8, (WORLD_Y)costtarget_y << 8, 15);
 			if (cost == 0 || c.shells + 2 * cost < info->shells) count_cost = FALSE;
 		}
@@ -941,12 +1111,12 @@ static Boolean find_best_route(OBJECT ttype, MAP_X tx, MAP_Y ty, BYTE shells, BY
 	MAP_X subtarg_x = tx;
 	MAP_Y subtarg_y = ty;
 	int i, step = 1;
-	long bestx = -1, besty;
+	int bestx = -1, besty;
 	u_short bestcost = MAX_COST;
 	TERRAIN best_terrain;
 	static MAP_X nodiagx;		// Don't consider diagonal movement
 	static MAP_Y nodiagy;		// when on this square
-	static long max_costarray_age = 120;	// start with two seconds
+	static int max_costarray_age = 120;	// start with two seconds
 
 	if (info->armour < armour) { explain("Insufficient armour for this objective"); return(FALSE); }
 
@@ -1021,7 +1191,7 @@ static Boolean find_best_route(OBJECT ttype, MAP_X tx, MAP_Y ty, BYTE shells, BY
 		//explain("BUG? find_best_route fell through");
 		return FALSE;
 	}
-	i = aim(bestx - (long)info->tankx, besty - (long)info->tanky);
+	i = aim(bestx - (int)info->tankx, besty - (int)info->tanky);
 	i = i + 8 >> 4 & 0xF;
 	direction_votes[i] += 100;
 	best_terrain = getmapcellW(bestx, besty);
@@ -1043,7 +1213,7 @@ static Boolean find_best_route(OBJECT ttype, MAP_X tx, MAP_Y ty, BYTE shells, BY
 
 // Calling reset_progress unconditionally resets 'progress' count
 // and ignores object for 'ignoretime' ticks. (ignoretime==0 means *don't* ignore)
-static void reset_progress(ProgressInfo* p, long ignoretime)
+static void reset_progress(ProgressInfo* p, int ignoretime)
 {
 	p->remaining_progress = MAX_PROGRESS;
 	// Must forward set last_progress time, or we risk having it
@@ -1053,7 +1223,7 @@ static void reset_progress(ProgressInfo* p, long ignoretime)
 }
 
 // returns TRUE if still making progress
-static Boolean register_progress(ProgressInfo* p, u_long remaining)
+static Boolean register_progress(ProgressInfo* p, unsigned remaining)
 {
 	// if we are still making progress, or this is a stale record that
 	// we haven't touched for a long time, then update it
@@ -1071,7 +1241,7 @@ static Boolean register_progress(ProgressInfo* p, u_long remaining)
 	return(TRUE);
 }
 
-static void decide_shooting(OBJECT what, u_long dist, long tx, long ty, short strength)
+static void decide_shooting(OBJECT what, unsigned dist, int tx, int ty, short strength)
 {
 	if (info->shells)
 	{
@@ -1103,10 +1273,10 @@ static inline ProgressInfo* getBaseProgress(ObjectInfo* ob) {
 // or the tank may decide that it doesn't want to refuel because it has > 20 shells
 // but decides it cannot attack its target because it has < (say) 30 shells
 
-static u_long check_objects(void)
+static unsigned check_objects(void)
 {
 	int i;
-	long tx, ty;
+	int tx, ty;
 	BYTE shells = 10, armour = 0;
 	ProgressInfo dummy;
 	ProgressInfo* progresstarget = &dummy;
@@ -1114,12 +1284,10 @@ static u_long check_objects(void)
 	ObjectInfo* nearest_tank = NULL;
 	ObjectInfo* nearest_pill = NULL, * nearest_frnd = NULL;
 	ObjectInfo* nearest_base = NULL, * nearest_refuel = NULL;
-	u_long dist;
-	u_long max_dist = (s.explore || s.attacktanks || s.attackpills || s.attackbases)
-		? MAX_VIS_RANGE : DEFENSIVE_RANGE;
-	u_long tankd = max_dist, pilld = max_dist, frndd = max_dist;
-	u_long based = max_dist, refueld = max_dist;
-	u_long limit_dist = max_dist;
+	unsigned dist;
+	unsigned max_dist = calc_max_dist();
+	unsigned tankd = max_dist, pilld = max_dist, frndd = max_dist;
+	unsigned based = max_dist, refueld = max_dist;
 	Boolean decided = FALSE;
 	BYTE wanted_shells = 30, useful_shells = 6;
 	static BYTE last_armour_value = 0;
@@ -1145,7 +1313,8 @@ static u_long check_objects(void)
 			if (info->armour < last_armour_value)
 			{
 				reset_progress(getBaseProgress(info->base), boredomtime);
-				explain("Abandon base! %d, %d", info->armour, last_armour_value);
+				explain("Abandon base (%d, %d)! %d, %d",
+					info->base->x >> 8, info->base->y >> 8, info->armour, last_armour_value);
 			}
 			// If base has just fully refuelled us, mark it is "not boring"
 			if (info->shells == 40 && info->armour == 8)
@@ -1153,8 +1322,7 @@ static u_long check_objects(void)
 		}
 
 		// Do we WANT to refuel?
-		if ((info->shells < wanted_shells || info->armour < 8) && safe_base(info->base))
-		{
+		if (want_refuel(wanted_shells) && safe_base(info->base) && !ignored(getBaseProgress(info->base))) {
 			// OK, if base can supply the requirements, make it the "nearest_refuel"
 			Boolean get_shells = (info->shells < wanted_shells && info->base_shells >= useful_shells);
 			Boolean get_armour = (info->armour < 8 && info->base_armour > MIN_BASE_ARMOUR);
@@ -1184,13 +1352,10 @@ static u_long check_objects(void)
 				if (ob->info & OBJECT_HOSTILE)
 					if ((dist = objectrange_to_me(ob)) < tankd)
 					{
-						nearest_tank = ob; tankd = dist;
+						nearest_tank = ob; tankd = dist; // no hysteresis filter on hostile tanks; set unconditionally
 					}
 			break;
 		case OBJECT_PILLBOX:
-			if (ob->pillbox_strength > 0 &&
-				pillprogress[ob->idnum].ignore_until - TimeNow > boredomtime)
-				reset_progress(&pillprogress[ob->idnum], boredomtime);
 			if (TimeNow - pillprogress[ob->idnum].ignore_until >= 0)
 			{
 				short strength = ob->pillbox_strength;
@@ -1200,12 +1365,18 @@ static u_long check_objects(void)
 					dist += 16 * 256;
 					if (fatal_x == ob->x >> 8 && fatal_y == ob->y >> 8)
 						reset_progress(&pillprogress[ob->idnum], 6 * 60 * 60 * 60);
-					else if (dist < pilld) { nearest_pill = ob; pilld = dist; }
+					else if (dist < pilld) {
+						nearest_pill = ob;
+						pilld = dist;
+					}
 				}
 				else if (ob->info & OBJECT_HOSTILE || ob->info & OBJECT_NEUTRAL)	// Hostile pillboxes
 				{
 					dist += strength * 256;
-					if (dist < pilld) { nearest_pill = ob; pilld = dist; }
+					if (dist < pilld) {
+						nearest_pill = ob;
+						pilld = dist;
+					}
 				}
 				else if (strength < 15)					// Friendly damaged pillbox
 				{
@@ -1227,13 +1398,9 @@ static u_long check_objects(void)
 							nearest_base = ob; based = dist;
 						}
 				}
-				else
+				else if (want_refuel(wanted_shells) && (dist = objectrange_to_me(ob)) < refueld && safe_base(ob))
 				{
-					if (info->shells < wanted_shells || info->armour < 8)
-						if ((dist = objectrange_to_me(ob)) < refueld && safe_base(ob))
-						{
-							nearest_refuel = ob; refueld = dist;
-						}
+					nearest_refuel = ob; refueld = dist;
 				}
 			}
 			break;
@@ -1269,25 +1436,28 @@ static u_long check_objects(void)
 		}
 	}
 
-	if (limit_dist > based) limit_dist = based;
-	if (limit_dist > refueld) limit_dist = refueld;
-	limit_dist = (limit_dist * 2) + DEFENSIVE_RANGE;
-	if (limit_dist > max_dist) limit_dist = max_dist;
-	// limit_dist is to limit our search, so we don't go to
-	// the other side of the map for a dead pillbox when
-	// there is something more important right next to us.
+	unsigned limit_dist = calc_limit_dist(max_dist, based, refueld);
+
+	// clear the locked goal from prev. tick if it is now invalid or ignored.
+	if (goal_is_invalid(wanted_shells, limit_dist)) clear_goal();
 
 	// Special priority: don't leave man outside tank
+	// (unidirectional hysteresis check -- make it easy to lock this goal)
 	if (TimeNow - manrescueprogress.ignore_until >= 0 && info->man_status > 1)
 	{
 		tx = info->man_x;
 		ty = info->man_y;
 		dist = findrange(tx, ty, info->tankx, info->tanky);
 		progresstarget = &manrescueprogress;
-		if (info->manobstructed || dist > 0x200) { decided = TRUE; explain("Rescuing Man"); }
+		if (info->manobstructed || dist > 0x200) {
+			decided = TRUE;
+			set_goal(GOAL_RESCUE_MAN, -1, 0, 0, dist);
+			explain("Rescuing Man");
+		}
 	}
 
 	// First priority: hostile tanks/pillboxes which are within shooting range
+	// (unidirectional hysteresis for hostile tanks too)
 
 	// If we have a nearby tank, but we're not attacking tanks, cancel it
 	if (tankd < limit_dist && !s.attacktanks) tankd = limit_dist;
@@ -1302,8 +1472,7 @@ static u_long check_objects(void)
 	{
 		if (tankd < pilld)	// We have a hostile tank approaching
 		{
-			BYTE required_armour = (tankd > DEFENSIVE_RANGE) ? 6 : incoming_shells;
-			Boolean wants_fight = info->shells > 5 && info->armour > required_armour;
+			Boolean wants_fight = wants_tank_fight(nearest_tank);
 			if (tankd < 0x800 || wants_fight)
 			{
 				dist = tankd;
@@ -1314,7 +1483,8 @@ static u_long check_objects(void)
 				decided = TRUE;
 				if (wants_fight)
 				{
-					shells = 20; armour = required_armour;
+					set_goal(GOAL_ATTACK_TANK, nearest_tank->idnum, tx >> 8, ty >> 8, dist);
+					shells = 20; armour = tank_required_armor(nearest_tank);
 #if VERBOSE
 					explain("Attacking tank: %lu, %lu (%ld, %ld)",
 						tx >> 8, ty >> 8, (tx - info->tankx) >> 8, (ty - info->tanky) >> 8);
@@ -1332,27 +1502,27 @@ static u_long check_objects(void)
 					explain("Fleeing tank: %lu, %lu", tx >> 8, ty >> 8);
 #endif
 					runaway = TRUE;
+					clear_goal();
 				}
 			}
 		}
 		else				// Nearest thing is a hostile pillbox
 		{
 			BYTE strength = nearest_pill->pillbox_strength;
-			BYTE required_shells = strength + strength / 2;
-			BYTE required_armour = incoming_shells + strength ? (2 + (strength + 2) / 3) : 0;
 
 			// ???? required_armour USED to say this:
 			// (pilld > DEFENSIVE_RANGE) ? 6 : incoming_shells + 1 + strength/4;
 			// but this made it afraid to pick up dead pillboxes if tank had no armour!
 
-			Boolean wants_fight = info->shells >= strength && info->armour >= required_armour;
+			Boolean wants_fight = wants_pillbox_fight(nearest_pill);
 
 			// Consider pillbox if any of:
 			// 1. It is dangerously close (do I still need this?)
 			// 2. Want to fight it
 			// 3. It's fighting us
 			// 4. It is dead and waiting to be picked up
-			if (/*pilld < 0x400 || */wants_fight || incoming_shells > 1 || strength == 0)
+			if ((/*pilld < 0x400 || */wants_fight || incoming_shells > 1 || strength == 0) &&
+				want_goalswitch(nearest_pill, GOAL_ATTACK_PILL, pilld))
 			{
 				dist = pilld;
 				tx = nearest_pill->x;
@@ -1365,7 +1535,8 @@ static u_long check_objects(void)
 				decided = TRUE;
 				if (wants_fight)
 				{
-					shells = 20; armour = required_armour;
+					set_goal(GOAL_ATTACK_PILL, nearest_pill->idnum, tx >> 8, ty >> 8, dist);
+					shells = 20; armour = pb_required_armor(nearest_pill);
 #if VERBOSE
 					explain("Attacking pill: %lu, %lu (%ld, %ld)",
 						tx >> 8, ty >> 8, (tx - info->tankx) >> 8, (ty - info->tanky) >> 8);
@@ -1386,13 +1557,14 @@ static u_long check_objects(void)
 					explain("Fleeing pill: %lu, %lu", tx >> 8, ty >> 8);
 #endif
 					runaway = TRUE;
+					clear_goal();
 				}
 			}
 		}
 	}
 
 	// Second priority: Attack some enemy bases
-	if (!decided && based < limit_dist)
+	if (!decided && based < limit_dist && want_goalswitch(nearest_base, GOAL_ATTACK_BASE, based))
 	{
 		dist = based;
 		tx = nearest_base->x;
@@ -1407,10 +1579,11 @@ static u_long check_objects(void)
 #endif
 		shells = 20; armour = 0;	// Don't need armour, but do need lots of shells
 		if (nearest_base->refbase_strength) decide_shooting(OBJECT_REFBASE, dist, tx, ty, 30);
+		set_goal(GOAL_ATTACK_BASE, -1, tx >> 8, ty >> 8, dist);
 	}
 
 	// Third priority: Do we need to refuel?
-	if (!decided && refueld < limit_dist)
+	if (!decided && refueld < limit_dist && want_goalswitch(nearest_refuel, GOAL_REFUEL, refueld))
 	{
 		dist = refueld;
 		tx = center(nearest_refuel->x);
@@ -1424,12 +1597,97 @@ static u_long check_objects(void)
 		}
 		decided = TRUE;
 #if VERBOSE
-		explain("Refuel: %lu, %lu (%ld, %ld)",
+		explain("Refuel: %u, %u (%d, %d)",
 			tx >> 8, ty >> 8, (tx - info->tankx) >> 8, (ty - info->tanky) >> 8);
 #else
-		explain("Refuel: %lu, %lu", tx >> 8, ty >> 8);
+		explain("Refuel: %u, %u", tx >> 8, ty >> 8);
 #endif
 		shells = 0; armour = 0;	// Don't care what we arrive with, just get us there
+		set_goal(GOAL_REFUEL, -1, tx >> 8, ty >> 8, dist);
+	}
+
+	// Reuse previously locked goal if it’s still valid and nothing else decided this tick
+	if (!decided && g_goal.kind != GOAL_NONE) {
+		ObjectInfo* obj = NULL;
+		ProgressInfo* prog = NULL;
+
+		switch (g_goal.kind) {
+		case GOAL_ATTACK_TANK:
+			obj = find_object_id(OBJECT_TANK, g_goal.id);
+			prog = &tankprogress[g_goal.id];
+			break;
+
+		case GOAL_ATTACK_PILL:
+			obj = find_object(OBJECT_PILLBOX, g_goal.x, g_goal.y);
+			prog = &pillprogress[g_goal.id];
+			break;
+
+		case GOAL_ATTACK_BASE:
+			obj = find_object(OBJECT_REFBASE, g_goal.x, g_goal.y);
+			prog = &baseprogress[g_goal.x][g_goal.y];
+			break;
+
+		case GOAL_REFUEL:
+			obj = find_object(OBJECT_REFBASE, g_goal.x, g_goal.y);
+			prog = &baseprogress[g_goal.x][g_goal.y];
+			break;
+
+		case GOAL_RESCUE_MAN:
+			// "obj" not used; reuse man fields directly
+			prog = &manrescueprogress;
+			break;
+
+		default: break;
+		}
+
+		if (g_goal.kind == GOAL_RESCUE_MAN) {
+			tx = info->man_x;
+			ty = info->man_y;
+			dist = findrange(tx, ty, info->tankx, info->tanky);
+			progresstarget = prog;
+			decided = TRUE;
+			//explain("Rescuing Man (locked)");
+		}
+		else if (obj) {
+			// Use centered coords for base/pill just like selection path
+			tx = (obj->object == OBJECT_REFBASE || obj->object == OBJECT_PILLBOX)
+				? center(obj->x) : obj->x;
+			ty = (obj->object == OBJECT_REFBASE || obj->object == OBJECT_PILLBOX)
+				? center(obj->y) : obj->y;
+
+			dist = objectrange_to_me(obj);
+			progresstarget = prog;
+			decided = TRUE;
+
+			// Set per-goal tactical desires, matching earlier branches
+			switch (g_goal.kind) {
+			case GOAL_ATTACK_TANK:
+				shells = 20; armour = tank_required_armor(obj);
+				//explain("Attacking tank (locked): %lu, %lu", tx >> 8, ty >> 8);
+				break;
+
+			case GOAL_ATTACK_PILL:
+				shells = 20; armour = pb_required_armor(obj);
+				//explain("Attacking pill (locked): %lu, %lu", tx >> 8, ty >> 8);
+				break;
+
+			case GOAL_ATTACK_BASE:
+				shells = 20; armour = 0;
+				if (obj->refbase_strength) decide_shooting(OBJECT_REFBASE, dist, tx, ty, 30);
+				//explain("Attacking base (locked): %lu, %lu", tx >> 8, ty >> 8);
+				break;
+
+			case GOAL_REFUEL:
+				shells = 0; armour = 0;
+				//explain("Refuel (locked): %lu, %lu", tx >> 8, ty >> 8);
+				break;
+			}
+		}
+		else {
+			// (Should never happen, but don't omit NULL checks)
+			// the target vanished between validation and deref; clear it.
+			clear_goal();
+		}
 	}
 
 	// If not decided on anything, then there is nothing to be bored with
@@ -1441,7 +1699,7 @@ static u_long check_objects(void)
 
 	register_progress(progresstarget, dist);
 
-	shoot_direction = aim(tx - (long)info->tankx, ty - (long)info->tanky);
+	shoot_direction = aim(tx - (int)info->tankx, ty - (int)info->tanky);
 	shoot_dir_vote = shoot_direction + 8 >> 4 & 0xF;
 	if (runaway)
 	{
@@ -1484,7 +1742,7 @@ static void setscout(void)
 
 static void scout(void)
 {
-	u_long dist = findrange((WORLD_X)scoutx << 8, (WORLD_Y)scouty << 8,
+	unsigned dist = findrange((WORLD_X)scoutx << 8, (WORLD_Y)scouty << 8,
 		info->tankx, info->tanky);
 
 	if (!register_progress(&scoutingprogress, dist)) setscout();
@@ -1511,7 +1769,7 @@ static void scout(void)
 // Simple kind of insect behaviour -- just look at the nearby terrain and
 // decide which is nicest
 
-static long terrain_desirability[NUM_TERRAINS] =
+static int terrain_desirability[NUM_TERRAINS] =
 {
 -10, -2, -1, -1,	// BUILDING, RIVER, SWAMP, CRATER
 5, 0, -1, 0,		// ROAD, FOREST, RUBBLE, GRASS,
@@ -1525,12 +1783,12 @@ static long terrain_desirability[NUM_TERRAINS] =
 static void check_terrain(void)
 {
 	int i;
-	long des = desirability(nearx, neary);
+	int des = desirability(nearx, neary);
 	terrain_desirability[RIVER] = info->inboat ? 0 : -2;
 	terrain_desirability[DEEPSEA] = info->inboat ? -10 : -100;
 	for (i = 0; i < 8; i++)
 	{
-		long val = desirability(nearx + surrounding.s.s8[i].x,
+		int val = desirability(nearx + surrounding.s.s8[i].x,
 			neary + surrounding.s.s8[i].y) - des;
 		direction_votes[i * 2 - 2 & 0xF] += val;
 		direction_votes[i * 2 - 1 & 0xF] += val * 2;
@@ -1541,7 +1799,7 @@ static void check_terrain(void)
 
 	for (i = 0; i < 16; i++)
 	{
-		long val = desirability(nearx + surrounding.s.s16[i].x,
+		int val = desirability(nearx + surrounding.s.s16[i].x,
 			neary + surrounding.s.s16[i].y) - des;
 		direction_votes[i - 1 & 0xF] += val >> 1;
 		direction_votes[i] += val;
@@ -1569,7 +1827,7 @@ static void check_terrain(void)
 
 static void cast_votes(void)
 {
-	u_long target_distance;
+	unsigned target_distance;
 	BYTE d = info->direction + 8 >> 4 & 0xF;
 
 	// If we are clearing mines, and we are dangerously close
@@ -1634,7 +1892,7 @@ static Boolean decide_building(MAP_X x, MAP_Y y)
 
 static MAP_X shotminex;		// Mine we have just shot at -- so ignore it
 static MAP_Y shotminey;		// when looking for other mines to shoot
-static long shotminetime;	// because it will be gone in a moment.
+static int shotminetime;	// because it will be gone in a moment.
 
 static MAP_X currentminex;	// The mine we plan to shoot at next
 static MAP_Y currentminey;
@@ -1730,11 +1988,11 @@ static void minesweep(Boolean* foundmine, Boolean* doshoot)
 
 static Boolean man_clear_of_shot(void)
 {
-	long x = (long)info->man_x - (long)info->tankx;		// displacement of man relative to tank
-	long y = (long)info->man_y - (long)info->tanky;
+	int x = (int)info->man_x - (int)info->tankx;		// displacement of man relative to tank
+	int y = (int)info->man_y - (int)info->tanky;
 	// Now do scalar product with tank's (unit) direction vector to find
 	// the point on the line of the shot path which is closest to the man
-	long d = (x * sin(info->direction) - y * cos(info->direction)) >> 7;
+	int d = (x * sin(info->direction) - y * cos(info->direction)) >> 7;
 	//debug("Man at %ld, %ld, range %ld, error %ld;g", x, y, d);
 	// Now make x and y be the displacement of the man relative to that
 	// closest point (calculated by d times the unit direction vector).
@@ -1753,15 +2011,15 @@ static Boolean man_clear_of_shot(void)
 static void count_votes(void)
 {
 	int i, best = 0;
-	u_long target_distance;
-	u_long desired_dist = 0x20;	// Approach bases gently, and don't overshoot
+	unsigned target_distance;
+	unsigned desired_dist = 0x20;	// Approach bases gently, and don't overshoot
 	BYTE max_speed;
 	char correction = 0;
 	Boolean panic = (getmapcellM(nearx, neary) == RIVER && !info->inboat || runaway);
 	Boolean gofaster = FALSE, goslower = FALSE;
 	Boolean tapfaster = FALSE;
 	Boolean fullstop = FALSE, killmine = FALSE;
-	static u_long lastFuelTick = 0;
+	static unsigned lastFuelTick = 0;
 
 	for (i = 1; i < 16; i++) if (direction_votes[best] < direction_votes[i]) best = i;
 
@@ -1793,7 +2051,7 @@ static void count_votes(void)
 			{
 				// Want to make sure tank is not turning, adjusting range etc.
 				// to be sure we will hit the mine and not waste a shell
-				u_long testkeys = 1 << KEY_turnleft | 1 << KEY_turnright
+				unsigned testkeys = 1 << KEY_turnleft | 1 << KEY_turnright
 					| 1 << KEY_morerange | 1 << KEY_lessrange
 					| 1 << KEY_shoot;
 				if ((testkeys & (last_keys | last_taps)) == 0)
@@ -1921,7 +2179,7 @@ static void count_votes(void)
 
 static void brain_think(void)
 {
-	long thinktime;
+	int thinktime;
 	int i;
 	ObjectInfo* ob;
 
@@ -1974,8 +2232,8 @@ static void brain_think(void)
 	for (ob = &info->objects[0]; ob < &info->objects[info->num_objects]; ob++)
 		if (ob->object == OBJECT_SHOT)
 		{
-			char dev = ob->direction - aim((long)info->tankx - (long)ob->x,
-				(long)info->tanky - (long)ob->y);
+			char dev = ob->direction - aim((int)info->tankx - (int)ob->x,
+				(int)info->tanky - (int)ob->y);
 			if (dev > -32 && dev < 32) incoming_shells++;
 			flying_shells++;
 		}
