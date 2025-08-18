@@ -91,6 +91,7 @@ target_link_libraries(winbolo PRIVATE
     dinput8
     ${ZLIB_LIB}
 )
+target_link_options(winbolo PRIVATE "/SUBSYSTEM:WINDOWS,10.0")
 
 # Brain Template.brn
 

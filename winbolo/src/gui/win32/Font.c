@@ -33,6 +33,7 @@
 #include "..\font.h"
 
 HFONT hBoloFont = NULL; /* The Bolo Font */
+HFONT hBoloFontNoAA = NULL; /* The Bolo Font (antialiasing turned off to avoid green fringes on tank labels */
 HFONT hTinyFont = NULL; /* Pillbox status stuff */
 
 /*********************************************************
@@ -66,11 +67,14 @@ bool fontSetup(HINSTANCE appInst, HWND appWnd) {
 
   if (tempDC != NULL) {
     nHeight = fontPointToHeight(height, tempDC);
-    hBoloFont = CreateFontA(nHeight, 0, 0, 0, FALSE, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, FONT_NAME);
+    hBoloFont = CreateFontA(nHeight, 0, 0, 0, FALSE, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
+        CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, FONT_NAME);
+    hBoloFontNoAA = CreateFontA(nHeight, 0, 0, 0, FALSE, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
+        CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH, FONT_NAME);
     DeleteDC(tempDC);
   }
 
-  if (hBoloFont == NULL) {
+  if (hBoloFont == NULL || hBoloFontNoAA == NULL) {
     MessageBoxA(appWnd, langGetText(STR_FONTERR_NOCOURIERFONT), DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);
     returnValue = FALSE;
   }
@@ -105,6 +109,10 @@ void fontCleanup(void) {
     DeleteObject(hBoloFont);
     hBoloFont = NULL;
   }
+  if (hBoloFontNoAA != NULL) {
+      DeleteObject(hBoloFontNoAA);
+      hBoloFontNoAA = NULL;
+  }
 }
 
 /*********************************************************
@@ -116,10 +124,13 @@ void fontCleanup(void) {
 *  Selects the font into the DC
 *
 *ARGUMENTS:
-* hDC - The Decive context to select into
+* hDC - The Device context to select into
 *********************************************************/
 void fontSelect(HDC hDC) {   
   SelectObject(hDC,hBoloFont);
+}
+void fontSelectNoAA(HDC hDC) {
+  SelectObject(hDC,hBoloFontNoAA);
 }
 
 /*********************************************************
@@ -131,7 +142,7 @@ void fontSelect(HDC hDC) {
 *  Selects the tiny font into the DC
 *
 *ARGUMENTS:
-* hDC - The Decive context to select into
+* hDC - The Device context to select into
 *********************************************************/
 void fontSelectTiny(HDC hDC) {
   SelectObject(hDC, hTinyFont);

@@ -28,6 +28,7 @@
 #include <math.h>
 #include <windows.h>
 #include <string.h>
+#include <initguid.h>
 #include <ddraw.h>
 #include "..\..\bolo\global.h"
 #include "..\..\bolo\backend.h"
@@ -47,20 +48,20 @@
 #include "..\skins.h"
 
 /* Direct Draw Surfaces */
-LPDIRECTDRAW lpDD = NULL;
-LPDIRECTDRAWSURFACE lpDDSPrimary = NULL;
-LPDIRECTDRAWSURFACE lpDDSBackBuffer = NULL;
-LPDIRECTDRAWSURFACE lpDDSTiles = NULL;
-LPDIRECTDRAWSURFACE lpDDSBackground = NULL;
-LPDIRECTDRAWSURFACE lpDDSMessages = NULL;
-LPDIRECTDRAWSURFACE lpDDSManStatus = NULL;
-LPDIRECTDRAWSURFACE lpDDSPillsStatus = NULL;
-LPDIRECTDRAWSURFACE lpDDSBasesStatus = NULL;
-LPDIRECTDRAWSURFACE lpDDSBasesStatusBars = NULL;
-LPDIRECTDRAWSURFACE lpDDSTankStatus = NULL;
-LPDIRECTDRAWSURFACE lpDDSTankStatusBars = NULL;
-LPDIRECTDRAWSURFACE lpDDSTankLabels = NULL;
-LPDIRECTDRAWSURFACE lpDDSLGMButtons = NULL;
+LPDIRECTDRAW7 lpDD = NULL;
+LPDIRECTDRAWSURFACE7 lpDDSPrimary = NULL;
+LPDIRECTDRAWSURFACE7 lpDDSBackBuffer = NULL;
+LPDIRECTDRAWSURFACE7 lpDDSTiles = NULL;
+LPDIRECTDRAWSURFACE7 lpDDSBackground = NULL;
+LPDIRECTDRAWSURFACE7 lpDDSMessages = NULL;
+LPDIRECTDRAWSURFACE7 lpDDSManStatus = NULL;
+LPDIRECTDRAWSURFACE7 lpDDSPillsStatus = NULL;
+LPDIRECTDRAWSURFACE7 lpDDSBasesStatus = NULL;
+LPDIRECTDRAWSURFACE7 lpDDSBasesStatusBars = NULL;
+LPDIRECTDRAWSURFACE7 lpDDSTankStatus = NULL;
+LPDIRECTDRAWSURFACE7 lpDDSTankStatusBars = NULL;
+LPDIRECTDRAWSURFACE7 lpDDSTankLabels = NULL;
+LPDIRECTDRAWSURFACE7 lpDDSLGMButtons = NULL;
 
 LPDIRECTDRAWCLIPPER lpDDClipper = NULL;
 
@@ -102,7 +103,7 @@ bool drawSetup(HINSTANCE appInst, HWND appWnd) {
   bool returnValue;				/* Value to return */
   BYTE zoomFactor;				/* scaling factor */
   HRESULT res;					/* Direct Draw Function returns */
-  DDSURFACEDESC primDesc;		/* Surface description */
+  DDSURFACEDESC2 primDesc;		/* Surface description */
   HBITMAP hTiles = NULL;		/* The tile file bitmap resource */
   HDC hTilesDC = NULL;			/* The tile file resource DC */
   HDC hDDSTilesDC = NULL;		/* Temp DC of a DDS use to copy tile file into */
@@ -119,7 +120,7 @@ bool drawSetup(HINSTANCE appInst, HWND appWnd) {
   bool usingDoubleSkin;			/* Are we using the double sized skin */
 
   /* Palette Checking */
-  DDSURFACEDESC   ddsd;
+  DDSURFACEDESC2   ddsd;
   hTiles = NULL;
   usingDoubleSkin = FALSE;
 
@@ -135,7 +136,7 @@ bool drawSetup(HINSTANCE appInst, HWND appWnd) {
 
   /* Create the Direct Draw Object */
   
-  res = DirectDrawCreate(NULL, &lpDD, NULL);
+  res = DirectDrawCreateEx(NULL, &lpDD, &IID_IDirectDraw7, NULL);
   if (FAILED(res)) {
     returnValue = FALSE;
     MessageBoxA(NULL, langGetText(STR_DRAWERROR_CREATEOBJECT), DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);
@@ -375,24 +376,31 @@ bool drawSetup(HINSTANCE appInst, HWND appWnd) {
       primDesc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
     }
     res = lpDD->lpVtbl->CreateSurface(lpDD, &primDesc, &lpDDSMessages, NULL);
-    if (res == DDERR_OUTOFMEMORY ) {
-      MessageBoxA(NULL, "Creating No Mem", DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);
-      returnValue = FALSE;
-    } else if (res ==DDERR_OUTOFVIDEOMEMORY) {
-      MessageBoxA(NULL, "Creating No Vide Mem", DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);
-      returnValue = FALSE;
-    } else if (res == DDERR_INVALIDPARAMS ) {
-      MessageBoxA(NULL, "Bad Parms", DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);
-      returnValue = FALSE;
-    } else if (FAILED(res)) {
-      MessageBoxA(NULL, "Creating DD Messages Back buffer Failed", DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);
-      returnValue = FALSE;
-    } else {
-      /* Fill the surface black */
-      ZeroMemory(&fx, sizeof(fx));
-      fx.dwSize = sizeof(fx);
-      fx.dwFillColor =  0;
-      lpDDSMessages->lpVtbl->Blt(lpDDSMessages, NULL, NULL, NULL, DDBLT_WAIT | DDBLT_COLORFILL, &fx);
+    switch (res) {
+    case DDERR_OUTOFMEMORY:
+        MessageBoxA(NULL, "Creating No Mem", DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);
+        returnValue = FALSE;
+        break;
+    case DDERR_OUTOFVIDEOMEMORY:
+        MessageBoxA(NULL, "Creating No Video Mem", DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);
+        returnValue = FALSE;
+        break;
+    case DDERR_INVALIDPARAMS:
+        MessageBoxA(NULL, "Bad Parms", DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);
+        returnValue = FALSE;
+        break;
+    default:
+        if (FAILED(res)) {
+            MessageBoxA(NULL, "Creating DD Messages Back buffer Failed", DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);
+            returnValue = FALSE;
+        }
+        else {
+            /* Fill the surface black */
+            ZeroMemory(&fx, sizeof(fx));
+            fx.dwSize = sizeof(fx);
+            fx.dwFillColor = 0;
+            lpDDSMessages->lpVtbl->Blt(lpDDSMessages, NULL, NULL, NULL, DDBLT_WAIT | DDBLT_COLORFILL, &fx);
+        }
     }
   }
 
@@ -3389,11 +3397,12 @@ void drawTankLabel(char *str, BYTE playerNum, int mx, int my, BYTE px, BYTE py) 
     if (SUCCEEDED(lpDDSTankLabels->lpVtbl->GetDC(lpDDSTankLabels, &hDC))) {
       /* Draw it on the back buffer */
 
-      fontSelect(hDC);
+      fontSelectNoAA(hDC);
       SetBkColor(hDC, RGB(0,255,0));
       SetTextColor(hDC, RGB(255, 255, 255));
 
-      DrawTextA(hDC, str, drawPlayerLens[playerNum][0], &textRect, (DT_LEFT | DT_NOCLIP | DT_CALCRECT | DT_NOPREFIX | DT_SINGLELINE));    
+      DrawTextA(hDC, str, drawPlayerLens[playerNum][0], &textRect,
+          (DT_LEFT | DT_NOCLIP | DT_CALCRECT | DT_NOPREFIX | DT_SINGLELINE));    
       DrawTextA(hDC, str, drawPlayerLens[playerNum][0], &textRect, (DT_LEFT | DT_NOCLIP | DT_NOPREFIX | DT_SINGLELINE));
       if (FAILED(lpDDSTankLabels->lpVtbl->ReleaseDC(lpDDSTankLabels, hDC))) {
         MessageBoxA(NULL, langGetText(STR_DRAWERROR_RELEASEDC), DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);

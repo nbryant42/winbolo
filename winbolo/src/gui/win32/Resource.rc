@@ -478,8 +478,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,1,7
- PRODUCTVERSION 1,0,1,7
+ FILEVERSION 1,0,1,8
+ PRODUCTVERSION 1,0,1,8
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -497,12 +497,12 @@ BEGIN
             VALUE "Comments", "WinBolo"
             VALUE "CompanyName", "John Morrison"
             VALUE "FileDescription", "WinBolo"
-            VALUE "FileVersion", "1.17"
+            VALUE "FileVersion", "1.18"
             VALUE "InternalName", "WinBolo"
             VALUE "LegalCopyright", "WinBolo © 1998-2009 John Morrison - Bolo © 1987-1995 Stuart Cheshire"
             VALUE "OriginalFilename", "WinBolo.exe"
             VALUE "ProductName", "WinBolo"
-            VALUE "ProductVersion", "1.16"
+            VALUE "ProductVersion", "1.18"
         END
     END
     BLOCK "VarFileInfo"

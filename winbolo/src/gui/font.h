@@ -80,6 +80,7 @@ void fontCleanup(void);
 * hDC - The Decive context to select into
 *********************************************************/
 void fontSelect(HDC hDC);
+void fontSelectNoAA(HDC hDC);
 
 /*********************************************************
 *NAME:          fontSelectTiny
