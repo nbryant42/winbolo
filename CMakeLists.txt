@@ -65,20 +65,20 @@ file(GLOB CLIENT_SOURCES
 #    langdll/*.c
 #)
 
-add_executable(winbolo
+add_executable(WinBolo
     ${CLIENT_SOURCES}
 )
 
-target_sources(winbolo PRIVATE winbolo/src/gui/win32/Resource.rc)
+target_sources(WinBolo PRIVATE winbolo/src/gui/win32/Resource.rc)
 
 set(ZLIB_LIB "${CMAKE_BINARY_DIR}/zlib.lib")
 
-set_target_properties(winbolo PROPERTIES
+set_target_properties(WinBolo PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
 # Link Windows libraries
-target_link_libraries(winbolo PRIVATE
+target_link_libraries(WinBolo PRIVATE
     ws2_32
     winmm
     comdlg32
@@ -91,7 +91,7 @@ target_link_libraries(winbolo PRIVATE
     dinput8
     ${ZLIB_LIB}
 )
-target_link_options(winbolo PRIVATE "/SUBSYSTEM:WINDOWS,10.0")
+target_link_options(WinBolo PRIVATE "/INCREMENTAL:NO" "/LTCG" "/SUBSYSTEM:WINDOWS,10.0")
 
 # Brain Template.brn
 
@@ -178,3 +178,44 @@ set_target_properties(BoloSounds PROPERTIES
 )
 target_link_options(BoloSounds PRIVATE "/NOENTRY")
 
+###
+#
+# Server
+#
+
+file(GLOB SERVER_SOURCES
+    winbolo/src/bolo/allience.c
+    winbolo/src/bolo/backend.c winbolo/src/bolo/bases.c winbolo/src/bolo/bolo_map.c
+    winbolo/src/bolo/building.c winbolo/src/bolo/crc.c winbolo/src/bolo/debug_file_output.c
+    winbolo/src/bolo/explosions.c winbolo/src/bolo/floodfill.c winbolo/src/bolo/gametype.c winbolo/src/bolo/global.c
+    winbolo/src/bolo/grass.c winbolo/src/bolo/labels.c winbolo/src/bolo/lgm.c winbolo/src/bolo/log.c
+    winbolo/src/bolo/mathWinbolo.c winbolo/src/bolo/mines.c winbolo/src/bolo/minesexp.c
+    winbolo/src/bolo/netmt.c winbolo/src/bolo/netplayers.c winbolo/src/bolo/netpnb.c
+    winbolo/src/bolo/pillbox.c winbolo/src/bolo/players.c winbolo/src/bolo/playersrejoin.c winbolo/src/bolo/rubble.c
+    winbolo/src/bolo/screenbrainmap.c winbolo/src/bolo/screenbullet.c
+    winbolo/src/bolo/screencalc.c
+    winbolo/src/bolo/shells.c winbolo/src/bolo/starts.c
+    winbolo/src/bolo/swamp.c winbolo/src/bolo/tank.c winbolo/src/bolo/tankexp.c winbolo/src/bolo/treegrow.c
+    winbolo/src/bolo/udppackets.c winbolo/src/bolo/util.c
+    winbolo/src/server/servercore.c winbolo/src/server/serverfrontend.c winbolo/src/server/servermain.c
+    winbolo/src/server/servermessages.c winbolo/src/server/servernet.c
+    winbolo/src/server/threads.c
+    winbolo/src/server/win32/*.c
+    winbolo/src/server/BigDigits/*.c
+    winbolo/src/gui/win32/clientmutex.c winbolo/src/gui/win32/lang.c
+    winbolo/src/winbolonet/*.c
+    winbolo/src/lzw/*.c
+)
+
+add_executable(WinBoloDS
+    ${SERVER_SOURCES}
+)
+
+target_sources(WinBoloDS PRIVATE winbolo/src/server/win32/Resource.rc)
+
+target_link_libraries(WinBoloDS PRIVATE
+    ws2_32
+    winmm
+    ${ZLIB_LIB}
+)
+target_link_options(WinBoloDS PRIVATE "/INCREMENTAL:NO" "/LTCG" "/SUBSYSTEM:CONSOLE,10.0")

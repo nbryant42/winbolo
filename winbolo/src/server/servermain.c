@@ -674,7 +674,7 @@ int main(int argc, char **argv) {
 
   /* Debugging file stuff */
   setWriteToDebugFileStream(-1);
-  setFileName(&debugFileName);
+  setFileName(debugFileName);
   if (openDebugFile() == -1) {
 	setWriteToDebugFileStream(-1);
   }
