@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.15)
 project(winbolo_client C)
 
-set(CMAKE_C_STANDARD 17) # Seems to work.
+set(CMAKE_C_STANDARD 99) # SDK 10.0.19041.0 headers violate newer standards
+
+set(CMAKE_SYSTEM_VERSION 10.0.19041.0) # oldest currently supported as of this writing
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /guard:cf /GL")
+add_link_options("/GUARD:CF" "/INCREMENTAL:NO" "/LTCG")
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(FATAL_ERROR "This project is currently 32-bit only.")
@@ -89,9 +93,9 @@ target_link_libraries(WinBolo PRIVATE
     ddraw
     dsound
     dinput8
-    ${ZLIB_LIB}
+    zlib
 )
-target_link_options(WinBolo PRIVATE "/INCREMENTAL:NO" "/LTCG" "/SUBSYSTEM:WINDOWS,10.0")
+target_link_options(WinBolo PRIVATE "/SUBSYSTEM:WINDOWS,10.0")
 
 # Brain Template.brn
 
@@ -216,6 +220,38 @@ target_sources(WinBoloDS PRIVATE winbolo/src/server/win32/Resource.rc)
 target_link_libraries(WinBoloDS PRIVATE
     ws2_32
     winmm
-    ${ZLIB_LIB}
+    zlib
 )
-target_link_options(WinBoloDS PRIVATE "/INCREMENTAL:NO" "/LTCG" "/SUBSYSTEM:CONSOLE,10.0")
+target_link_options(WinBoloDS PRIVATE "/SUBSYSTEM:CONSOLE,10.0")
+
+
+# get output in the correct locations under msbuild (not necessary with ninja)
+
+# Put a target's outputs in a flat folder (no /Debug, /Release)
+function(set_flat_output TARGET OUTDIR)
+  # Base (used by single-config generators)
+  set_target_properties(${TARGET} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${OUTDIR}"
+    LIBRARY_OUTPUT_DIRECTORY "${OUTDIR}"
+    ARCHIVE_OUTPUT_DIRECTORY "${OUTDIR}"
+  )
+  # Per-config (needed for multi-config generators like MSBuild/VS)
+  if(CMAKE_CONFIGURATION_TYPES)
+    foreach(cfg ${CMAKE_CONFIGURATION_TYPES})
+      string(TOUPPER "${cfg}" CFGU)
+      set_target_properties(${TARGET} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY_${CFGU} "${OUTDIR}"
+        LIBRARY_OUTPUT_DIRECTORY_${CFGU} "${OUTDIR}"
+        ARCHIVE_OUTPUT_DIRECTORY_${CFGU} "${OUTDIR}"
+      )
+    endforeach()
+  endif()
+endfunction()
+
+set(brain_out "${CMAKE_BINARY_DIR}/Brains")
+set_flat_output(BrainTemplate       "${brain_out}")
+set_flat_output(Ryan2               "${brain_out}")
+set_flat_output(StandardAutopilot   "${brain_out}")
+set_flat_output(WinBolo             "${CMAKE_BINARY_DIR}")
+set_flat_output(WinBoloDS           "${CMAKE_BINARY_DIR}")
+set_flat_output(BoloSounds          "${CMAKE_BINARY_DIR}")
