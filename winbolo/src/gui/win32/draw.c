@@ -85,6 +85,31 @@ int drawPosX[255];
 int drawPosY[255];
 int drawPlayerLens[MAX_TANKS][3];
 
+// Sets SRCCOLORKEY to "pure green" for whatever pixel format this surface actually has. Works for truecolor
+// (565/555/888/8888). Palette mode not supported. The thinking is we let the driver pick the format for each new
+// surface (may differ based on SYSTEMMEMORY flag) and adapt to it after the fact; trying to force a particular format
+// may fail.
+static HRESULT SetSurfaceSrcKeyPureGreen(LPDIRECTDRAWSURFACE7 s) {
+    if (!s) return E_INVALIDARG;
+
+    DDSURFACEDESC2 sd = { sizeof(sd) };
+    HRESULT hr = s->lpVtbl->GetSurfaceDesc(s, &sd);
+    if (FAILED(hr)) return hr;
+
+    DDCOLORKEY ck = { 0,0 };
+
+    if (sd.ddpfPixelFormat.dwFlags & DDPF_RGB) {
+        // Truecolor: pure green == the surface's green bit mask (e.g., 565 -> 0x07E0)
+        ck.dwColorSpaceLowValue = sd.ddpfPixelFormat.dwGBitMask;
+        ck.dwColorSpaceHighValue = sd.ddpfPixelFormat.dwGBitMask;
+    }
+    else {
+        return DDERR_INVALIDPIXELFORMAT;
+    }
+
+    return s->lpVtbl->SetColorKey(s, DDCKEY_SRCBLT, &ck);
+}
+
 /*********************************************************
 *NAME:          drawSetup
 *AUTHOR:        John Morrison
@@ -210,15 +235,13 @@ bool drawSetup(HINSTANCE appInst, HWND appWnd) {
     ZeroMemory(&primDesc, sizeof (primDesc));
     primDesc.dwSize = sizeof (primDesc);
     primDesc.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_CKSRCBLT;
-    primDesc.ddckCKSrcBlt.dwColorSpaceLowValue = ddpf.dwGBitMask;
-    primDesc.ddckCKSrcBlt.dwColorSpaceHighValue = ddpf.dwGBitMask;
     primDesc.dwWidth = zoomFactor * TILE_FILE_X;
     primDesc.dwHeight = zoomFactor * TILE_FILE_Y;
     primDesc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
     res = lpDD->lpVtbl->CreateSurface(lpDD, &primDesc, &lpDDSTiles, NULL);
-    if (FAILED(res)) {
-      MessageBoxA(NULL, "Creating DD Tile buffer and copying resource into it Failed", DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);
-      returnValue = FALSE;
+    if (FAILED(res) || FAILED(SetSurfaceSrcKeyPureGreen(lpDDSTiles))) {
+        MessageBoxA(NULL, "Creating DD Tile buffer and copying resource into it Failed", DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);
+        returnValue = FALSE;
     } else {
       /* Copy the bitmap into it */
       hTiles = NULL;
