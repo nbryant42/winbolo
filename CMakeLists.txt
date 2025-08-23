@@ -255,3 +255,24 @@ set_flat_output(StandardAutopilot   "${brain_out}")
 set_flat_output(WinBolo             "${CMAKE_BINARY_DIR}")
 set_flat_output(WinBoloDS           "${CMAKE_BINARY_DIR}")
 set_flat_output(BoloSounds          "${CMAKE_BINARY_DIR}")
+
+# --- Patch release zip via WSL -------------------------------------------------
+# Produces: <build>/winbolo-patch.zip containing:
+#   - WinBolo.exe
+#   - Brains/Standard Autopilot.brn
+#   - Brains/Ryan2.brn
+
+set(RELEASE_ZIP "${CMAKE_BINARY_DIR}/winbolo-patch.zip")
+
+add_custom_target(PatchZip ALL
+  DEPENDS WinBolo StandardAutopilot Ryan2
+  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+  COMMAND ${CMAKE_COMMAND} -E echo "Creating ${RELEASE_ZIP} via WSL zip"
+  COMMAND ${CMAKE_COMMAND} -E rm -f "${RELEASE_ZIP}"
+  COMMAND bash -c "exec zip winbolo-patch.zip \
+      WinBolo.exe \
+      'Brains/Standard Autopilot.brn' \
+      Brains/Ryan2.brn"
+  BYPRODUCTS "${RELEASE_ZIP}"
+  VERBATIM
+)
