@@ -263,6 +263,7 @@
 /* Size of the tank label back buffer */
 #define TANK_LABEL_WIDTH 200
 #define TANK_LABEL_HEIGHT 50
+#define KILLS_DEATHS_HEIGHT 50
 
 #endif /* POSITIONS_H */
 

@@ -61,6 +61,7 @@ LPDIRECTDRAWSURFACE7 lpDDSBasesStatusBars = NULL;
 LPDIRECTDRAWSURFACE7 lpDDSTankStatus = NULL;
 LPDIRECTDRAWSURFACE7 lpDDSTankStatusBars = NULL;
 LPDIRECTDRAWSURFACE7 lpDDSTankLabels = NULL;
+LPDIRECTDRAWSURFACE7 lpDDSKillsDeaths = NULL;
 LPDIRECTDRAWSURFACE7 lpDDSLGMButtons = NULL;
 
 LPDIRECTDRAWCLIPPER lpDDClipper = NULL;
@@ -374,16 +375,29 @@ bool drawSetup(HINSTANCE appInst, HWND appWnd) {
     ZeroMemory(&primDesc, sizeof (primDesc));
     primDesc.dwSize = sizeof (primDesc);
     primDesc.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_CKSRCBLT;
-    primDesc.ddckCKSrcBlt.dwColorSpaceLowValue = ddpf.dwGBitMask;
-    primDesc.ddckCKSrcBlt.dwColorSpaceHighValue = ddpf.dwGBitMask;
     primDesc.dwWidth = zoomFactor * MAIN_BACK_BUFFER_SIZE_X * TILE_SIZE_X; //zoomFactor * TANK_LABEL_WIDTH;
-    primDesc.dwHeight = zoomFactor * (2* TANK_LABEL_HEIGHT - 20);
+    primDesc.dwHeight = zoomFactor * (TANK_LABEL_HEIGHT * MAX_TANKS + 30);
     primDesc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
     res = lpDD->lpVtbl->CreateSurface(lpDD, &primDesc, &lpDDSTankLabels, NULL);
-    if (FAILED(res)) {
+    if (FAILED(res) || FAILED(SetSurfaceSrcKeyPureGreen(lpDDSTankLabels))) {
       returnValue = FALSE;
       MessageBoxA(NULL, "Creating DD Tank Label Back buffer Failed", DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);
     }
+  }
+
+  /* Create the kills/deaths back buffer */
+  if (returnValue == TRUE) {
+      ZeroMemory(&primDesc, sizeof(primDesc));
+      primDesc.dwSize = sizeof(primDesc);
+      primDesc.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_CKSRCBLT;
+      primDesc.dwWidth = zoomFactor * MAIN_BACK_BUFFER_SIZE_X * TILE_SIZE_X;
+      primDesc.dwHeight = zoomFactor * (2 * KILLS_DEATHS_HEIGHT - 20);
+      primDesc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+      res = lpDD->lpVtbl->CreateSurface(lpDD, &primDesc, &lpDDSKillsDeaths, NULL);
+      if (FAILED(res) || FAILED(SetSurfaceSrcKeyPureGreen(lpDDSKillsDeaths))) {
+          returnValue = FALSE;
+          MessageBoxA(NULL, "Creating DD Kills/Deaths Back buffer Failed", DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);
+      }
   }
 
   /* Create the Messages Buffer */
@@ -2709,59 +2723,50 @@ void drawTanks(screenTanks *tks) {
 *  deaths - The number of times the tank has died
 *********************************************************/
 void drawKillsDeaths(int xValue, int yValue, int kills, int deaths) {
-  RECT textRect;         /* Text rectangle */
+  RECT killsRect, deathsRect;         /* Text rectangle */
   RECT dest;             /* Destination rectangle */
   HRESULT res;           /* DX Return Values */
   HDC hDC;               /* DC of the Primary Surface */
-  char str[STRING_SIZE]; /* Holds the charectors to print */
+  char str[STRING_SIZE]; /* Holds the characters to print */
   BYTE zf;               /* Zoom Factor */
 
   zf = windowGetZoomFactor();
   
-  textRect.left = 0;
-  textRect.right = TANK_LABEL_WIDTH;
-  textRect.top = 0;
-  textRect.bottom = TANK_LABEL_HEIGHT;
-
-  str[0] = EMPTY_CHAR;
-  sprintf(str, "%d", kills);
-
   /* Get the DC and write the text */
-  res = lpDDSTankLabels->lpVtbl->GetDC(lpDDSTankLabels, &hDC);
+  res = lpDDSTankLabels->lpVtbl->GetDC(lpDDSKillsDeaths, &hDC);
   if (SUCCEEDED(res)) {
     fontSelect(hDC);
+      
+    killsRect.left = 0;
+    killsRect.right = TANK_LABEL_WIDTH;
+    killsRect.top = 0;
+    killsRect.bottom = KILLS_DEATHS_HEIGHT;
+    str[0] = EMPTY_CHAR;
+    sprintf(str, "%d", kills);
     SetBkColor(hDC, RGB(0,0,0));
     SetTextColor(hDC, RGB(255,255,255));
-    DrawTextA(hDC, str, (int) strlen(str), &textRect, (DT_CALCRECT | DT_TOP | DT_NOCLIP));
-    DrawTextA(hDC, str, (int) strlen(str), &textRect, (DT_TOP | DT_NOCLIP));
-    lpDDSTankLabels->lpVtbl->ReleaseDC(lpDDSTankLabels, hDC);
-    dest.top = yValue + (zf * STATUS_KILLS_TOP);
-    dest.bottom = dest.top + textRect.bottom;
-    dest.left = xValue + (zf * STATUS_KILLS_LEFT);
-    dest.right = dest.left + textRect.right;
-    lpDDSPrimary->lpVtbl->Blt(lpDDSPrimary, &dest, lpDDSTankLabels, &textRect, DDBLT_WAIT , NULL);
-  }
+    DrawTextA(hDC, str, (int) strlen(str), &killsRect, (DT_CALCRECT | DT_TOP | DT_NOCLIP));
+    DrawTextA(hDC, str, (int) strlen(str), &killsRect, (DT_TOP | DT_NOCLIP));
 
-  res = lpDDSTankLabels->lpVtbl->GetDC(lpDDSTankLabels, &hDC);
-  if (SUCCEEDED(res)) {
-    textRect.left = 0;
-    textRect.right = TANK_LABEL_WIDTH;
-    textRect.top = 0;
-    textRect.bottom = TANK_LABEL_HEIGHT;
-    str[0] = '\0';
+    deathsRect.left = 0;
+    deathsRect.right = TANK_LABEL_WIDTH;
+    deathsRect.top = zf * (STATUS_DEATHS_TOP - STATUS_KILLS_TOP);
+    deathsRect.bottom = KILLS_DEATHS_HEIGHT;
+    str[0] = EMPTY_CHAR;
     sprintf(str, "%d", deaths);    
-    fontSelect(hDC);
     SetBkColor(hDC, RGB(0,0,0));
     SetTextColor(hDC, RGB(255,255,255));
-    DrawTextA(hDC, str, (int) strlen(str), &textRect, (DT_CALCRECT | DT_TOP | DT_NOCLIP));
-    DrawTextA(hDC, str, (int) strlen(str), &textRect, (DT_TOP | DT_NOCLIP));
-    lpDDSTankLabels->lpVtbl->ReleaseDC(lpDDSTankLabels, hDC);
-    dest.top = yValue + (zf * STATUS_DEATHS_TOP);
-    dest.bottom = dest.top + textRect.bottom;
-    dest.left = xValue + (zf * STATUS_DEATHS_LEFT);
-    dest.right = dest.left + textRect.right;
+    DrawTextA(hDC, str, (int) strlen(str), &deathsRect, (DT_CALCRECT | DT_TOP | DT_NOCLIP));
+    DrawTextA(hDC, str, (int) strlen(str), &deathsRect, (DT_TOP | DT_NOCLIP));
+    lpDDSTankLabels->lpVtbl->ReleaseDC(lpDDSKillsDeaths, hDC);
+    killsRect.right = max(killsRect.right, deathsRect.right);
+    killsRect.bottom = deathsRect.bottom;
+    dest.top = yValue + (zf * STATUS_KILLS_TOP);
+    dest.bottom = dest.top + killsRect.bottom;
+    dest.left = xValue + (zf * STATUS_KILLS_LEFT);
+    dest.right = dest.left + killsRect.right;
 
-    lpDDSPrimary->lpVtbl->Blt(lpDDSPrimary, &dest, lpDDSTankLabels, &textRect, DDBLT_WAIT, NULL);
+    lpDDSPrimary->lpVtbl->Blt(lpDDSPrimary, &dest, lpDDSKillsDeaths, &killsRect, DDBLT_WAIT, NULL);
   }
 }
 
@@ -3408,8 +3413,8 @@ void drawTankLabel(char *str, BYTE playerNum, int mx, int my, BYTE px, BYTE py) 
   zf = windowGetZoomFactor();
   textRect.left = 0;
   textRect.right = zf * MAIN_BACK_BUFFER_SIZE_X * TILE_SIZE_X;
-  textRect.top = 0;
-  textRect.bottom = zf * TANK_LABEL_HEIGHT;
+  textRect.top = zf * TANK_LABEL_HEIGHT * playerNum;
+  textRect.bottom = zf * TANK_LABEL_HEIGHT * (playerNum + 1);
   len = (int) strlen(str);
   
   if (len > 0) {
@@ -3437,8 +3442,8 @@ void drawTankLabel(char *str, BYTE playerNum, int mx, int my, BYTE px, BYTE py) 
       if ((x + textRect.right) > zf * MAIN_BACK_BUFFER_SIZE_X * TILE_SIZE_X) {
         textRect.right = zf * MAIN_BACK_BUFFER_SIZE_X * TILE_SIZE_X - x;
       }
-      if ((y + textRect.bottom) > (MAIN_BACK_BUFFER_SIZE_Y * (zf * TILE_SIZE_Y))) {
-         textRect.bottom = zf * MAIN_BACK_BUFFER_SIZE_Y * TILE_SIZE_Y - y;
+      if ((y + textRect.bottom - textRect.top) > (MAIN_BACK_BUFFER_SIZE_Y * (zf * TILE_SIZE_Y))) {
+         textRect.bottom = textRect.top + zf * MAIN_BACK_BUFFER_SIZE_Y * TILE_SIZE_Y - y;
       }
       /* Output it */
       lpDDSBackBuffer->lpVtbl->BltFast(lpDDSBackBuffer, x, y, lpDDSTankLabels, &textRect, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
