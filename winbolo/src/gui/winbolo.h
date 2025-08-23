@@ -198,7 +198,7 @@ LRESULT CALLBACK windowAboutBoxProc( HWND hwnd, unsigned uMsg, WPARAM wParam, LP
 *ARGUMENTS:
 *
 *********************************************************/
-void CALLBACK windowGameTimer(UINT uID, UINT uMsg, DWORD dwUser, DWORD dw1, DWORD dw2);
+__declspec(dllexport) void CALLBACK windowGameTimer(UINT uID, UINT uMsg, DWORD dwUser, DWORD dw1, DWORD dw2);
 
 /*********************************************************
 *NAME:          windowKeyPressed
@@ -496,7 +496,7 @@ BYTE windowGetZoomFactor();
 *ARGUMENTS:
 *
 *********************************************************/
-void CALLBACK windowFrameRateTimer(UINT uID, UINT uMsg, DWORD dwUser, DWORD dw1, DWORD dw2);
+__declspec(dllexport) void CALLBACK windowFrameRateTimer(UINT uID, UINT uMsg, DWORD dwUser, DWORD dw1, DWORD dw2);
 
 /*********************************************************
 *NAME:          windowWnd
@@ -811,7 +811,7 @@ HANDLE windowGetMutex();
 *ARGUMENTS:
 *
 *********************************************************/
-void windowReCreate();
+__declspec(dllexport) void windowReCreate();
 
 /*********************************************************
 *NAME:          windowApplyMenuChecks
@@ -824,7 +824,7 @@ void windowReCreate();
 *ARGUMENTS:
 *
 *********************************************************/
-void windowApplyMenuChecks();
+__declspec(dllexport) void windowApplyMenuChecks();
 
 /*********************************************************
 *NAME:          windowMenuAllowAllianceRequest

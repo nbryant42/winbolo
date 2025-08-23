@@ -302,7 +302,7 @@ int winUtilVirtKeyToDI(int value);
 *               successful find it also modifies this to
 *               the complete path of the directory
 *********************************************************/
-bool winUtilWBSubDirExist(char *subDirName);
+__declspec(dllexport) bool winUtilWBSubDirExist(char *subDirName);
 
 /*********************************************************
 *NAME:          winUtilOpenHelpFile

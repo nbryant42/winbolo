@@ -162,7 +162,7 @@ void langGetFileName(char *fileName) {
 *ARGUMENTS:
 *  id - Id to load
 *********************************************************/
-char* langGetText(langid id) {
+__declspec(dllexport) char* langGetText(langid id) {
   int ret; /* Function returnValue */
 
   ret = sizeof(langBuff);

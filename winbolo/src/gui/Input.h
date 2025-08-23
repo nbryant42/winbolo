@@ -119,7 +119,7 @@ tankButton inputGetKeys(HWND hWnd, keyItems *setKeys, bool isMenu);
 *ARGUMENTS:
 * 
 *********************************************************/
-void inputActivate(void);
+__declspec(dllexport) void inputActivate(void);
 
 /*********************************************************
 *NAME:          inputIsFireKeyPressed

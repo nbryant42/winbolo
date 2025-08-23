@@ -1016,7 +1016,7 @@ void screenGetLgmStatus(bool *isOut, bool *isDead, TURNTYPE *angle);
 *  first - TRUE if this is the first time we have been
 *          called
 *********************************************************/
-void screenMakeBrainInfo(BrainInfo *value, bool first);
+__declspec(dllexport) void screenMakeBrainInfo(BrainInfo *value, bool first);
 
 /*********************************************************
 *NAME:          screenExtractBrainInfo
@@ -1030,7 +1030,7 @@ void screenMakeBrainInfo(BrainInfo *value, bool first);
 *ARGUMENTS:
 *  value - Pointer to the brain info structure
 *********************************************************/
-void screenExtractBrainInfo(BrainInfo *value);
+__declspec(dllexport) void screenExtractBrainInfo(BrainInfo *value);
 
 /*********************************************************
 *NAME:          screenSetAiType
@@ -1406,9 +1406,9 @@ bool screenGetInStartFind();
 
 bool backendGetContext();
 
-void initWinboloTimer(void);
-DWORD winboloTimer(void);
-void endWinboloTimer(void);
+__declspec(dllexport) void initWinboloTimer(void);
+__declspec(dllexport) DWORD winboloTimer(void);
+__declspec(dllexport) void endWinboloTimer(void);
 
 
 /*

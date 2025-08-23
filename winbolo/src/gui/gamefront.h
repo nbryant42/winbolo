@@ -117,7 +117,7 @@ typedef enum {
 *  keys     - Structure that holds the keys
 *  isLoaded - Have we loaded before?
 *********************************************************/
-HWND gameFrontStart(HINSTANCE hInst, char *cmdLine, int nCmdShow, keyItems *keys, bool isLoaded);
+__declspec(dllexport) HWND gameFrontStart(HINSTANCE hInst, char *cmdLine, int nCmdShow, keyItems *keys, bool isLoaded);
 
 /*********************************************************
 *NAME:          gameFrontEnd
@@ -135,7 +135,7 @@ HWND gameFrontStart(HINSTANCE hInst, char *cmdLine, int nCmdShow, keyItems *keys
 *               screen (ie played a game)
 *  isQuiting  - TRUE if we are quiting
 *********************************************************/
-void gameFrontEnd(HINSTANCE hInst, HWND hWnd, keyItems *keys, bool gamePlayed, bool isQuiting);
+__declspec(dllexport) void gameFrontEnd(HINSTANCE hInst, HWND hWnd, keyItems *keys, bool gamePlayed, bool isQuiting);
 
 /*********************************************************
 *NAME:          gameFrontRun
@@ -151,7 +151,7 @@ void gameFrontEnd(HINSTANCE hInst, HWND hWnd, keyItems *keys, bool gamePlayed, b
 *  hAccel   - Accelerator table
 *  nCmdShow - Window state
 *********************************************************/
-void gameFrontRun(HINSTANCE hInst, HWND appWnd, HACCEL hAccel, int nCmdShow);
+__declspec(dllexport) void gameFrontRun(HINSTANCE hInst, HWND appWnd, HACCEL hAccel, int nCmdShow);
 
 /*********************************************************
 *NAME:          gameFrontDialogs

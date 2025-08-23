@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 3.15)
 project(winbolo_client C)
 
-set(CMAKE_C_STANDARD 17) # Seems to work.
+set(CMAKE_C_STANDARD 99) # SDK 10.0.19041.0 headers violate newer standards
+
+get_property(ALL_TARGETS GLOBAL PROPERTY CMAKE_TARGETS)
+
+set(CMAKE_SYSTEM_VERSION 10.0.19041.0) # oldest currently supported as of this writing
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /guard:cf /GL")
+add_link_options("/GUARD:CF" "/INCREMENTAL:NO" "/LTCG")
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(FATAL_ERROR "This project is currently 32-bit only.")
@@ -23,6 +29,41 @@ add_library(zlib STATIC
 )
 
 file(GLOB CLIENT_SOURCES
+    winbolo/src/gui/win32/winmain.c
+)
+
+# TODO: handle langdll/
+#file(GLOB LANG_SOURCES
+#    langdll/*.c
+#)
+
+add_executable(WinBolo
+    ${CLIENT_SOURCES}
+)
+
+target_sources(WinBolo PRIVATE winbolo/src/gui/win32/Resource.rc)
+
+set(ZLIB_LIB "${CMAKE_BINARY_DIR}/zlib.lib")
+
+set_target_properties(WinBolo PROPERTIES
+    WIN32_EXECUTABLE TRUE
+    VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+)
+
+# Link Windows libraries
+target_link_libraries(WinBolo PRIVATE
+    winmm
+    WinBoloNet
+)
+target_link_options(WinBolo PRIVATE "/SUBSYSTEM:WINDOWS,10.0")
+
+###
+# WinBoloNet.DLL
+#
+# Almost all the code has been moved to WinBoloNet.DLL in order to separate network code from brain handling.
+# We don't need common antivirus software saying "oh looky here, this process loads arbitrary DLLs and also talks over
+# the network"
+file(GLOB DLL_SOURCES
     winbolo/src/bolo/allience.c winbolo/src/bolo/backend.c winbolo/src/bolo/bases.c winbolo/src/bolo/bolo_map.c
     winbolo/src/bolo/building.c winbolo/src/bolo/crc.c winbolo/src/bolo/debug_file_output.c
     winbolo/src/bolo/explosions.c winbolo/src/bolo/floodfill.c winbolo/src/bolo/gametype.c winbolo/src/bolo/global.c
@@ -38,7 +79,7 @@ file(GLOB CLIENT_SOURCES
     winbolo/src/bsd/*.c
     winbolo/src/gui/*.c
     winbolo/src/gui/win32/clientmutex.c winbolo/src/gui/win32/dialogAlliance.c winbolo/src/gui/win32/dnslookups.c
-    winbolo/src/gui/win32/winbolo.c winbolo/src/gui/win32/brainsHandler.c winbolo/src/gui/win32/cuursor.c
+    winbolo/src/gui/win32/cuursor.c winbolo/src/gui/win32/winbolo.c
     winbolo/src/gui/win32/dialogAbout.c winbolo/src/gui/win32/dialogGameInfo.c winbolo/src/gui/win32/dialogGameFinder.c
     winbolo/src/gui/win32/dialogGameSetup.c winbolo/src/gui/win32/dialogKeySetup.c
     winbolo/src/gui/win32/dialogLanguages.c winbolo/src/gui/win32/dialogMessages.c
@@ -60,25 +101,19 @@ file(GLOB CLIENT_SOURCES
     winbolo/src/winbolonet/*.c
 )
 
-# TODO: handle langdll/
-#file(GLOB LANG_SOURCES
-#    langdll/*.c
-#)
+add_library(WinBoloNet SHARED)
 
-add_executable(WinBolo
-    ${CLIENT_SOURCES}
+target_sources(WinBoloNet PRIVATE ${DLL_SOURCES})
+
+set_target_properties(WinBoloNet PROPERTIES
+    LINKER_LANGUAGE C
 )
 
-target_sources(WinBolo PRIVATE winbolo/src/gui/win32/Resource.rc)
+set(BRAINSHANDLER_LIB_PATH ${CMAKE_CURRENT_BINARY_DIR}/BrainsHandler_Pre.lib)
+set(BRAINSHANDLER_EXP_PATH ${CMAKE_CURRENT_BINARY_DIR}/BrainsHandler.exp)
+set(BRAINSHANDLER_SOURCES winbolo/src/gui/win32/brainsHandler.c)
 
-set(ZLIB_LIB "${CMAKE_BINARY_DIR}/zlib.lib")
-
-set_target_properties(WinBolo PROPERTIES
-    WIN32_EXECUTABLE TRUE
-)
-
-# Link Windows libraries
-target_link_libraries(WinBolo PRIVATE
+target_link_libraries(WinBoloNet PRIVATE
     ws2_32
     winmm
     comdlg32
@@ -89,9 +124,10 @@ target_link_libraries(WinBolo PRIVATE
     ddraw
     dsound
     dinput8
-    ${ZLIB_LIB}
+    BrainsHandler_Pre
+    zlib
 )
-target_link_options(WinBolo PRIVATE "/INCREMENTAL:NO" "/LTCG" "/SUBSYSTEM:WINDOWS,10.0")
+
 
 # Brain Template.brn
 
@@ -179,6 +215,34 @@ set_target_properties(BoloSounds PROPERTIES
 target_link_options(BoloSounds PRIVATE "/NOENTRY")
 
 ###
+# BrainsHandler.DLL - moves our LoadLibrary/GetProcAddress calls out of the main EXE to hopefully reduce
+# antivirus false positives.
+#
+# define _Pre to handle circular DLL deps
+
+add_library(BrainsHandler_objects OBJECT ${BRAINSHANDLER_SOURCES})
+
+add_custom_command(
+    OUTPUT ${BRAINSHANDLER_LIB_PATH}
+    BYPRODUCTS ${BRAINSHANDLER_EXP_PATH}
+    COMMAND LIB /DEF /NAME:BrainsHandler /OUT:${BRAINSHANDLER_LIB_PATH} /MACHINE:X86 $<TARGET_OBJECTS:BrainsHandler_objects> /LTCG
+    DEPENDS $<TARGET_OBJECTS:BrainsHandler_objects>
+    COMMENT "Generating initial BrainsHandler import library and export file"
+)
+add_custom_target(BrainsHandler_Pre DEPENDS ${BRAINSHANDLER_LIB_PATH} ${BRAINSHANDLER_EXP_PATH})
+
+add_library(BrainsHandler MODULE)
+
+target_sources(BrainsHandler PRIVATE $<TARGET_OBJECTS:BrainsHandler_objects>)
+
+set_target_properties(BrainsHandler PROPERTIES
+    LINKER_LANGUAGE C
+)
+
+target_link_libraries(BrainsHandler WinBoloNet)
+
+
+###
 #
 # Server
 #
@@ -216,6 +280,40 @@ target_sources(WinBoloDS PRIVATE winbolo/src/server/win32/Resource.rc)
 target_link_libraries(WinBoloDS PRIVATE
     ws2_32
     winmm
-    ${ZLIB_LIB}
+    zlib
 )
-target_link_options(WinBoloDS PRIVATE "/INCREMENTAL:NO" "/LTCG" "/SUBSYSTEM:CONSOLE,10.0")
+target_link_options(WinBoloDS PRIVATE "/SUBSYSTEM:CONSOLE,10.0")
+
+
+# get brain output in the correct locations under msbuild (not necessary with ninja)
+
+# Put a target's outputs in a flat folder (no /Debug, /Release)
+function(set_flat_output TARGET OUTDIR)
+  # Base (used by single-config generators)
+  set_target_properties(${TARGET} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${OUTDIR}"
+    LIBRARY_OUTPUT_DIRECTORY "${OUTDIR}"
+    ARCHIVE_OUTPUT_DIRECTORY "${OUTDIR}"
+  )
+  # Per-config (needed for multi-config generators like MSBuild/VS)
+  if(CMAKE_CONFIGURATION_TYPES)
+    foreach(cfg ${CMAKE_CONFIGURATION_TYPES})
+      string(TOUPPER "${cfg}" CFGU)
+      set_target_properties(${TARGET} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY_${CFGU} "${OUTDIR}"
+        LIBRARY_OUTPUT_DIRECTORY_${CFGU} "${OUTDIR}"
+        ARCHIVE_OUTPUT_DIRECTORY_${CFGU} "${OUTDIR}"
+      )
+    endforeach()
+  endif()
+endfunction()
+
+set(brain_out "${CMAKE_BINARY_DIR}/Brains")
+set_flat_output(BrainTemplate       "${brain_out}")
+set_flat_output(Ryan2               "${brain_out}")
+set_flat_output(StandardAutopilot   "${brain_out}")
+set_flat_output(WinBolo             "${CMAKE_BINARY_DIR}")
+set_flat_output(WinBoloDS           "${CMAKE_BINARY_DIR}")
+set_flat_output(WinBoloNet          "${CMAKE_BINARY_DIR}")
+set_flat_output(BoloSounds          "${CMAKE_BINARY_DIR}")
+set_flat_output(BrainsHandler       "${CMAKE_BINARY_DIR}")

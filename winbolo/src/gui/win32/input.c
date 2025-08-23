@@ -398,7 +398,7 @@ void inputScroll(HWND hWnd, keyItems *setKeys, bool isMenu) {
 *ARGUMENTS:
 * 
 *********************************************************/
-void inputActivate(void) {
+__declspec(dllexport) void inputActivate(void) {
   lpDIDKeyboard->lpVtbl->Acquire(lpDIDKeyboard);
 }
 

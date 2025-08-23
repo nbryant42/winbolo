@@ -550,7 +550,7 @@ switch (value) {
 *               successful find it also modifies this to
 *               the complete path of the directory
 *********************************************************/
-bool winUtilWBSubDirExist(char *subDirName) {
+__declspec(dllexport) bool winUtilWBSubDirExist(char *subDirName) {
   bool returnValue;            /* Value to return */
   char fileName[FILENAME_MAX]; /* Filename used in lookup */
   WIN32_FIND_DATA fd;          /* Find data */

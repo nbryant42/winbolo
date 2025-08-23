@@ -162,7 +162,7 @@ extern labelLen labelTank;
 *  keys     - Structure that holds the keys
 *  isLoaded - Have we loaded before?
 *********************************************************/
-HWND gameFrontStart(HINSTANCE hInst, char *cmdLine, int nCmdShow, keyItems *keys, bool isLoaded) {
+__declspec(dllexport) HWND gameFrontStart(HINSTANCE hInst, char *cmdLine, int nCmdShow, keyItems *keys, bool isLoaded) {
   HWND appWnd;      /* Window created and returned */
   int length;       /* Length of command line */
   bool OKStart;     /* Is the program OK to start? */
@@ -293,7 +293,7 @@ HWND gameFrontStart(HINSTANCE hInst, char *cmdLine, int nCmdShow, keyItems *keys
 *               screen (ie played a game)
 *  isQuiting  - TRUE if we are quiting
 *********************************************************/
-void gameFrontEnd(HINSTANCE hInst, HWND hWnd, keyItems *keys, bool gamePlayed, bool isQuiting) { 
+__declspec(dllexport) void gameFrontEnd(HINSTANCE hInst, HWND hWnd, keyItems *keys, bool gamePlayed, bool isQuiting) {
   clientMutexWaitFor();
   ShowWindow(hWnd, FALSE);
   if (gamePlayed == TRUE) {
@@ -339,7 +339,7 @@ void gameFrontEnd(HINSTANCE hInst, HWND hWnd, keyItems *keys, bool gamePlayed, b
 *  hAccel   - Accelerator table
 *  nCmdShow - Window state
 *********************************************************/
-void gameFrontRun(HINSTANCE hInst, HWND appWnd, HACCEL hAccel, int nCmdShow) {
+__declspec(dllexport) void gameFrontRun(HINSTANCE hInst, HWND appWnd, HACCEL hAccel, int nCmdShow) {
   MSG msg;        /* Windows Messages */
   bool done;      /* Program finished? */
   bool process;   /* Whether to process the message or not */

@@ -743,7 +743,7 @@ void setBuildCurrentSelect(buildSelect bs) {
 *ARGUMENTS:
 *
 *********************************************************/
-void initWinboloTimer(void){
+__declspec(dllexport) void initWinboloTimer(void){
 #ifdef _WIN32
 	timeBeginPeriod(1);
 #else
@@ -752,7 +752,7 @@ void initWinboloTimer(void){
 #endif
 }
 
-DWORD winboloTimer(void) {
+__declspec(dllexport) DWORD winboloTimer(void) {
 #ifdef _WIN32
 	return timeGetTime();
 #else
@@ -764,7 +764,7 @@ DWORD winboloTimer(void) {
 #endif
 }
 
-void endWinboloTimer(void){
+__declspec(dllexport) void endWinboloTimer(void){
 #ifdef _WIN32
 	timeEndPeriod(1);
 #else

@@ -74,7 +74,7 @@ bool clientMutexCreate(void) {
 *ARGUMENTS:
 *
 *********************************************************/
-void clientMutexDestroy(void) {
+__declspec(dllexport) void clientMutexDestroy(void) {
   CloseHandle(hClientMutexHandle);
   hClientMutexHandle = NULL;
 }
@@ -91,7 +91,7 @@ void clientMutexDestroy(void) {
 *ARGUMENTS:
 *
 *********************************************************/
-void clientMutexWaitFor(void) {
+__declspec(dllexport) void clientMutexWaitFor(void) {
   WaitForSingleObject(hClientMutexHandle, INFINITE);
   threadsWaitForMutex();
 }
@@ -108,7 +108,7 @@ void clientMutexWaitFor(void) {
 *ARGUMENTS:
 *
 *********************************************************/
-void clientMutexRelease(void) {
+__declspec(dllexport) void clientMutexRelease(void) {
   threadsReleaseMutex();
   ReleaseMutex(hClientMutexHandle);
 }

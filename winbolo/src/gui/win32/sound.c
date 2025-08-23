@@ -455,7 +455,7 @@ void soundPlayEffect(sndEffects value) {
 *ARGUMENTS:
 *  value - TRUE to turn on FALSE to turn off.
 *********************************************************/
-void soundISASoundCard(bool value) {
+__declspec(dllexport) void soundISASoundCard(bool value) {
   if (value == TRUE) {
     lpDSPrimary->lpVtbl->Play(lpDSPrimary, 0, 0, DSBPLAY_LOOPING);
   } else {

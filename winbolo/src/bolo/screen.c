@@ -2915,7 +2915,7 @@ void screenMakeBrainViewData(BYTE *buff, BYTE leftPos, BYTE rightPos, BYTE topPo
 *  first - TRUE if this is the first time we have been
 *          called
 *********************************************************/
-void screenMakeBrainInfo(BrainInfo *value, bool first) {
+__declspec(dllexport) void screenMakeBrainInfo(BrainInfo *value, bool first) {
   BYTE tx;        /* Tank X and Y Co-ordinates */
   BYTE ty; 
   BYTE closeBase; /* The closest base to our current position */
@@ -3088,7 +3088,7 @@ void screenMakeBrainInfo(BrainInfo *value, bool first) {
 *ARGUMENTS:
 *  value - Pointer to the brain info structure
 *********************************************************/
-void screenExtractBrainInfo(BrainInfo *value) {
+__declspec(dllexport) void screenExtractBrainInfo(BrainInfo *value) {
   BYTE pillNum;
 
   free(value->allies);

@@ -58,7 +58,7 @@
 *  appInst - Handle to the application.
 *  hWnd  - Main Window Handle.
 *********************************************************/
-bool brainsHandlerLoadBrains(HWND hWnd);
+__declspec(dllexport) bool brainsHandlerLoadBrains(HWND hWnd);
 
 /*********************************************************
 *NAME:          brainsHandlerLoadBrainMenuItems
@@ -87,7 +87,7 @@ bool brainsHandlerLoadBrainMenuItems(HMENU brainsList);
 *  enabled - TRUE if we should enable the items else
 *            disable them
 *********************************************************/
-void brainsHandlerSet(HWND hWnd, bool enabled);
+__declspec(dllexport) void brainsHandlerSet(HWND hWnd, bool enabled);
 
 /*********************************************************
 *NAME:          brainsHandlerGetNum
@@ -100,7 +100,7 @@ void brainsHandlerSet(HWND hWnd, bool enabled);
 *ARGUMENTS:
 *
 *********************************************************/
-int brainsHandlerGetNum();
+__declspec(dllexport) int brainsHandlerGetNum();
 
 /*********************************************************
 *NAME:          brainsHandlerManual
@@ -113,7 +113,7 @@ int brainsHandlerGetNum();
 *ARGUMENTS:
 *  hWnd - Window Handle
 *********************************************************/
-void brainsHandlerManual(HWND hWnd);
+__declspec(dllexport) void brainsHandlerManual(HWND hWnd);
 
 /*********************************************************
 *NAME:          brainsHandlerStart
@@ -142,7 +142,7 @@ bool brainsHandlerStart(HWND hWnd, char *str, char *name);
 *  hWnd - Window Handle
 *  id   - Window parameter offset pressed.
 *********************************************************/
-void brainsHandlerItem(HWND hWnd, UINT id);
+__declspec(dllexport) void brainsHandlerItem(HWND hWnd, UINT id);
 
 /*********************************************************
 *NAME:          brainsHandlerBrainsItem
@@ -156,7 +156,7 @@ void brainsHandlerItem(HWND hWnd, UINT id);
 *  hWnd - Window Handle
 *  id   - Window parameter offset pressed.
 *********************************************************/
-void brainsHandlerBrainsItem(HWND hWnd, UINT id);
+__declspec(dllexport) void brainsHandlerBrainsItem(HWND hWnd, UINT id);
 
 /*********************************************************
 *NAME:          brainsHandlerShutdown
@@ -169,7 +169,7 @@ void brainsHandlerBrainsItem(HWND hWnd, UINT id);
 *ARGUMENTS:
 *  hWnd - Pointer to the main window
 *********************************************************/
-void brainsHandlerShutdown(HWND hWnd);
+__declspec(dllexport) void brainsHandlerShutdown(HWND hWnd);
 
 /*********************************************************
 *NAME:          brainHandlerIsBrainRunning
@@ -182,7 +182,7 @@ void brainsHandlerShutdown(HWND hWnd);
 *ARGUMENTS:
 *
 *********************************************************/
-bool brainHandlerIsBrainRunning();
+__declspec(dllexport) bool brainHandlerIsBrainRunning();
 
 /*********************************************************
 *NAME:          brainHandlerRun
@@ -196,6 +196,6 @@ bool brainHandlerIsBrainRunning();
 *ARGUMENTS:
 *  hWnd - Main Window handler
 *********************************************************/
-void brainHandlerRun(HWND hWnd);
+__declspec(dllexport) void brainHandlerRun(HWND hWnd);
 
 #endif /* BRAINSHANDLER_H */

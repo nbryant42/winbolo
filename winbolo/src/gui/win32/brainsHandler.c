@@ -419,7 +419,7 @@ void brainsHandlerShutdown(HWND hWnd) {
 *ARGUMENTS:
 *
 *********************************************************/
-bool brainHandlerIsBrainRunning() {
+__declspec(dllexport) bool brainHandlerIsBrainRunning() {
   return brainsRunning;
 }
 

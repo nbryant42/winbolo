@@ -18,6 +18,9 @@
 #ifndef _TYPES_H
 #define _TYPES_H
 
+/* Ensure this header is isolated from ambient pack state */
+#pragma pack(push, 4)
+
 #include "global.h"
 /* Defines */
 #define MAX_BASES 16
@@ -225,5 +228,5 @@ struct startsObj {
   BYTE numStarts;
 };
 
-
+#pragma pack(pop)
 #endif

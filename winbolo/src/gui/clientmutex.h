@@ -49,7 +49,7 @@
 *ARGUMENTS:
 *
 *********************************************************/
-bool clientMutexCreate(void);
+__declspec(dllexport) bool clientMutexCreate(void);
 
 /*********************************************************
 *NAME:          clientMutexCreate
@@ -62,7 +62,7 @@ bool clientMutexCreate(void);
 *ARGUMENTS:
 *
 *********************************************************/
-void clientMutexDestroy(void);
+__declspec(dllexport) void clientMutexDestroy(void);
 
 /*********************************************************
 *NAME:          clientMutexWaitFor
@@ -75,7 +75,7 @@ void clientMutexDestroy(void);
 *ARGUMENTS:
 *
 *********************************************************/
-void clientMutexWaitFor(void);
+__declspec(dllexport) void clientMutexWaitFor(void);
 
 /*********************************************************
 *NAME:          clientMutexRelease
@@ -89,6 +89,6 @@ void clientMutexWaitFor(void);
 *ARGUMENTS:
 *
 *********************************************************/
-void clientMutexRelease(void);
+__declspec(dllexport) void clientMutexRelease(void);
 
 #endif /* _CLIENT_MUTEX_H */

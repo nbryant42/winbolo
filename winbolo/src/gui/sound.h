@@ -111,7 +111,7 @@ void soundPlayEffect(sndEffects value);
 *ARGUMENTS:
 *  value - TRUE to turn on FALSE to turn off.
 *********************************************************/
-void soundISASoundCard(bool value);
+__declspec(dllexport) void soundISASoundCard(bool value);
 
 /*********************************************************
 *NAME:          soundIsPlayable
