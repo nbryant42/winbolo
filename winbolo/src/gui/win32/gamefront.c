@@ -163,7 +163,7 @@ extern labelLen labelTank;
 *  isLoaded - Have we loaded before?
 *********************************************************/
 HWND gameFrontStart(HINSTANCE hInst, char *cmdLine, int nCmdShow, keyItems *keys, bool isLoaded) {
-  HWND appWnd;      /* Window created and returned */
+  static HWND appWnd;      /* Window created and returned */
   int length;       /* Length of command line */
   bool OKStart;     /* Is the program OK to start? */
 
