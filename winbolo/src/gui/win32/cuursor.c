@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <windows.h>
 #include <winuser.h>
+#include <ShellScalingAPI.h>
 #include "..\..\bolo\global.h"
 #include "..\..\bolo\backend.h"
 #include "..\winbolo.h"
@@ -38,8 +39,8 @@
 
 /* Is the cursor inside the main view area */
 bool cursorInMainView = FALSE;
-HCURSOR saveCurs = NULL;
 HWND cursorappWnd = NULL;
+static HCURSOR hBoloCurs = NULL;
 /*********************************************************
 *NAME:          cursorSetup
 *AUTHOR:        John Morrison
@@ -55,7 +56,6 @@ HWND cursorappWnd = NULL;
 * appWnd  - Main Window Handle (Required for clipper)
 *********************************************************/
 bool cursorSetup(HINSTANCE appInst, HWND appWnd) {
-  saveCurs = CopyCursor(LoadCursor(NULL, IDC_ARROW));
   cursorappWnd = appWnd;
   return TRUE;
 }
@@ -73,6 +73,10 @@ bool cursorSetup(HINSTANCE appInst, HWND appWnd) {
 *********************************************************/
 void cursorCleanup(HINSTANCE appInst) {
   cursorSetCursor(appInst, TRUE);
+  if (hBoloCurs) {
+    DestroyCursor(hBoloCurs);
+    hBoloCurs = NULL;
+  }
 }
 
 /*********************************************************
@@ -91,14 +95,34 @@ void cursorCleanup(HINSTANCE appInst) {
 *********************************************************/
 void cursorSetCursor(HINSTANCE appInst, bool normalCurs) {
   HCURSOR hCurs = NULL; /* The cursor to set */
+  HCURSOR destroy = NULL;
+  static int _cx = 0;
+  static int _cy = 0;
 
   if (normalCurs == TRUE) {
-    hCurs = CopyCursor(saveCurs);
+    hCurs = LoadCursor(NULL, IDC_ARROW);
   } else {
-    hCurs = LoadCursor(appInst, MAKEINTRESOURCE(IDC_BOLOCURSOR));  
+    BYTE zf = windowGetZoomFactor();
+    HMONITOR mon = MonitorFromWindow(cursorappWnd, MONITOR_DEFAULTTONEAREST);
+    UINT dx = 96, dy = 96;
+    if (!mon || FAILED(GetDpiForMonitor(mon, MDT_EFFECTIVE_DPI, &dx, &dy)))
+    {
+      dx = 96;
+      dy = 96;
+    }
+    int cx = zf * GetSystemMetricsForDpi(SM_CXCURSOR, dx);
+    int cy = zf * GetSystemMetricsForDpi(SM_CYCURSOR, dy);
+    if (cx != _cx || cy != _cy || !hBoloCurs) {
+      if (hBoloCurs) destroy = hBoloCurs;
+      hBoloCurs = LoadImage(appInst, MAKEINTRESOURCE(IDC_BOLOCURSOR), IMAGE_CURSOR, cx, cy, LR_DEFAULTCOLOR);
+      _cx = cx;
+      _cy = cy;
+    }
+    hCurs = hBoloCurs;
   }
   if (hCurs != NULL) {
-     SetSystemCursor(hCurs, 32512);
+     SetCursor(hCurs);
+     if (destroy) DestroyCursor(destroy);
   }
 }
 
@@ -200,40 +224,6 @@ bool cursorPos(RECT *rcWindow, BYTE *xValue, BYTE *yValue) {
     *yValue = 0;
   }
   return FALSE;
-}
-
-/*********************************************************
-*NAME:          cursorAcquireCursor
-*AUTHOR:        John Morrison
-*CREATION DATE: 13/1/99
-*LAST MODIFIED: 27/3/99
-*PURPOSE:
-*  The window has just aquired the cursor. Set its icon
-*  accordingly
-*
-*ARGUMENTS:
-*  appInst  - Application instance
-*  rcWindow - Rect with the windows co-ordinates
-*********************************************************/
-void cursorAcquireCursor(HINSTANCE appInst, RECT rcWindow) {
-  POINT mousePos;  /* Used to get the mouse position */
-  int xPos;        /* X and Y positions of the mouse adjusted */ 
-  int yPos;        /* to the window */
-  BYTE zoomFactor; /* The zooming factor */
-
-//  cursorMove(appInst, windowWnd(), rcWindow);
-  GetCursorPos(&mousePos);
-  zoomFactor = windowGetZoomFactor();
-  xPos = mousePos.x - rcWindow.left;
-  yPos = mousePos.y - rcWindow.top;
-
-  if ((xPos >= (zoomFactor * MAIN_OFFSET_X) && xPos <= ((zoomFactor * MAIN_OFFSET_X) + ((zoomFactor * MAIN_SCREEN_SIZE_X) * (zoomFactor * TILE_SIZE_X)))) && (yPos >= (zoomFactor * MAIN_OFFSET_Y) && yPos <= ((zoomFactor * MAIN_OFFSET_Y) + ((zoomFactor * MAIN_SCREEN_SIZE_Y) * (zoomFactor * TILE_SIZE_Y))))) {
-    cursorSetCursor(appInst, FALSE);
-    cursorInMainView = TRUE;
-  } else {
-    cursorSetCursor(appInst, TRUE);
-    cursorInMainView = FALSE;
-  } 
 }
 
 /*********************************************************

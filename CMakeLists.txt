@@ -94,6 +94,7 @@ target_link_libraries(WinBolo PRIVATE
     dsound
     dinput8
     zlib
+    shcore
 )
 target_link_options(WinBolo PRIVATE "/SUBSYSTEM:WINDOWS,10.0")
 

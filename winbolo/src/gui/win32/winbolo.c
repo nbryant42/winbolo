@@ -351,7 +351,6 @@ LRESULT CALLBACK ExWindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         drawRestore();
         if (GetClientRect( appWnd, &rcWindow )) {
           if (ClientToScreen( appWnd, ( LPPOINT )&rcWindow )) {
-            cursorAcquireCursor(appInst, rcWindow);
             if (doneInitTutorial == FALSE && isTutorial == TRUE) {
               doneInitTutorial = TRUE;
               windowStartTutorial();
@@ -376,7 +375,6 @@ LRESULT CALLBACK ExWindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
       /* Redraw the window */
       if (GetClientRect( appWnd, &rcWindow )) {
         if (ClientToScreen( appWnd, ( LPPOINT )&rcWindow )) {
-          cursorMove(appInst, appWnd, rcWindow);
           clientMutexWaitFor();
           drawRedrawAll(appInst, appWnd, getBuildCurrentSelect(), &rcWindow, showPillLabels, showBaseLabels);
           clientMutexRelease();
@@ -390,7 +388,7 @@ LRESULT CALLBACK ExWindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_CLOSE:
       winboloQuit=TRUE;
       PostQuitMessage(0);
-	    break;
+	  break;
     case WM_DESTROY:
       /* Quit time */
       winboloQuit=TRUE;
@@ -401,6 +399,14 @@ LRESULT CALLBACK ExWindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
       break;
     case WM_EXITMENULOOP:
       isInMenu = FALSE;
+      break;
+    case WM_SETCURSOR:
+      if (LOWORD(lParam) == HTCLIENT &&
+        GetClientRect(appWnd, &rcWindow) &&
+        ClientToScreen(appWnd, (LPPOINT)&rcWindow)) {
+        cursorMove(appInst, appWnd, rcWindow);
+        return TRUE; // must consume this or DefWindowProc will override the cursor.
+      }
       break;
     case WM_MOUSEMOVE:
       {
@@ -860,11 +866,6 @@ void CALLBACK windowGameTimer(UINT uID, UINT uMsg, DWORD dwUser, DWORD dw1, DWOR
   }
 
   ttick = winboloTimer();
-  if (GetClientRect(appWnd, &rcWindow )) {
-    if (ClientToScreen(appWnd, ( LPPOINT )&rcWindow )) {
-      cursorMove(appInst, appWnd, rcWindow);
-    }
-  }
   dwSysFrame += (winboloTimer() - ttick);
 }
 
