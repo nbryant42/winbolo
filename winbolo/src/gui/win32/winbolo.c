@@ -250,6 +250,22 @@ int PASCAL WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, LPSTR szCmdLine, int nC
   return 0;
 }
 
+// set window size while accounting for how DPI affects the size of the non-client area.
+static BOOL SizeWindowForClient(HWND hWnd, int clientW, int clientH, UINT flags) {
+    RECT rc = { 0, 0, clientW, clientH };
+    DWORD style = (DWORD)GetWindowLongPtr(hWnd, GWL_STYLE);
+    DWORD ex = (DWORD)GetWindowLongPtr(hWnd, GWL_EXSTYLE);
+    BOOL  hasMenu = (GetMenu(hWnd) != NULL);
+
+    UINT dpi = GetDpiForWindow(hWnd);
+    if (!AdjustWindowRectExForDpi(&rc, style, hasMenu, ex, dpi)) {
+        // failed; fall back to the old, hardcoded logic.
+        return SetWindowPos(hWnd, HWND_NOTOPMOST, 0, 0, clientW + 4, clientH + 42, flags);
+    }
+
+    return SetWindowPos(hWnd, HWND_NOTOPMOST, 0, 0, rc.right - rc.left, rc.bottom - rc.top, flags);
+}
+
 /*********************************************************
 *NAME:          windowCreate
 *AUTHOR:        John Morrison
@@ -292,6 +308,8 @@ HWND windowCreate(HINSTANCE hInst, int nCmdShow) {
      hInst,                          /* inst handle */
      0                               /* no params */
      );
+    SizeWindowForClient(returnValue, zoomFactor * TOTAL_WINDOW_SIZE_X, zoomFactor * TOTAL_WINDOW_SIZE_Y,
+        SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOACTIVATE);
   } else {
     returnValue = NULL;
   }
@@ -1838,7 +1856,8 @@ void windowZoomChange(BYTE amount) {
     fontCleanup();
     drawSetup(appInst, appWnd);
     fontSetup(appInst, appWnd);
-    SetWindowPos(appWnd, HWND_NOTOPMOST, 0, 0, (zoomFactor * TOTAL_WINDOW_SIZE_X) +4, (zoomFactor * TOTAL_WINDOW_SIZE_Y) +42, (SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_SHOWWINDOW));
+    SizeWindowForClient(appWnd, zoomFactor * TOTAL_WINDOW_SIZE_X, zoomFactor * TOTAL_WINDOW_SIZE_Y,
+        SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_SHOWWINDOW);
     clientMutexRelease();
     drawBusy = FALSE;
 

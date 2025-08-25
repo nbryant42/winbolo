@@ -86,7 +86,6 @@ void cursorCleanup(HINSTANCE appInst) {
 *LAST MODIFIED: 18/1/02
 *PURPOSE:
 *  Loads and Sets up cursors a cursor on the screen
-*  Sets it as the system cursor to stop flickering
 *
 *ARGUMENTS:
 * appInst    - Handle to the application (Required to 
@@ -103,9 +102,18 @@ void cursorSetCursor(HINSTANCE appInst, bool normalCurs) {
     hCurs = LoadCursor(NULL, IDC_ARROW);
   } else {
     BYTE zf = windowGetZoomFactor();
+    DPI_AWARENESS_CONTEXT ctx = GetWindowDpiAwarenessContext(cursorappWnd);
+    DPI_AWARENESS aware = GetAwarenessFromDpiAwarenessContext(ctx);
+    // This is subtly different than the way we need to handle DPI for fonts.
+    // If we are in an application-based DPI scaling mode, we are working in raw pixels and `zf` is the only thing
+    // that affects display size, so we should ignore the monitor DPI. Otherwise, the system is scaling up our graphics
+    // for us, and we want to scale the cursor to match. GetDpiForWindow is also the wrong function to call here,
+    // because it virtualizes to 96 in the DPI_AWARENESS_UNAWARE case. For the moment, I'm reluctant to fully commit to
+    // per-monitor mode, and trying to support multiple modes, which can be selected by the compatibility properties
+    // for the EXE file.
     HMONITOR mon = MonitorFromWindow(cursorappWnd, MONITOR_DEFAULTTONEAREST);
     UINT dx = 96, dy = 96;
-    if (!mon || FAILED(GetDpiForMonitor(mon, MDT_EFFECTIVE_DPI, &dx, &dy)))
+    if (!mon || aware == DPI_AWARENESS_PER_MONITOR_AWARE || FAILED(GetDpiForMonitor(mon, MDT_EFFECTIVE_DPI, &dx, &dy)))
     {
       dx = 96;
       dy = 96;

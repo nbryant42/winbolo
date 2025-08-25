@@ -164,6 +164,6 @@ void fontSelectTiny(HDC hDC) {
 int fontPointToHeight(int pntSize, HDC hWindowDC) {
   int returnValue; /* Value to Return */
 
-  returnValue = -MulDiv(pntSize, GetDeviceCaps(hWindowDC, LOGPIXELSY), 72);
+  returnValue = -MulDiv(pntSize, 96, 72); // we are working in device pixels, so we must force 96dpi.
   return returnValue;
 }
