@@ -28,7 +28,7 @@
 #ifndef __WINBOLO_NET_DIALOG_H
 #define __WINBOLO_NET_DIALOG_H
 
-#include <windows.h>
+#include <WinSock2.h>
 #include "..\..\bolo\global.h"
 
 

@@ -19,7 +19,7 @@
 //
 // URL underlining and hand subclassing derived from: http://www.wischik.com/lu/programmer/setdlgitemurl.html
 
-#include <windows.h>
+#include <WinSock2.h>
 #include <winuser.h>
 #include <string.h>
 #include <commdlg.h>

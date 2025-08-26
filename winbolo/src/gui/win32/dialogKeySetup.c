@@ -26,7 +26,6 @@
 *********************************************************/
 
 #include <WinSock2.h>
-#include <windows.h>
 #include <string.h>
 #include "..\winbolo.h"
 #include "..\..\bolo\backend.h"

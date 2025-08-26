@@ -36,7 +36,7 @@
 /* Includes */
 
 #include "brain.h"
-#include  <windows.h>
+#include <WinSock2.h>
 #include "resource.h"
 
 /* Defines */

@@ -16,7 +16,7 @@
 
 /* Mini C file needed to compile resource DLL */
 
-#include <windows.h>
+#include <WinSock2.h>
 BOOL WINAPI DllMain(HANDLE hInst, ULONG ul_reason_for_call, LPVOID lpReserved) {
 	return TRUE;
 }

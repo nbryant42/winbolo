@@ -28,7 +28,7 @@
 #ifndef DIALOG_PASSWORD_H
 #define DIALOG_PASSWORD_H
 
-#include <windows.h>
+#include <WinSock2.h>
 #include "..\bolo\global.h"
 
 /*********************************************************

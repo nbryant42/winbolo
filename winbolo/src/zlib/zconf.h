@@ -219,7 +219,7 @@
 #    ifdef FAR
 #      undef FAR
 #    endif
-#    include <windows.h>
+#    #include <WinSock2.h>
      /* No need for _export, use ZLIB.DEF instead. */
      /* For complete Windows compatibility, use WINAPI, not __stdcall. */
 #    define ZEXPORT WINAPI

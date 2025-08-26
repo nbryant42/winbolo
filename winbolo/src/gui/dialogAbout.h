@@ -29,7 +29,7 @@
 #define DIALOG_ABOUT_H
 
 
-#include <windows.h>
+#include <WinSock2.h>
 
 /*********************************************************
 *NAME:          dialogAboutCallback

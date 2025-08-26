@@ -28,7 +28,7 @@
 #ifndef DIALOG_KEY_SETUP_H
 #define DIALOG_KEY_SETUP_H
 
-#include <windows.h>
+#include <WinSock2.h>
 #include "..\bolo\global.h"
 
 /* Get Key Window class and window caption */

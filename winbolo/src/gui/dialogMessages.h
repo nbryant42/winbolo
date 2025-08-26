@@ -28,7 +28,7 @@
 #ifndef DIALOG_MESSAGES_H
 #define DIALOG_MESSAGES_H
 
-#include <windows.h>
+#include <WinSock2.h>
 
 /*********************************************************
 *NAME:          dialogMessagesCallback

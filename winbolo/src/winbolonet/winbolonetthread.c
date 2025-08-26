@@ -27,7 +27,7 @@
 *********************************************************/
 
 #ifdef _WIN32
-//  #include <windows.h>
+//  #include <WinSock2.h>
 //  #include <string.h>
 #else
 	#include "SDL.h"

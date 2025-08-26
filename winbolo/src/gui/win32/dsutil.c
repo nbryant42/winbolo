@@ -19,8 +19,7 @@
 
 /*  Modifed 27/3/99 By John Morrison to add background sound toggle and custom buffer desciption settings */
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include <WinSock2.h>
 #include <mmsystem.h>
 #include <dsound.h>
 

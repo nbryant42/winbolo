@@ -30,7 +30,7 @@
 
 #ifdef _WIN32
 /* Windows */
-#include <windows.h>
+#include <WinSock2.h>
 #else
 /* Linux */
 #endif

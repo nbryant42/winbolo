@@ -25,7 +25,7 @@
 
 #ifdef WIN32
 	#include <stdarg.h>
-	#include <windows.h>
+	#include <WinSock2.h>
 	#include "resource.h"
 
 #endif

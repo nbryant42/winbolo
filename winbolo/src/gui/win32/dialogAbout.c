@@ -26,7 +26,6 @@
 *********************************************************/
 
 #include <WinSock2.h>
-#include <windows.h>
 #include "..\dialogAbout.h"
 #include "..\lang.h"
 #include "..\resource.h"

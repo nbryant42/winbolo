@@ -37,7 +37,7 @@
 	*  run it on windows.  resource.h holds information created  *
 	*  by Visual C++, it can be edited however if you wish to    *
 	*  create new menu's by hand. */
-	#include <windows.h>
+	#include <WinSock2.h>
 	#include "resource.h"
 
 	/* This funciton is used to tell the menu to check or uncheck *

@@ -28,7 +28,7 @@
 #ifndef _WINBOLO_H
 #define _WINBOLO_H
 
-#include <windows.h>
+#include <WinSock2.h>
 #include "..\bolo\global.h"
 #include "..\bolo\backend.h"
 #include "input.h"

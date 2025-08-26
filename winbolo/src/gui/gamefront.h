@@ -28,7 +28,7 @@
 #ifndef GAMEFRONT_H
 #define GAMEFRONT_H
 
-#include <windows.h>
+#include <WinSock2.h>
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 #include "..\bolo\global.h"

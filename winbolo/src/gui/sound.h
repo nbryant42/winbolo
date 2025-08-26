@@ -29,7 +29,7 @@
 #ifndef SOUND_H 
 #define SOUND_H 
 
-#include <windows.h>
+#include <WinSock2.h>
 #include <dsound.h>
 #include "..\bolo\global.h"
 #include "..\bolo\backend.h"

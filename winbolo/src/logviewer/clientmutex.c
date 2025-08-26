@@ -25,7 +25,7 @@
 *  WinBolo Server Thread manager
 *********************************************************/
 
-#include <windows.h>
+#include <WinSock2.h>
 #include <winbase.h>
 #include <string.h>
 #include "global.h"

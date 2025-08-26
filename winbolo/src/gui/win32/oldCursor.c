@@ -26,7 +26,7 @@
 *********************************************************/
 
 #include <stdlib.h>
-#include <windows.h>
+#include <WinSock2.h>
 #include <winuser.h>
 #include "..\..\bolo\global.h"
 #include "..\..\bolo\backend.h"

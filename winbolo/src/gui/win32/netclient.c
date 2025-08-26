@@ -29,7 +29,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <winsock2.h>
-#include <windows.h>
 #include <mmsystem.h>
 #include "..\..\bolo\global.h"
 #include "..\winbolo.h"

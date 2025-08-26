@@ -26,7 +26,6 @@
 *********************************************************/
 
 #include <WinSock2.h>
-#include <Windows.h>
 #include <string.h>
 #include <commdlg.h>
 #include <mmsystem.h>

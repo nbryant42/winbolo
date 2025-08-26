@@ -68,8 +68,7 @@ static const int kUseNoAllocs = 0;
 #ifndef STRICT
 #define STRICT
 #endif
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include <WinSock2.h>
 void mpFail(char *msg)
 {
 	MessageBox(NULL, msg, "BigDigits Error", MB_ICONERROR);

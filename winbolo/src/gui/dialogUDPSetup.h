@@ -28,7 +28,7 @@
 #ifndef DIALOG_UDPSETUP_H
 #define DIALOG_UDPSETUP_H
 
-#include <windows.h>
+#include <WinSock2.h>
 #include "..\bolo\global.h"
 
 /* The default UDP port */

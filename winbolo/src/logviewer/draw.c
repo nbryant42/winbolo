@@ -28,7 +28,7 @@
 #include <math.h>
 
 
-#include <windows.h>
+#include <WinSock2.h>
 #include <windowsx.h>
 #include <stdio.h>
 #include "resource.h"

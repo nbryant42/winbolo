@@ -26,7 +26,6 @@
 *********************************************************/
 
 #include <WinSock2.h>
-#include <windows.h>
 #include "..\mappreview.h"
 
 HDC previewDC = NULL;

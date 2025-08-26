@@ -29,7 +29,7 @@
 #define WIN_UTIL_H
 
 
-#include <windows.h>
+#include <WinSock2.h>
 #include "..\bolo\global.h"
 
 /* String identifiers for each key */

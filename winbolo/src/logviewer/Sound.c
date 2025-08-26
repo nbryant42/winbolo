@@ -26,7 +26,7 @@
 *  (Uses Direct Sound)
 *********************************************************/
 
-#include <windows.h>
+#include <WinSock2.h>
 #include <dsound.h>
 #include "global.h"
 #include "backend.h"

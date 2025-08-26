@@ -30,7 +30,6 @@
 #include <string.h>
 #ifdef _WIN32
 #include <WinSock2.h>
-#include <windows.h>
 #endif
 #include "global.h"
 #include "tank.h"

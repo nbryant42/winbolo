@@ -33,7 +33,6 @@ You'll know it when you see it :)
 *********************************************************/
 
 #include <WinSock2.h>
-#include <windows.h>
 #include <winbase.h>
 #include <stdio.h>
 #include <stdlib.h>

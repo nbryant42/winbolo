@@ -29,7 +29,7 @@
 #define _DIALOG_LANGUAGES_H
 
 
-#include <windows.h>
+#include <WinSock2.h>
 
 
 #define SLASH_STRING "\\"

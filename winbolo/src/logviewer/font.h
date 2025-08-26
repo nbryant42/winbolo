@@ -28,7 +28,7 @@
 #ifndef _FONT_H
 #define _FONT_H
 
-#include <windows.h>
+#include <WinSock2.h>
 #include "global.h"
 
 

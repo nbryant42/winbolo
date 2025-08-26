@@ -26,7 +26,6 @@
 *********************************************************/
 
 #include <WinSock2.h>
-#include <windows.h>
 #include <winbase.h>
 #include <string.h>
 #include "..\../bolo/global.h"

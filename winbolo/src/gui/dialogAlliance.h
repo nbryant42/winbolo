@@ -28,7 +28,7 @@
 #ifndef _DIALOG_ALLIANCE_H
 #define _DIALOG_ALLIANCE_H
 
-#include <windows.h>
+#include <WinSock2.h>
 
 /*********************************************************
 *NAME:          dialogAllianceCallback

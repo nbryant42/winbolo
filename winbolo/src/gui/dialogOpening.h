@@ -28,7 +28,7 @@
 #ifndef DIALOG_OPENING_H
 #define DIALOG_OPENING_H
 
-#include <windows.h>
+#include <WinSock2.h>
 #include "..\bolo\global.h"
 
 /*********************************************************

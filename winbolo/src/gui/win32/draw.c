@@ -27,7 +27,6 @@
 
 #include <WinSock2.h>
 #include <math.h>
-#include <windows.h>
 #include <string.h>
 #include <initguid.h>
 #include <ddraw.h>

@@ -31,7 +31,6 @@
 #ifdef _WIN32
 	/* Windows winsock */
 	#include <winsock2.h>
-	#include <windows.h>
 	#include <memory.h>
 	#define INTERESTING_SEND_SIGNAL	0
 #else

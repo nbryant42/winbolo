@@ -26,7 +26,6 @@
 *********************************************************/
 
 #include <WinSock2.h>
-#include <windows.h>
 #include "..\dialogskins.h"
 #include "..\lang.h"
 #include "..\winutil.h"

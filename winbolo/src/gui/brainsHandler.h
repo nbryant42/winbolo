@@ -28,7 +28,7 @@
 #ifndef BRAINSHANDLER_H
 #define BRAINSHANDLER_H
 
-#include <windows.h>
+#include <WinSock2.h>
 #include "..\bolo\global.h"
 
 /* Strings */

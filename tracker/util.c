@@ -30,7 +30,6 @@
 #ifdef _WIN32
 /* Windows winsock */
 #include <winsock2.h>
-#include <windows.h>
 #include <memory.h>
 
 #else

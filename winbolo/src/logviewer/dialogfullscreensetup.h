@@ -28,7 +28,7 @@
 #ifndef __DIALOGFULLSCREENSETUP_H
 #define __DIALOGFULLSCREENSETUP_H
 
-#include <windows.h>
+#include <WinSock2.h>
 #include <ddraw.h>
 #include "global.h"
 

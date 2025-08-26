@@ -28,7 +28,6 @@
 #include <stdio.h>
 #ifdef _WIN32
 #include <winsock2.h>
-#include <windows.h>
 #else 
 #include <sys/socket.h>
 #include <netinet/in.h>

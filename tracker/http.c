@@ -32,7 +32,6 @@
 /* Windows winsock */
 #include <pthread.h>
 #include <winsock2.h>
-#include <windows.h>
 #include <memory.h>
 #define HTTP_SEND_SIGNAL	0
 #else

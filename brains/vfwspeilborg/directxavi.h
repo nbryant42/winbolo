@@ -9,7 +9,7 @@
 #define _DIRECTXAVI_
 
 //#include "Core.h"
-#include <windows.h>
+#include <WinSock2.h>
 #include <ddraw.h>
 #include <vfw.h> //The VideoForWindows header file, Vfw32.lib must also be linked
 

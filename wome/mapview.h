@@ -27,7 +27,7 @@
 #ifndef MAPVIEW_H
 #define MAPVIEW_H
 
-#include <windows.h>
+#include <WinSock2.h>
 #include "global.h"
 #include "screen.h"
 

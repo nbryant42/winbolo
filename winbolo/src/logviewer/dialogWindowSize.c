@@ -25,7 +25,7 @@
 *  Looks after the Game setup dialog
 *********************************************************/
 
-#include <windows.h>
+#include <WinSock2.h>
 #include <commdlg.h>
 #include "global.h"
 #include "backend.h"

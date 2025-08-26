@@ -29,7 +29,7 @@
 /* Includes */
 
 #include "brain.h"
-#include  <windows.h>
+#include <WinSock2.h>
 #include <ddraw.h>
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>

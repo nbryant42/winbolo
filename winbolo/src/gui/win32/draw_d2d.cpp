@@ -29,7 +29,7 @@
 *********************************************************/
 
 #include <math.h>
-#include <windows.h>
+#include <WinSock2.h>
 #include <string.h>
 #include <d3d11.h>
 #include <dxgi1_4.h>

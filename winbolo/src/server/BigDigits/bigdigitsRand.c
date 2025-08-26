@@ -118,8 +118,7 @@ static void get_time64(uint32_t t[2])
 	memcpy(t, &tv, 2*sizeof(uint32_t));
 }
 #elif defined(_WIN32) || defined(WIN32)
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include <WinSock2.h>
 static void get_time64(uint32_t t[2])
 {
 	FILETIME ft;

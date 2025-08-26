@@ -30,7 +30,7 @@
 
 #define STRICT 1
 
-#include <windows.h>
+#include <WinSock2.h>
 #include "global.h"
 #include "backend.h"
 

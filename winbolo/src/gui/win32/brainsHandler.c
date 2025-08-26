@@ -33,7 +33,6 @@
 
 #include <WinSock2.h>
 #include <string.h>
-#include <windows.h>
 #include <winbase.h>
 #include "..\..\bolo\global.h"
 #include "..\..\bolo\brain.h"

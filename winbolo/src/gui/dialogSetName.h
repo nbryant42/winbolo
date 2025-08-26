@@ -28,7 +28,7 @@
 #ifndef _DIALOG_SET_PLAYER_NAME_H
 #define _DIALOG_SET_PLAYER_NAME_H
 
-#include <windows.h>
+#include <WinSock2.h>
 
 /*********************************************************
 *NAME:          dialogSetNameCallback

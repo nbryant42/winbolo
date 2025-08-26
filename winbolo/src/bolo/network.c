@@ -27,7 +27,6 @@
 
 #ifdef _WIN32
 #include <WinSock2.h>
-#include <windows.h>
   HWND dlgAllianceWnd;
   #include "../gui/gamefront.h"
   #include "../gui/winbolo.h"

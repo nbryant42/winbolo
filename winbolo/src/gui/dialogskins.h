@@ -25,7 +25,7 @@
 *  Looks after the skins dialog
 *********************************************************/
 
-#include <windows.h>
+#include <WinSock2.h>
 #include "..\..\bolo\global.h"
 
 

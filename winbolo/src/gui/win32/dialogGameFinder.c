@@ -27,7 +27,6 @@
 
 #include <WinSock2.h>
 #include <string.h>
-#include <windows.h>
 #include "..\..\bolo\global.h"
 #include "..\gamefront.h"
 #include "..\resource.h"

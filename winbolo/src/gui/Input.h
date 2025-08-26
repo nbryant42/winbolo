@@ -27,7 +27,7 @@
 #ifndef _INPUT_H
 #define _INPUT_H
 
-#include <windows.h>
+#include <WinSock2.h>
 #include "..\bolo\global.h"
 #include "..\bolo\backend.h"
 

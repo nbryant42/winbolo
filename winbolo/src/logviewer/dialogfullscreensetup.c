@@ -26,7 +26,7 @@
 *********************************************************/
 
 #include <string.h>
-#include <windows.h>
+#include <WinSock2.h>
 #include <commdlg.h>
 #include <ddraw.h>
 #include "global.h"

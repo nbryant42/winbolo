@@ -25,7 +25,7 @@
 *  Create/Select/Destroy Font Routines
 *********************************************************/
 
-#include <windows.h>
+#include <WinSock2.h>
 #include "global.h"
 #include "font.h"
 

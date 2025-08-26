@@ -13,7 +13,7 @@
 
 
 
-#include <windows.h>
+#include <WinSock2.h>
 #include <stdio.h>
 #include "actionqueue.h" // must include after any system headers that define printf
 

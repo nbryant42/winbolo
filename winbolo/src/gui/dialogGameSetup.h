@@ -28,7 +28,7 @@
 #ifndef DIALOG_GAMESETUP_H
 #define DIALOG_GAMESETUP_H
 
-#include <windows.h>
+#include <WinSock2.h>
 #include "..\bolo\global.h"
 
 /* There are 60 seconds in a minute */

@@ -21,7 +21,7 @@
 #include "../winbolonet/http.h"
 
 #ifdef _WIN32
-  #include <windows.h>
+  #include <WinSock2.h>
   #include "../gui/resource.h"
 #else
   #include <sys/time.h>

@@ -28,7 +28,7 @@
 #ifndef DIALOG_NETWORK_INFO_H
 #define DIALOG_NETWORK_INFO_H
 
-#include <windows.h>
+#include <WinSock2.h>
 
 /*********************************************************
 *NAME:          dialogNetInfoCallback
