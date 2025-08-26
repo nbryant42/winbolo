@@ -25,7 +25,7 @@
 *  Map previews in file open dialog box
 *********************************************************/
 
-
+#include <WinSock2.h>
 #include <windows.h>
 #include "..\mappreview.h"
 

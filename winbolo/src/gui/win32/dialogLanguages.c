@@ -25,6 +25,7 @@
 *  Looks after the Languages dialog
 *********************************************************/
 
+#include <WinSock2.h>
 #include <windows.h>
 #include "..\dialogLanguages.h"
 #include "..\lang.h"

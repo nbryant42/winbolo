@@ -25,6 +25,7 @@
 *  Looks after the skins dialog
 *********************************************************/
 
+#include <WinSock2.h>
 #include <windows.h>
 #include "..\dialogskins.h"
 #include "..\lang.h"

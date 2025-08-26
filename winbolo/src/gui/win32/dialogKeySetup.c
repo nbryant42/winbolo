@@ -25,6 +25,7 @@
 *  Looks after the keyboard setup dialog box
 *********************************************************/
 
+#include <WinSock2.h>
 #include <windows.h>
 #include <string.h>
 #include "..\winbolo.h"

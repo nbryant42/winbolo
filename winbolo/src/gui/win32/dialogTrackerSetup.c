@@ -25,6 +25,7 @@
 *  Looks after the tracker setup dialog box
 *********************************************************/
 
+#include <WinSock2.h>
 #include <stdlib.h>
 #include <windows.h>
 #include "..\..\bolo\global.h"

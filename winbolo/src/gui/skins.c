@@ -32,6 +32,7 @@ You'll know it when you see it :)
 *  Code from zlib version 1.1.4
 *********************************************************/
 
+#include <WinSock2.h>
 #include <windows.h>
 #include <winbase.h>
 #include <stdio.h>

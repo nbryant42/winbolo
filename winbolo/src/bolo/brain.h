@@ -101,7 +101,7 @@ A base bust have one armour unit or more to resist a shell --
 #ifndef NETWORK_H
 /* Only define it if we need it */
 #ifdef _WIN32
-#include <winsock.h>
+#include <winsock2.h>
 typedef unsigned char  u_char;
 typedef unsigned short u_short;
 typedef unsigned long  u_long;

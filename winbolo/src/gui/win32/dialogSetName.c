@@ -25,6 +25,7 @@
 *  Looks after the set player name dialog box.
 *********************************************************/
 
+#include <WinSock2.h>
 #include <string.h>
 #include <windows.h>
 #include "..\..\bolo\global.h"

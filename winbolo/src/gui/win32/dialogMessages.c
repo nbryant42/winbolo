@@ -25,6 +25,7 @@
 *  Looks after the send messages dialog box.
 *********************************************************/
 
+#include <WinSock2.h>
 #include <string.h>
 #include <windows.h>
 #include <winuser.h>

@@ -25,6 +25,7 @@
 *  Provides the front end for dialog/preferences etc.
 *********************************************************/
 
+#include <WinSock2.h>
 #include <windows.h>
 #include <winbase.h>
 #define DIRECTINPUT_VERSION 0x0800

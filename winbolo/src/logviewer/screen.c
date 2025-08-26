@@ -28,7 +28,7 @@
 /* Includes */
 #include <math.h>
 #include "global.h"
-#include <winsock.h>
+#include <winsock2.h>
 #include "backend.h"
 #include "bolo_map.h"
 #include "pillbox.h"

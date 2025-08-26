@@ -27,6 +27,7 @@
 
 #define DIRECTINPUT_VERSION 0x0800
 
+#include <WinSock2.h>
 #include <windows.h>
 #include <initguid.h>
 #include <dinput.h>

@@ -25,6 +25,7 @@
 *  Our Winbolo.net information
 *********************************************************/
 
+#include <WinSock2.h>
 #include <windows.h>
 #include "..\..\bolo\global.h"
 #include "..\gamefront.h"

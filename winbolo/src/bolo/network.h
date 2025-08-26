@@ -31,7 +31,7 @@
 #include "global.h"
 #include "../server/rsaalgorithm.h"
 #ifdef _WIN32
-#include <winsock.h>
+#include <winsock2.h>
 
 #elif __APPLE__
 #include <sys/types.h>

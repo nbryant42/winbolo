@@ -25,6 +25,7 @@
 *  Looks after the Opening/Welcoming dialog
 *********************************************************/
 
+#include <WinSock2.h>
 #include <windows.h>
 #include "..\..\bolo\global.h"
 #include "..\winbolo.h"

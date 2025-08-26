@@ -27,7 +27,7 @@
 
 #include <stdio.h>
 #include <string.h>
-//#include <winsock.h>
+//#include <winsock2.h>
 #include "global.h"
 #include "util.h"
 #include "bolo_map.h"

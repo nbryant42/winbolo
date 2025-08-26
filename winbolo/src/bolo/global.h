@@ -29,6 +29,7 @@ typedef BYTE MAP_X, MAP_Y;
 typedef float TURNTYPE;
 typedef float SPEEDTYPE;
 #ifdef _WIN32
+#include <WinSock2.h>
 typedef unsigned char u_char;
 #endif
 

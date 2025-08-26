@@ -33,7 +33,7 @@
 #include "rsaalgorithm.h"
 
 #ifdef _WIN32
-  #include <winsock.h>
+  #include <winsock2.h>
 #else
   #include <sys/socket.h>
   #include <netinet/in.h>

@@ -25,6 +25,7 @@
 *  Looks after the UDP (Interet) setup dialog box
 *********************************************************/
 
+#include <WinSock2.h>
 #include <stdlib.h>
 #include <windows.h>
 #include <winuser.h>

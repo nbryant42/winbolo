@@ -25,6 +25,7 @@
 *  Loads the different Cursors
 *********************************************************/
 
+#include <WinSock2.h>
 #include <stdlib.h>
 #include <windows.h>
 #include <winuser.h>

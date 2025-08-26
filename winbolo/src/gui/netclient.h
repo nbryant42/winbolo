@@ -29,7 +29,7 @@
 
 #include "../bolo/global.h"
 #ifdef _WIN32
-#include <winsock.h>
+#include <winsock2.h>
 #endif
 #include "../bolo/network.h"
 #include "currentgames.h"

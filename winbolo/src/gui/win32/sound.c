@@ -26,6 +26,7 @@
 *  (Uses Direct Sound)
 *********************************************************/
 
+#include <WinSock2.h>
 #include <windows.h>
 #include <dsound.h>
 #include "..\..\bolo\global.h"
