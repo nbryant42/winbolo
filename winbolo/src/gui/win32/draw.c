@@ -236,7 +236,7 @@ bool drawSetup(HINSTANCE appInst, HWND appWnd) {
     /* Create the buffer */
     ZeroMemory(&primDesc, sizeof (primDesc));
     primDesc.dwSize = sizeof (primDesc);
-    primDesc.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_CKSRCBLT;
+    primDesc.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
     primDesc.dwWidth = zoomFactor * TILE_FILE_X;
     primDesc.dwHeight = zoomFactor * TILE_FILE_Y;
     primDesc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
@@ -375,7 +375,7 @@ bool drawSetup(HINSTANCE appInst, HWND appWnd) {
   if (returnValue == TRUE) {
     ZeroMemory(&primDesc, sizeof (primDesc));
     primDesc.dwSize = sizeof (primDesc);
-    primDesc.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_CKSRCBLT;
+    primDesc.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
     primDesc.dwWidth = zoomFactor * MAIN_BACK_BUFFER_SIZE_X * TILE_SIZE_X; //zoomFactor * TANK_LABEL_WIDTH;
     primDesc.dwHeight = zoomFactor * (TANK_LABEL_HEIGHT * MAX_TANKS + 30);
     primDesc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
@@ -390,7 +390,7 @@ bool drawSetup(HINSTANCE appInst, HWND appWnd) {
   if (returnValue == TRUE) {
       ZeroMemory(&primDesc, sizeof(primDesc));
       primDesc.dwSize = sizeof(primDesc);
-      primDesc.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_CKSRCBLT;
+      primDesc.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
       primDesc.dwWidth = zoomFactor * MAIN_BACK_BUFFER_SIZE_X * TILE_SIZE_X;
       primDesc.dwHeight = zoomFactor * (2 * KILLS_DEATHS_HEIGHT - 20);
       primDesc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
