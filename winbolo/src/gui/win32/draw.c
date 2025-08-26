@@ -167,6 +167,15 @@ bool drawSetup(HINSTANCE appInst, HWND appWnd) {
     returnValue = FALSE;
     MessageBoxA(NULL, langGetText(STR_DRAWERROR_CREATEOBJECT), DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);
   }
+
+  DDCAPS caps = { .dwSize = sizeof(caps) };
+  // Check whether the hardware supports color keys. We haven't used GetCaps until now, so if it fails, just assume yes.
+  // If !supportsColorKeys, we will create lpDDSTiles and lpDDSTankLabels with DDSCAPS_SYSTEMMEMORY, which fixes
+  // color-key transparency for the tank, crosshair, etc on the Intel iGPUs where we have seen this problem. However,
+  // setting DDSCAPS_SYSTEMMEMORY can definitely destroy our FPS on lpDDSTiles blits for discrete GPUs, so we may need
+  // to refine this further in the future, probably via two copies of that surface, one for tile blits and another for
+  // anything that needs color keys.
+  bool supportsColorKeys = lpDD->lpVtbl->GetCaps(lpDD, &caps, NULL) != DD_OK || caps.dwCaps & DDCAPS_COLORKEY;
   
   /* Set the co-op level */
   if (returnValue == TRUE) {
@@ -222,7 +231,7 @@ bool drawSetup(HINSTANCE appInst, HWND appWnd) {
     primDesc.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
     primDesc.dwWidth = zoomFactor * MAIN_BACK_BUFFER_SIZE_X * TILE_SIZE_X;
     primDesc.dwHeight = zoomFactor * MAIN_BACK_BUFFER_SIZE_Y * TILE_SIZE_Y;
-    primDesc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+    primDesc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | (supportsColorKeys ? 0 : DDSCAPS_SYSTEMMEMORY);
     res = lpDD->lpVtbl->CreateSurface(lpDD, &primDesc, &lpDDSBackBuffer, NULL);
     if (FAILED(res)) {
       MessageBoxA(NULL, langGetText(STR_DRAWERROR_BUFFERCREATE), DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);
@@ -238,7 +247,7 @@ bool drawSetup(HINSTANCE appInst, HWND appWnd) {
     primDesc.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
     primDesc.dwWidth = zoomFactor * TILE_FILE_X;
     primDesc.dwHeight = zoomFactor * TILE_FILE_Y;
-    primDesc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+    primDesc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | (supportsColorKeys ? 0 : DDSCAPS_SYSTEMMEMORY);
     res = lpDD->lpVtbl->CreateSurface(lpDD, &primDesc, &lpDDSTiles, NULL);
     if (FAILED(res) || FAILED(SetSurfaceSrcKeyPureGreen(lpDDSTiles))) {
         MessageBoxA(NULL, "Creating DD Tile buffer and copying resource into it Failed", DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);
