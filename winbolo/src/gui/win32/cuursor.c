@@ -132,6 +132,7 @@ void cursorSetCursor(HINSTANCE appInst, bool normalCurs) {
      SetCursor(hCurs);
      if (destroy) DestroyCursor(destroy);
   }
+  cursorInMainView = !normalCurs;
 }
 
 /*********************************************************
@@ -161,7 +162,6 @@ void cursorMove(HINSTANCE appInst, HWND hWnd, RECT rcWindow) {
   if (GetForegroundWindow() != hWnd) {
     if (cursorInMainView == TRUE) {
       cursorSetCursor(appInst, TRUE);
-      cursorInMainView = FALSE;
     }
     return;
   } else {
@@ -176,12 +176,10 @@ void cursorMove(HINSTANCE appInst, HWND hWnd, RECT rcWindow) {
     if (xPos >= leftPos && xPos <= rightPos && yPos >= topPos && yPos <= bottomPos) {
       if (cursorInMainView == FALSE) {
         cursorSetCursor(appInst, FALSE);
-        cursorInMainView = TRUE;
       }
     } else {
       if (cursorInMainView == TRUE) {
         cursorSetCursor(appInst, TRUE);
-        cursorInMainView = FALSE;
       }
     }
   }
@@ -298,6 +296,8 @@ void cursorSetPos(RECT rcWindow, BYTE xValue, BYTE yValue) {
 *  value - which scroll direction was requested
 *********************************************************/
 void moveMousePointer(updateType value){
+  if (isInMenu || !cursorInMainView) return;
+
   POINT mousePointer;                  /* mousepointer location  */
   RECT clientArea;					   /* client area coordinates */
   BYTE zoomFactor;					   /* The zooming factor */

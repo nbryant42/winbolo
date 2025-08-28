@@ -101,6 +101,9 @@ typedef enum {
   wsrClose /* Window has closed */
 } windowShowRequest;
 
+/* Are we in a menu or not */
+extern bool isInMenu;
+
 /*********************************************************
 *NAME:          windowCreate
 *AUTHOR:        John Morrison
