@@ -68,7 +68,7 @@ BOOL CALLBACK dialogUdpSetupCallback(HWND hWnd, unsigned uMsg, WPARAM wParam, LP
 *  wParam - Message parameters
 *  lParam - More Message parameters
 *********************************************************/
-BOOL CALLBACK dialogUdpSetupIpCallback(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
+INT_PTR CALLBACK dialogUdpSetupIpCallback(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
 
 /*********************************************************
 *NAME:          dialogUdpSetupInit

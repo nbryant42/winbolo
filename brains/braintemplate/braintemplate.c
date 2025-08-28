@@ -78,7 +78,7 @@ Boolean opt1, opt2, opt3; /* Menu options         */
 /* About dialog box callback. We use dialogbox rather then a simple
    MessageBox because a MessageBox stops WinBolo from continuing 
    until the user has clicked OK in the MessageBox. */
-BOOL CALLBACK aboutDialogCallback(HWND hWnd, unsigned uMsg, WPARAM wParam, LPARAM lParam) {
+INT_PTR CALLBACK aboutDialogCallback(HWND hWnd, unsigned uMsg, WPARAM wParam, LPARAM lParam) {
   if (uMsg == WM_COMMAND && LOWORD(wParam) == IDOK) {
     /* OK Pressed. Hide the window till next time it is called */
     ShowWindow(hAboutDialog, SW_HIDE);
@@ -124,7 +124,7 @@ Boolean brainOpen(void) {
 
   /* Added our menu */
   if (returnValue == TRUE) {
-    AppendMenu(hMenu, MF_POPUP, (UINT) brainMenu, BRAIN_MENU_NAME);
+    AppendMenu(hMenu, MF_POPUP, (UINT_PTR) brainMenu, BRAIN_MENU_NAME);
     DrawMenuBar(hMainWnd);
   }
 

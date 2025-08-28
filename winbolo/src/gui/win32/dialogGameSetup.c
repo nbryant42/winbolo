@@ -171,7 +171,7 @@ BOOL NEAR PASCAL dialogGameFinderDlgNotify(HWND hDlg, LPOFNOTIFY pofn) {
 *  wParam - Message parameters
 *  lParam - More Message parameters
 *********************************************************/
-BOOL CALLBACK dialogGameFinderOpeningProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+UINT_PTR CALLBACK dialogGameFinderOpeningProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	char szFile[MAX_PATH];
   HWND hWnd;
   HDC hDC;

@@ -30,6 +30,7 @@
 
 #include "../bolo/global.h"
 #include "../bolo/backend.h"
+#include "../bolo/netplayers.h"
 #include "rsaalgorithm.h"
 
 #ifdef _WIN32
@@ -1015,6 +1016,8 @@ void serverNetReturnLockStatus(bool statusFile);
 * none
 *********************************************************/
 void serverNetKickPlayer(char *player);
+
+netPlayers *serverNetGetNetPlayers(void);
 
 #pragma pack(pop)
 

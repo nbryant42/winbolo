@@ -160,7 +160,7 @@ void serverNetCheck(BYTE *ptr, int len) {
 }
 
 
-netPlayers *serverNetGetNetPlayers() {
+netPlayers *serverNetGetNetPlayers(void) {
   return &np;
 }
 

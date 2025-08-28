@@ -74,7 +74,7 @@ bool dialogWinbolonetOK(HWND hWnd);
 *  wParam - Message parameters
 *  lParam - More Message parameters
 *********************************************************/
-BOOL CALLBACK dialogWinbolonetCallback(HWND hWnd, unsigned uMsg, WPARAM wParam, LPARAM lParam );
+INT_PTR CALLBACK dialogWinbolonetCallback(HWND hWnd, unsigned uMsg, WPARAM wParam, LPARAM lParam );
 
 #endif /* __WINBOLO_NET_DIALOG_H */
 

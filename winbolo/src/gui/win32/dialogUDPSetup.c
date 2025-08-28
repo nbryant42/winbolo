@@ -142,7 +142,7 @@ BOOL CALLBACK dialogUdpSetupCallback(HWND hWnd, unsigned uMsg, WPARAM wParam, LP
 *  wParam - Message parameters
 *  lParam - More Message parameters
 *********************************************************/
-BOOL CALLBACK dialogUdpSetupIpCallback(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam ) {
+INT_PTR CALLBACK dialogUdpSetupIpCallback(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam ) {
   HANDLE cbHandle; /* handle to the clipboard data */
   char *dataPtr;   /* pointer to clipboard data */
   char str[1024];  /* String to paste in */
@@ -249,7 +249,7 @@ void dialogUdpSetupInit(HWND hWnd) {
 
   /* Set the edit control callback for pasting */
   dlgElemWnd = GetDlgItem(hWnd, IDC_EDITIP);
-  oldWndProc = (FARPROC) SetWindowLong(dlgElemWnd, GWL_WNDPROC, (DWORD)dialogUdpSetupIpCallback);
+  oldWndProc = (FARPROC) SetWindowLongPtr(dlgElemWnd, GWLP_WNDPROC, (LONG_PTR)dialogUdpSetupIpCallback);
   if (oldWndProc == 0) {
     MessageBoxA(hWnd, langGetText(STR_ERR_DLGTCP_SUBCLASS), DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);
   }

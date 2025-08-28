@@ -7,9 +7,9 @@ set(CMAKE_SYSTEM_VERSION 10.0.19041.0) # oldest currently supported as of this w
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /guard:cf /GL")
 add_link_options("/GUARD:CF" "/INCREMENTAL:NO" "/LTCG")
 
-if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    message(FATAL_ERROR "This project is currently 32-bit only.")
-endif()
+#if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+#    message(FATAL_ERROR "This project is currently 32-bit only.")
+#endif()
 
 add_library(zlib STATIC
     winbolo/src/zlib/inflate.c
@@ -118,7 +118,6 @@ set_target_properties(BrainTemplate PROPERTIES
 # make default calling conv stdcall, and keep undecorated export name
 if (MSVC)
   target_compile_options(BrainTemplate PRIVATE /Gz)
-  target_link_options(BrainTemplate PRIVATE "/EXPORT:BrainMain=_BrainMain@4")
 endif()
 
 # Ryan2.brn
@@ -145,7 +144,6 @@ target_link_libraries(Ryan2 PRIVATE
 # make default calling conv stdcall, and keep undecorated export name
 if (MSVC)
   target_compile_options(Ryan2 PRIVATE /Gz)
-  target_link_options(Ryan2 PRIVATE "/EXPORT:BrainMain=_BrainMain@4")
 endif()
 
 # Standard Autopilo.brn
@@ -169,7 +167,6 @@ set_target_properties(StandardAutopilot PROPERTIES
 # make default calling conv stdcall, and keep undecorated export name
 if (MSVC)
   target_compile_options(StandardAutopilot PRIVATE /Gz)
-  target_link_options(StandardAutopilot PRIVATE "/EXPORT:BrainMain=_BrainMain@4")
 endif()
 
 

@@ -119,7 +119,7 @@ bool dialogWinbolonetOK(HWND hWnd) {
 *  wParam - Message parameters
 *  lParam - More Message parameters
 *********************************************************/
-BOOL CALLBACK dialogWinbolonetCallback(HWND hWnd, unsigned uMsg, WPARAM wParam, LPARAM lParam ) {
+INT_PTR CALLBACK dialogWinbolonetCallback(HWND hWnd, unsigned uMsg, WPARAM wParam, LPARAM lParam ) {
   HWND dlgWnd;
   switch ( uMsg ) {
   case WM_INITDIALOG:

@@ -313,7 +313,7 @@ void processKeys() {
 *
 *********************************************************/
 #ifdef _WIN32
-void CALLBACK serverGameTimer(UINT uID, UINT uMsg, DWORD dwUser, DWORD dw1, DWORD dw2) {
+void CALLBACK serverGameTimer(UINT uID, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2) {
   DWORD tick;     /* Number of ticks passed */
   static int trackerTime = 5500;   /* When we should update the tracker */
   static int wbnTime = 0;

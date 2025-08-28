@@ -44,7 +44,7 @@
 *  wParam - Message parameters
 *  lParam - More Message parameters
 *********************************************************/
-BOOL CALLBACK dialogSetNameCallback( HWND hWnd, unsigned uMsg, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK dialogSetNameCallback( HWND hWnd, unsigned uMsg, WPARAM wParam, LPARAM lParam);
 
 /*********************************************************
 *NAME:          dialogSetNameInit

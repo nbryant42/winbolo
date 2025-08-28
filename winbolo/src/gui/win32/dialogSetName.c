@@ -53,7 +53,7 @@ bool setNameInGame = FALSE; /* Are we in a game or not */
 *  wParam - Message parameters
 *  lParam - More Message parameters
 *********************************************************/
-BOOL CALLBACK dialogSetNameCallback( HWND hWnd, unsigned uMsg, WPARAM wParam, LPARAM lParam) {
+INT_PTR CALLBACK dialogSetNameCallback( HWND hWnd, unsigned uMsg, WPARAM wParam, LPARAM lParam) {
   switch ( uMsg ) {
   case WM_INITDIALOG:
     dialogSetNameInit(hWnd);
