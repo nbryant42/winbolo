@@ -3418,6 +3418,7 @@ void drawTankLabel(char *str, BYTE playerNum, int mx, int my, BYTE px, BYTE py) 
   int x;          /* X And Y Locations on the back buffer to do the drawing */
   int y;
   BYTE zf;
+  static char lastPlayerName[MAX_TANKS][MAX_PATH];
 
   zf = windowGetZoomFactor();
   textRect.left = 0;
@@ -3427,35 +3428,60 @@ void drawTankLabel(char *str, BYTE playerNum, int mx, int my, BYTE px, BYTE py) 
   len = (int) strlen(str);
   
   if (len > 0) {
-    if (len != drawPlayerLens[playerNum][2] || zf != drawPlayerLens[playerNum][1]) {
-      drawTankLabelsCalcSize(str, playerNum, zf);
-    }
+    if (strcmp(lastPlayerName[playerNum], str)) {
+      strcpy(lastPlayerName[playerNum], str);
 
-    if (SUCCEEDED(lpDDSTankLabels->lpVtbl->GetDC(lpDDSTankLabels, &hDC))) {
-      /* Draw it on the back buffer */
-
-      fontSelectNoAA(hDC);
-      SetBkColor(hDC, RGB(0,255,0));
-      SetTextColor(hDC, RGB(255, 255, 255));
-
-      DrawTextA(hDC, str, drawPlayerLens[playerNum][0], &textRect,
-          (DT_LEFT | DT_NOCLIP | DT_CALCRECT | DT_NOPREFIX | DT_SINGLELINE));    
-      DrawTextA(hDC, str, drawPlayerLens[playerNum][0], &textRect, (DT_LEFT | DT_NOCLIP | DT_NOPREFIX | DT_SINGLELINE));
-      if (FAILED(lpDDSTankLabels->lpVtbl->ReleaseDC(lpDDSTankLabels, hDC))) {
-        MessageBoxA(NULL, langGetText(STR_DRAWERROR_RELEASEDC), DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);
+      if (len != drawPlayerLens[playerNum][2] || zf != drawPlayerLens[playerNum][1]) {
+        drawTankLabelsCalcSize(str, playerNum, zf);
       }
-      x = (mx+1) * zf * TILE_SIZE_X + zf * (px+1);
+
+      if (SUCCEEDED(lpDDSTankLabels->lpVtbl->GetDC(lpDDSTankLabels, &hDC))) {
+        /* Draw it on the back buffer */
+
+        HBRUSH brush = CreateSolidBrush(RGB(0, 255, 0));
+        if (brush) {
+          FillRect(hDC, &textRect, brush);
+          DeleteObject(brush);
+        }
+        fontSelectNoAA(hDC);
+        SetBkColor(hDC, RGB(0, 255, 0));
+        SetTextColor(hDC, RGB(255, 255, 255));
+
+        DrawTextA(hDC, str, drawPlayerLens[playerNum][0], &textRect,
+          (DT_LEFT | DT_NOCLIP | DT_CALCRECT | DT_NOPREFIX | DT_SINGLELINE));
+        DrawTextA(hDC, str, drawPlayerLens[playerNum][0], &textRect,
+          (DT_LEFT | DT_NOCLIP | DT_NOPREFIX | DT_SINGLELINE));
+        if (FAILED(lpDDSTankLabels->lpVtbl->ReleaseDC(lpDDSTankLabels, hDC))) {
+          MessageBoxA(NULL, langGetText(STR_DRAWERROR_RELEASEDC), DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);
+        }
+        x = (mx + 1) * zf * TILE_SIZE_X + zf * (px + 1);
+        y = my * zf * TILE_SIZE_Y + zf * py;
+        textRect.left = 0;
+        /* Fix displaying off the edge of the screen */
+        if ((x + textRect.right) > zf * MAIN_BACK_BUFFER_SIZE_X * TILE_SIZE_X) {
+          textRect.right = zf * MAIN_BACK_BUFFER_SIZE_X * TILE_SIZE_X - x;
+        }
+        if ((y + textRect.bottom - textRect.top) > (MAIN_BACK_BUFFER_SIZE_Y * (zf * TILE_SIZE_Y))) {
+          textRect.bottom = textRect.top + zf * MAIN_BACK_BUFFER_SIZE_Y * TILE_SIZE_Y - y;
+        }
+        /* Output it */
+        lpDDSBackBuffer->lpVtbl->BltFast(lpDDSBackBuffer, x, y, lpDDSTankLabels, &textRect,
+          DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+      }
+    }
+    else {
+      x = (mx + 1) * zf * TILE_SIZE_X + zf * (px + 1);
       y = my * zf * TILE_SIZE_Y + zf * py;
-      textRect.left = 0;
-      /* Fix displaying off the edge of the screen */ 
+      /* Fix displaying off the edge of the screen */
       if ((x + textRect.right) > zf * MAIN_BACK_BUFFER_SIZE_X * TILE_SIZE_X) {
         textRect.right = zf * MAIN_BACK_BUFFER_SIZE_X * TILE_SIZE_X - x;
       }
       if ((y + textRect.bottom - textRect.top) > (MAIN_BACK_BUFFER_SIZE_Y * (zf * TILE_SIZE_Y))) {
-         textRect.bottom = textRect.top + zf * MAIN_BACK_BUFFER_SIZE_Y * TILE_SIZE_Y - y;
+        textRect.bottom = textRect.top + zf * MAIN_BACK_BUFFER_SIZE_Y * TILE_SIZE_Y - y;
       }
       /* Output it */
-      lpDDSBackBuffer->lpVtbl->BltFast(lpDDSBackBuffer, x, y, lpDDSTankLabels, &textRect, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+      lpDDSBackBuffer->lpVtbl->BltFast(lpDDSBackBuffer, x, y, lpDDSTankLabels, &textRect,
+        DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
     }
   }
 }
