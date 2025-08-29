@@ -2731,7 +2731,7 @@ void drawKillsDeaths(int xValue, int yValue, int kills, int deaths) {
   zf = windowGetZoomFactor();
   
   /* Get the DC and write the text */
-  res = lpDDSTankLabels->lpVtbl->GetDC(lpDDSKillsDeaths, &hDC);
+  res = lpDDSKillsDeaths->lpVtbl->GetDC(lpDDSKillsDeaths, &hDC);
   if (SUCCEEDED(res)) {
     fontSelect(hDC);
       
@@ -2756,7 +2756,7 @@ void drawKillsDeaths(int xValue, int yValue, int kills, int deaths) {
     SetTextColor(hDC, RGB(255,255,255));
     DrawTextA(hDC, str, (int) strlen(str), &deathsRect, (DT_CALCRECT | DT_TOP | DT_NOCLIP));
     DrawTextA(hDC, str, (int) strlen(str), &deathsRect, (DT_TOP | DT_NOCLIP));
-    lpDDSTankLabels->lpVtbl->ReleaseDC(lpDDSKillsDeaths, hDC);
+    lpDDSKillsDeaths->lpVtbl->ReleaseDC(lpDDSKillsDeaths, hDC);
     killsRect.right = max(killsRect.right, deathsRect.right);
     killsRect.bottom = deathsRect.bottom;
     dest.top = yValue + (zf * STATUS_KILLS_TOP);
