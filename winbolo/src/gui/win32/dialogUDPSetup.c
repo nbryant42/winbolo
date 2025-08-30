@@ -27,7 +27,6 @@
 
 #include <WinSock2.h>
 #include <stdlib.h>
-#include <winuser.h>
 #include <richedit.h>
 #include "..\..\bolo\global.h"
 #include "..\gamefront.h"

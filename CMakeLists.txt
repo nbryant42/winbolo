@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.15)
 project(winbolo_client C)
 
 set(CMAKE_C_STANDARD 99) # SDK 10.0.19041.0 headers violate newer standards
-
-set(CMAKE_SYSTEM_VERSION 10.0.19041.0) # oldest currently supported as of this writing
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /guard:cf /GL")
 add_link_options("/GUARD:CF" "/INCREMENTAL:NO" "/LTCG")
 

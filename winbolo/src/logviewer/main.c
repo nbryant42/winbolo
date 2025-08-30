@@ -15,12 +15,11 @@
  */
 
 
-// This is the main file and contains most of the windows code exluding sound/draw
+// This is the main file and contains most of the windows code excluding sound/draw
 //
 // URL underlining and hand subclassing derived from: http://www.wischik.com/lu/programmer/setdlgitemurl.html
 
 #include <WinSock2.h>
-#include <winuser.h>
 #include <string.h>
 #include <commdlg.h>
 #include <commctrl.h>

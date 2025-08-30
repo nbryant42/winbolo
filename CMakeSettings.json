@@ -9,7 +9,13 @@
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
-      "inheritEnvironments": [ "msvc_x86" ]
+      "inheritEnvironments": [ "msvc_x86" ],
+      "variables": [
+        {
+          "name": "CMAKE_SYSTEM_VERSION",
+          "value": "10.0.19041.0"
+        }
+      ]
     },
     {
       "name": "x86-Release",
@@ -20,7 +26,13 @@
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
-      "inheritEnvironments": [ "msvc_x86" ]
+      "inheritEnvironments": [ "msvc_x86" ],
+      "variables": [
+        {
+          "name": "CMAKE_SYSTEM_VERSION",
+          "value": "10.0.19041.0"
+        }
+      ]
     }
   ]
 }
