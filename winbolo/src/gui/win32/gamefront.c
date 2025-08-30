@@ -806,7 +806,7 @@ bool gameFrontGetPrefs(keyItems *keys, bool *useAutoslow, bool *useAutohide) {
  
   /* Player Name */
   strcpy(def, langGetText(STR_DLGGAMESETUP_DEFAULTNAME));
-  GetPrivateProfileStringA("SETTINGS", "Player Name", def, gameFrontName, FILENAME_MAX, PREFERENCE_FILE);
+  GetPrivateProfileStringA("SETTINGS", "Player Name", def, gameFrontName, sizeof gameFrontName, PREFERENCE_FILE);
  
   /* Target Address */
   def[0] = '\0';
