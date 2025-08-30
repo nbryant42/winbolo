@@ -170,14 +170,14 @@ int treeGrowCalcScore(map *mp, pillboxes *pb, bases *bs, BYTE mx, BYTE my) {
   if (pos != FOREST && pos != RIVER && pos != BUILDING && pos != HALFBUILDING && pillsExistPos(pb, mx, my) == FALSE && basesExistPos(bs, mx, my) == FALSE) {
     /* OK to do calculation */
     returnValue += treeGrowCalcSquare(mp, pb, bs, mx, my);
-    returnValue += treeGrowCalcSquare(mp, pb, bs, (BYTE) (mx-1), (BYTE) (my-1));
-    returnValue += treeGrowCalcSquare(mp, pb, bs, (BYTE) (mx-1), my);
-    returnValue += treeGrowCalcSquare(mp, pb, bs, (BYTE) (mx-1), (BYTE) (my+1));
-    returnValue += treeGrowCalcSquare(mp, pb, bs, mx, (BYTE) (my-1));
-    returnValue += treeGrowCalcSquare(mp, pb, bs, mx, (BYTE) (my+1));
-    returnValue += treeGrowCalcSquare(mp, pb, bs, (BYTE) (mx+1), (BYTE) (my-1));
-    returnValue += treeGrowCalcSquare(mp, pb, bs, (BYTE) (mx+1), my);
-    returnValue += treeGrowCalcSquare(mp, pb, bs, (BYTE) (mx+1), (BYTE) (my-1));
+    if (mx && my) returnValue += treeGrowCalcSquare(mp, pb, bs, (BYTE) (mx-1), (BYTE) (my-1));
+    if (mx) returnValue += treeGrowCalcSquare(mp, pb, bs, (BYTE) (mx-1), my);
+    if (mx && my < 255) returnValue += treeGrowCalcSquare(mp, pb, bs, (BYTE) (mx-1), (BYTE) (my+1));
+    if (my) returnValue += treeGrowCalcSquare(mp, pb, bs, mx, (BYTE) (my-1));
+    if (my < 255) returnValue += treeGrowCalcSquare(mp, pb, bs, mx, (BYTE) (my+1));
+    if (mx < 255 && my) returnValue += treeGrowCalcSquare(mp, pb, bs, (BYTE) (mx+1), (BYTE) (my-1));
+    if (mx < 255) returnValue += treeGrowCalcSquare(mp, pb, bs, (BYTE) (mx+1), my);
+    if (mx < 255 && my < 255) returnValue += treeGrowCalcSquare(mp, pb, bs, (BYTE) (mx+1), (BYTE) (my+1));
     if (returnValue < 0) {
       returnValue = 0;
     }
