@@ -56,9 +56,9 @@ file(GLOB CLIENT_SOURCES
     winbolo/src/server/servercore.c
     winbolo/src/server/servermessages.c
     winbolo/src/server/servernet.c
-    winbolo/src/server/servertransport.c
     winbolo/src/server/threads.c
     winbolo/src/server/BigDigits/*.c
+    winbolo/src/server/win32/servertransport.c
     winbolo/src/winbolonet/*.c
 )
 
