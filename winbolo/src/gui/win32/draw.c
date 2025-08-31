@@ -2720,7 +2720,7 @@ void drawTanks(screenTanks *tks) {
 *  kills  - The number of kills the tank has.
 *  deaths - The number of times the tank has died
 *********************************************************/
-void drawKillsDeaths(int xValue, int yValue, int kills, int deaths) {
+void drawKillsDeaths(int xValue, int yValue, unsigned kills, unsigned deaths) {
   RECT killsRect, deathsRect;         /* Text rectangle */
   RECT dest;             /* Destination rectangle */
   HRESULT res;           /* DX Return Values */
@@ -2729,6 +2729,8 @@ void drawKillsDeaths(int xValue, int yValue, int kills, int deaths) {
   BYTE zf;               /* Zoom Factor */
 
   zf = windowGetZoomFactor();
+  kills = min(kills, 99);
+  deaths = min(deaths, 99);
   
   /* Get the DC and write the text */
   res = lpDDSKillsDeaths->lpVtbl->GetDC(lpDDSKillsDeaths, &hDC);
@@ -2740,7 +2742,7 @@ void drawKillsDeaths(int xValue, int yValue, int kills, int deaths) {
     killsRect.top = 0;
     killsRect.bottom = KILLS_DEATHS_HEIGHT;
     str[0] = EMPTY_CHAR;
-    sprintf(str, "%d", kills);
+    sprintf(str, "%u", kills);
     SetBkColor(hDC, RGB(0,0,0));
     SetTextColor(hDC, RGB(255,255,255));
     DrawTextA(hDC, str, (int) strlen(str), &killsRect, (DT_CALCRECT | DT_TOP | DT_NOCLIP));
@@ -2751,7 +2753,7 @@ void drawKillsDeaths(int xValue, int yValue, int kills, int deaths) {
     deathsRect.top = zf * (STATUS_DEATHS_TOP - STATUS_KILLS_TOP);
     deathsRect.bottom = KILLS_DEATHS_HEIGHT;
     str[0] = EMPTY_CHAR;
-    sprintf(str, "%d", deaths);    
+    sprintf(str, "%u", deaths);    
     SetBkColor(hDC, RGB(0,0,0));
     SetTextColor(hDC, RGB(255,255,255));
     DrawTextA(hDC, str, (int) strlen(str), &deathsRect, (DT_CALCRECT | DT_TOP | DT_NOCLIP));

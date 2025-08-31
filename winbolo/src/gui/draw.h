@@ -306,7 +306,7 @@ void drawTanks(screenTanks *tks);
 *  kills  - The number of kills the tank has.
 *  deaths - The number of times the tank has died
 *********************************************************/
-void drawKillsDeaths(int xValue, int yValue, int kills, int deaths);
+void drawKillsDeaths(int xValue, int yValue, unsigned kills, unsigned deaths);
 
 /*********************************************************
 *NAME:          drawStatusBaseBars

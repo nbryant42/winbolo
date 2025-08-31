@@ -390,7 +390,7 @@ void drawMessages(int xValue, int yValue, char *top, char *bottom);
 *  kills  - The number of kills the tank has.
 *  deaths - The number of times the tank has died
 *********************************************************/
-void drawKillsDeaths(int xValue, int yValue, int kills, int deaths);
+void drawKillsDeaths(int xValue, int yValue, unsigned kills, unsigned deaths);
 
 /*********************************************************
 *NAME:          drawSetupArrays

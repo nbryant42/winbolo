@@ -2708,14 +2708,14 @@ void drawDownloadScreen(bool justBlack) {
 *  kills  - The number of kills the tank has.
 *  deaths - The number of times the tank has died
 *********************************************************/
-void drawKillsDeaths(int xValue, int yValue, int kills, int deaths) {
+void drawKillsDeaths(int xValue, int yValue, unsigned kills, unsigned deaths) {
   SDL_Surface *lpTextSurface;
   SDL_Rect dest;   /* The dest square to draw it */
   BYTE zf;     /* Scaling factor */
   char str[16]; /* Holds the charectors to print */
 
   zf = 1; //FIXME: windowGetZoomFactor();
-  sprintf(str, "%d", kills);
+  sprintf(str, "%u", kills);
 
   lpTextSurface = TTF_RenderText_Shaded(lpFont, str, white, black);
   if (lpTextSurface) {
@@ -2727,7 +2727,7 @@ void drawKillsDeaths(int xValue, int yValue, int kills, int deaths) {
     SDL_UpdateRects(lpScreen, 1, &dest);
     SDL_FreeSurface(lpTextSurface);
   }
-  sprintf(str, "%d", deaths);
+  sprintf(str, "%u", deaths);
   lpTextSurface = TTF_RenderText_Shaded(lpFont, str, white, black);
   if (lpTextSurface) {
     dest.x = xValue + zf * STATUS_DEATHS_LEFT;
