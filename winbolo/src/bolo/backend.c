@@ -24,6 +24,7 @@
 #include "client.h"
 #include "messages.h"
 #include "backend.h"
+#include "sounddist.h"
 
 #ifdef _WIN32
 	

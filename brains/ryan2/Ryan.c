@@ -32,7 +32,7 @@
 * the text and graphical interface.  man them if you need more info.     */
 
 
-#ifdef WIN32
+#ifdef _WIN32
 	/* These are the includes we need to incorporate in order to *
 	*  run it on windows.  resource.h holds information created  *
 	*  by Visual C++, it can be edited however if you wish to    *

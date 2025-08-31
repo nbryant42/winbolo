@@ -1043,4 +1043,8 @@ void serverCoreBasesMigrate(BYTE playerNumOldOwner, BYTE playerNumNewOwner);
 *********************************************************/
 void serverCorePillsMigratePlanted(BYTE playerNumOldOwner, BYTE playerNumNewOwner);
 
+void serverCoreCenterTank(void);
+
+void serverCoreSoundDist(sndEffects value, BYTE mx, BYTE my);
+
 #endif /* SERVER_CORE_H */

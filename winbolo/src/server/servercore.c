@@ -1067,7 +1067,7 @@ BYTE serverCoreGetTankPlayer(tank *value) {
 *ARGUMENTS:
 *
 *********************************************************/
-void serverCoreCenterTank() {
+void serverCoreCenterTank(void) {
   return;
 }
 

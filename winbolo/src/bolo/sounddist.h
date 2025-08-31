@@ -74,6 +74,8 @@ void soundDist(sndEffects value, BYTE mx, BYTE my);
 *********************************************************/
 void soundDistLog(sndEffects value, BYTE mx, BYTE my);
 
+void clientSoundDist(sndEffects value, BYTE mx, BYTE my);
+
 #endif /* _SOUNDDIST_H */
 
 

@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.15)
 project(winbolo_client C)
 
 set(CMAKE_C_STANDARD 99) # SDK 10.0.19041.0 headers violate newer standards
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /guard:cf /GL")
-add_link_options("/GUARD:CF" "/INCREMENTAL:NO" "/LTCG")
+add_compile_options(/guard:cf /GL $<$<CONFIG:Debug>:/RTC1>)
+add_link_options(/GUARD:CF /INCREMENTAL:NO /LTCG)
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(FATAL_ERROR "This project is currently 32-bit only.")
