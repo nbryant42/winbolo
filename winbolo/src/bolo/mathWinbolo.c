@@ -239,7 +239,7 @@ int mathAngleTravelUsingComponents(float speedX, float speedY)
 			a = mathConvertRadianToDegree((float) atan((speedY * -1)/speedX));
 		}
 		/* Tank is moving NE */
-		else if ((speedX > 0) && (speedY < 0))
+		else
 		{
 			a = mathConvertRadianToDegree((float) atan((speedY * -1)/speedX));
 		}

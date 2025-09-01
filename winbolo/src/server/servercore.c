@@ -1527,11 +1527,11 @@ void serverCoreSendTeams() {
 bool serverCoreCheckGameWin(bool printWinners) {
   static bool doneOnce = FALSE; /* Have we done this once successfully */
   static bool doneWbnOnce = FALSE; /* Have we done this once successfully */
-  bool returnValue; /* Value to return */
-  BYTE count;       /* Looping variable */
-  BYTE max;         /* Max number of bases */
-  BYTE first;       /* First Owner */
-  BYTE current;     /* Current owner */
+  bool returnValue;     /* Value to return */
+  BYTE count;           /* Looping variable */
+  BYTE max;             /* Max number of bases */
+  BYTE first = NEUTRAL; /* First Owner */
+  BYTE current;         /* Current owner */
   char dest[FILENAME_MAX]; /* Player Name */
   BYTE shellsAmount;
   BYTE minesAmount;

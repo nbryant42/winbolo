@@ -162,23 +162,21 @@ void playersRejoinAddPlayer(char *playerName, PlayerBitMap pills, PlayerBitMap b
 *********************************************************/
 void playersRejoinRequest(char *playerName, BYTE playerNum, pillboxes *pb, bases *bs) {
   BYTE count;    /* Looping variable */
-  BYTE num;      /* Number player is at */
-  bool found;    /* Found Player */
+  BYTE num = 255;      /* Number player is at */
   unsigned long testItem; /* Pill base item we are testing */
   base ba;
  
   count = 0;
-  found = FALSE;
-  while (count < MAX_TANKS && found == FALSE) {
+  while (count < MAX_TANKS) {
     if (strcmp(rejoin.item[count].playerName, playerName) == 0) {
       /* Found them */
-      found = TRUE;
       num = count;
+      break;
     }
     count++;
   }
 
-  if (found == TRUE) {
+  if (num < 255) {
     /* They did exist */
     count = 0;
     logAddEvent(log_PlayerRejoin, playerNum, 0, 0, 0, 0, NULL);

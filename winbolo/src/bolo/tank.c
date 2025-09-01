@@ -1162,7 +1162,11 @@ void tankGetKillsDeaths(tank *value, int *kills, int *deaths) {
 	if(*value != NULL){
 		*kills = (*value)->numKills;
 		*deaths = (*value)->numDeaths;
-	}
+    }
+    else { // don't leave them uninitialized
+        *kills = 0;
+        *deaths = 0;
+    }
 }
 
 /*********************************************************

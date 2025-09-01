@@ -1111,7 +1111,7 @@ static Boolean find_best_route(OBJECT ttype, MAP_X tx, MAP_Y ty, BYTE shells, BY
 	MAP_X subtarg_x = tx;
 	MAP_Y subtarg_y = ty;
 	int i, step = 1;
-	int bestx = -1, besty;
+	int bestx = -1, besty = -1;
 	u_short bestcost = MAX_COST;
 	TERRAIN best_terrain;
 	static MAP_X nodiagx;		// Don't consider diagonal movement
@@ -1276,7 +1276,7 @@ static inline ProgressInfo* getBaseProgress(ObjectInfo* ob) {
 static unsigned check_objects(void)
 {
 	int i;
-	int tx, ty;
+	int tx = info->tankx, ty = info->tanky;
 	BYTE shells = 10, armour = 0;
 	ProgressInfo dummy;
 	ProgressInfo* progresstarget = &dummy;
@@ -1284,7 +1284,7 @@ static unsigned check_objects(void)
 	ObjectInfo* nearest_tank = NULL;
 	ObjectInfo* nearest_pill = NULL, * nearest_frnd = NULL;
 	ObjectInfo* nearest_base = NULL, * nearest_refuel = NULL;
-	unsigned dist;
+	unsigned dist = MAX_VIS_RANGE;
 	unsigned max_dist = calc_max_dist();
 	unsigned tankd = max_dist, pilld = max_dist, frndd = max_dist;
 	unsigned based = max_dist, refueld = max_dist;
@@ -1902,7 +1902,7 @@ static MAP_Y currentminey;
 
 static void minesweep(Boolean* foundmine, Boolean* doshoot)
 {
-	char a, best_a;
+	char a, best_a = 0;
 	short r, best_r = 0;
 
 	// Want to try to hit mines as close to the centre as possible.

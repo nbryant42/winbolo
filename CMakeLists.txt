@@ -2,7 +2,32 @@ cmake_minimum_required(VERSION 3.15)
 project(winbolo_client C)
 
 set(CMAKE_C_STANDARD 99) # SDK 10.0.19041.0 headers violate newer standards
-add_compile_options(/guard:cf /GL $<$<CONFIG:Debug>:/RTC1>)
+add_compile_options(
+    /WX                         # Warnings as errors
+    /sdl                        # Additional security warnings
+    /permissive-                # Stricter standards conformance
+    /W4                         # All info-level warnings, except:
+    /external:W3                # - just W3 level for system headers
+    /wd4013                     # - function called without prototype
+    /wd4057                     # - slightly different pointer type
+    /wd4100                     # - unreferenced parameter
+    /wd4101                     # - unreferenced local
+    /wd4127                     # - constant conditional
+    /wd4131                     # - old-style declarator
+    /wd4152                     # - function to data pointer conversion
+    /wd4189                     # - local initialized but not referenced
+    /wd4244                     # - narrowing conversion
+    /wd4245                     # - signed/unsigned mismatch
+    /wd4310                     # - cast truncates constant
+    /wd4456                     # - declaration hides previous local
+    /wd4457                     # - declaration hides parameter
+    /wd4459                     # - declaration hides global
+    /wd4554                     # - suggest clarifying parentheses
+    /wd4702                     # - unreachable code
+    /wd4996                     # - unsafe/deprecated function
+    /guard:cf                   # Control Flow Guard
+    /GL                         # Whole-program optimization
+    $<$<CONFIG:Debug>:/RTC1>)   # Runtime checks
 add_link_options(/GUARD:CF /INCREMENTAL:NO /LTCG)
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)

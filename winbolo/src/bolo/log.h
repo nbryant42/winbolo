@@ -57,7 +57,7 @@
 
 /* The events we record in our log file */
 typedef enum {
-log_PlayerJoined=1,
+log_PlayerJoined=1, // 0 must remain an invalid/canary value
 log_PlayerQuit,
 log_PlayerLocation,
 log_LgmLocation,

@@ -801,7 +801,7 @@ bool netJoinInit(char *ip, unsigned short port, bool usCreate, char *gamePasswor
   char buff[MAX_UDPPACKET_SIZE]; /* Data Buffer */
   char sendBuff[MAX_UDPPACKET_SIZE]; /* Buffer that is sent */
   BOLOHEADER bh;        /* Header packet   */
-  INFO_PACKET inf;      /* Info packet */
+  INFO_PACKET inf = {0};  /* Info packet */
   PASSWORD_PACKET pp;   /* Password packet */
   RSA_PACKET rsap;		/* RSA Packet */
   PLAYERNAME_PACKET pn; /* Player name packet */
@@ -827,7 +827,7 @@ bool netJoinInit(char *ip, unsigned short port, bool usCreate, char *gamePasswor
     returnValue = FALSE;
   }
 
-  /* Check there is an availble player slot */
+  /* Check there is an available player slot */
   if (returnValue == TRUE) {
     memcpy(&inf, buff, sizeof(inf));
     if (inf.num_players == MAX_TANKS) {

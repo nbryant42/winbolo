@@ -183,10 +183,8 @@ void clientSoundDist(sndEffects value, BYTE mx, BYTE my) {
 *  my    - Map Y co-ordinatate for the sound origin
 *********************************************************/
 void soundDistLog(sndEffects value, BYTE mx, BYTE my) {
-  BYTE logMessageType; /* Log item type */
-  bool wantLog;        /* Do we want to log this? */
+  BYTE logMessageType = 0; /* Log item type */
   
-  wantLog = TRUE;
   switch (value) {
   case shootSelf:
   case shootNear:
@@ -207,12 +205,10 @@ void soundDistLog(sndEffects value, BYTE mx, BYTE my) {
   case hitTankNear:
   case hitTankFar:
   case hitTankSelf:
-    wantLog = FALSE;
     break;
   case bubbles:
   case tankSinkNear:
   case tankSinkFar:
-    wantLog = FALSE;
     break;
   case bigExplosionNear:
     logMessageType = log_SoundExplosion;
@@ -243,7 +239,7 @@ void soundDistLog(sndEffects value, BYTE mx, BYTE my) {
     break;
   }
 
-  if (wantLog == TRUE) {
+  if (logMessageType) {
     logAddEvent(logMessageType, mx, my, 0, 0, 0, NULL);
   }
 
