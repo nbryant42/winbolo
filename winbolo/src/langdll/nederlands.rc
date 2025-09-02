@@ -538,7 +538,7 @@ BEGIN
                             "Fout bij het vinden van tracker (DNS lookup fout)"
     STR_NETCLIENTERR_TRACKERCONNECTFAIL "Fout bij tracker connectie"
     STR_NETCLIENTERR_TRACKERNOBLOCK 
-                            "Fout bij het opzetten van noblocking socket"
+                            "Fout bij het opzetten van nonblocking socket"
     STR_NETCLIENT_TRACKERGETRESPONSE "Bezig met verkrijgen van spel info..."
     STR_NETCLIENT_TRACKERPROCESSRESPONSE "Verwerken van tracker data..."
 END

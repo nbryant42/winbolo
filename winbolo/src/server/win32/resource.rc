@@ -676,17 +676,17 @@ BEGIN
     STR_GAMEFRONTERR_FONTS  "Error Loading Fonts"
     STR_GAMEFRONT_LANFINDER_TITLE "LAN Game Finder"
     STR_GAMEFRONT_TRACKERFINDER_TITLE "Tracker Game Finder"
-    STR_GAMEFRONTERR_JOINGAME "An error occured trying to join the game"
+    STR_GAMEFRONTERR_JOINGAME "An error occurred trying to join the game"
     STR_GAMEFRONTERR_SPAWNSERVER 
-                            "An error occured trying to spawn the server process.\n Is the program ""WinBoloDS"" in the same directory as WinBolo?"
+                            "An error occurred trying to spawn the server process.\n Is the program ""WinBoloDS"" in the same directory as WinBolo?"
 END
 
 STRINGTABLE 
 BEGIN
     STR_GAMEFRONTERR_NETSINGLEPLAYER 
-                            "Something really bizzare happened in the networking subsystems which is strange since you selected a single player game. Lucky you..."
+                            "Something really bizarre happened in the networking subsystems which is strange since you selected a single player game. Lucky you..."
     STR_GAMEFRONT_SERVERSTARTMSG 
-                            "This release of WinBolo make use of the standalone server to run network games\nThis will be changed in subsequent releases"
+                            "Launching dedicated server. Type ""quit"" in its window to quit."
     STR_GAMEFRONT_INPUTERR_CREATE 
                             "Creation of Direct Input Keyboard Device Failed"
     STR_GAMEFRONT_INPUTERR_DATAFORMAT 
@@ -704,7 +704,7 @@ BEGIN
     STR_NETCLIENTERR_TRACKERDNSFAIL 
                             "Error finding tracker (DNS lookup failure)"
     STR_NETCLIENTERR_TRACKERCONNECTFAIL "Error Connecting to tracker"
-    STR_NETCLIENTERR_TRACKERNOBLOCK "Error setting socket to be noblocking"
+    STR_NETCLIENTERR_TRACKERNOBLOCK "Error setting socket to be nonblocking"
     STR_NETCLIENT_TRACKERGETRESPONSE "Receiving game info..."
     STR_NETCLIENT_TRACKERPROCESSRESPONSE "Processing tracker data..."
 END

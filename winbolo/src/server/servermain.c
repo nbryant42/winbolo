@@ -653,6 +653,15 @@ bool processArgs(int numArgs, char **argv, char *mapName, unsigned short *port, 
 #include <time.h>
 
 int main(int argc, char **argv) {
+#ifdef _WIN32
+  // Show the console w/o activation if we were started hidden by WinBolo.exe
+  HWND hConsoleWnd = GetConsoleWindow();
+  if (hConsoleWnd != NULL) {
+    // Show the window, but do not activate it.
+    ShowWindow(hConsoleWnd, SW_SHOWNOACTIVATE);
+  }
+#endif
+
   gameType game;
   unsigned short port;
   bool hiddenMines;

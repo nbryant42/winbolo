@@ -521,32 +521,26 @@ bool gameFrontSetDlgState(openingStates newState) {
     dlgState = openLan;
   } else if ((dlgState == openUdpSetup || dlgState == openInternetSetup || dlgState == openLanSetup) && newState == openFinished) {
     /* Start network game */
-
-    /* Starting servers from vista is currently broken. Don't allow it */
-    if (winUtilDetectVista() == TRUE) {
-      MessageBox(NULL, "Starting game servers from within the WinBolo client on Vista (or later) does not work correctly and has been disabled.\n\nIf you wish to start a new game server please use the dedicated server. See the WinBolo manual for details.", DIALOG_BOX_TITLE, MB_ICONINFORMATION);
+    dlgState = newState;
+    SetCursor(LoadCursor(NULL, IDC_WAIT));
+    if (gameFrontSetupServer() == TRUE) {
+      screenSetup(0, FALSE, 0, UNLIMITED_GAME_TIME);
+      if (netSetup(netUdp, gameFrontMyUdp, "127.0.0.1", gameFrontTargetUdp, password, TRUE, gameFrontTrackerAddr, gameFrontTrackerPort, gameFrontTrackerEnabled, wantRejoin, gameFrontWbnUse, gameFrontWbnPass) == FALSE) {
+        wantRejoin = FALSE;
+        MessageBoxA(NULL, "Unable to start server", DIALOG_BOX_TITLE, MB_ICONINFORMATION);
+        netDestroy();
+        screenDestroy();
+        gameFrontShutdownServer();
+        returnValue = FALSE;
+        dlgState = openStart;
+      } else {
+        dlgState = openFinished;
+      }
     } else {
-      dlgState = newState;
-      SetCursor(LoadCursor(NULL, IDC_WAIT));
-      if (gameFrontSetupServer() == TRUE) {
-        screenSetup(0, FALSE, 0, UNLIMITED_GAME_TIME);
-        if (netSetup(netUdp, gameFrontMyUdp, "127.0.0.1", gameFrontTargetUdp, password, TRUE, gameFrontTrackerAddr, gameFrontTrackerPort, gameFrontTrackerEnabled, wantRejoin, gameFrontWbnUse, gameFrontWbnPass) == FALSE) {
-          wantRejoin = FALSE;
-          MessageBoxA(NULL, "Unable to start server", DIALOG_BOX_TITLE, MB_ICONINFORMATION);
-          netDestroy();
-          screenDestroy();
-          gameFrontShutdownServer();
-          returnValue = FALSE;
-          dlgState = openStart;
-        } else {
-          dlgState = openFinished;
-        }
-       } else {
-          MessageBox(NULL, "Error starting server", DIALOG_BOX_TITLE, MB_ICONINFORMATION);
-          dlgState = openStart;
-       }
-      SetCursor(LoadCursor(NULL, IDC_ARROW));
+      MessageBox(NULL, "Error starting server", DIALOG_BOX_TITLE, MB_ICONINFORMATION);
+      dlgState = openStart;
     }
+    SetCursor(LoadCursor(NULL, IDC_ARROW));
   } else if (dlgState == openSetup && newState == openFinished) {
     dlgState = openFinished;
     if (netSetup(netSingle, gameFrontMyUdp, gameFrontUdpAddress, gameFrontTargetUdp, password, TRUE, gameFrontTrackerAddr, gameFrontTrackerPort, gameFrontTrackerEnabled, wantRejoin, gameFrontWbnUse, gameFrontWbnPass) == FALSE) {
@@ -1267,6 +1261,7 @@ void CALLBACK serverGameTimer(UINT uID, UINT uMsg, DWORD dwUser, DWORD dw1, DWOR
 *
 *********************************************************/
 void gameFrontShutdownServer() {
+#if 0
   if (isServer == TRUE) {
     isServer = FALSE;
     threadsSetContext(TRUE);
@@ -1277,6 +1272,7 @@ void gameFrontShutdownServer() {
     serverCoreDestroy();
     threadsSetContext(FALSE);
   }
+#endif
 }
 
 /*********************************************************
@@ -1291,77 +1287,167 @@ void gameFrontShutdownServer() {
 *
 *********************************************************/
 bool gameFrontSetupServer() {
-  bool returnValue;           /* Value to return */
-  char tempPath[MAX_PATH]; /* Temp Path for writing out map from resource to read back in */
-  char tempFile[MAX_PATH]; /* Temp filename for reading file */
-  FILE *fp; /* File pointer used to write data out */
- 
+  bool returnValue;           /* Value to return                 */
+  char cmdLine[1024]; /* Command Line                   */
+  char tmp[FILENAME_MAX];     /* Temp String */
+#if 0
+  SECURITY_ATTRIBUTES sa;     /* Security attributes of the pipe */
+#endif
+  BOOL ret;                   /* Function return Value           */
+  STARTUPINFO si;             /* Startup information    */
+  long l;
+
+  MessageBox(NULL, langGetText(STR_GAMEFRONT_SERVERSTARTMSG), DIALOG_BOX_TITLE, MB_ICONINFORMATION);
+
   returnValue = TRUE;
-  isServer = FALSE;
-  ticks = 0;
+  cmdLine[0] = EMPTY_CHAR;
 
-  threadsSetContext(TRUE);
-  if (strcmp(fileName, "") != 0 ) {
-    if (serverCoreCreate(fileName, gametype, hiddenMines, startDelay , timeLen ) == FALSE) {
-      returnValue = FALSE;
-      MessageBoxA(NULL, "Error Loading Map", DIALOG_BOX_TITLE, MB_OK);
-    }
-  } else {
-    /* Use the inbuilt map */
-    HGLOBAL hGlobal;  /* Resource handle */
-    BYTE *buff;       /* Byte buffer     */
-    HRSRC res;        /* FindResource return */
+  strcat(cmdLine, " -map ");
+  /* Make the command line */
+  if (strcmp(fileName, "") != 0) {
+    strcat(cmdLine, "\"");
+    strcat(cmdLine, fileName);
+    strcat(cmdLine, "\"");
+  }
+  else {
+    strcat(cmdLine, "-inbuilt");
+  }
+  strcat(cmdLine, " ");
+  strcat(cmdLine, "-port ");
+  sprintf(tmp, "%d ", gameFrontTargetUdp);
+  strcat(cmdLine, tmp);
+  strcat(cmdLine, " -gametype ");
+  switch (gametype) {
+  case gameOpen:
+    strcat(cmdLine, "open ");
+    break;
+  case gameTournament:
+    strcat(cmdLine, "tournament ");
+    break;
+  case gameStrictTournament:
+    strcat(cmdLine, "strict ");
+    break;
+  }
+  strcat(cmdLine, " -mines ");
+  if (hiddenMines == TRUE) {
+    strcat(cmdLine, "yes ");
+  }
+  else {
+    strcat(cmdLine, "no ");
+  }
 
-    res = FindResourceA(NULL, MAKEINTRESOURCE(IDR_EVERARD), "MAPS");
-    if (res != NULL) {
-      hGlobal = LoadResource(NULL, res);
-      if (hGlobal != NULL) {
-        buff = LockResource(hGlobal);
-		if (buff != NULL) {
-	        GetTempPathA(MAX_PATH, tempPath);
-	        sprintf(tempFile, "%sEverard Island.map", tempPath);
-	        fp = fopen(tempFile, "wb");
-	        fwrite(buff, 1954, 1, fp);
-	        fclose(fp);
-			returnValue = serverCoreCreate(tempFile, gametype, hiddenMines, startDelay, timeLen);
-		    DeleteFile(tempFile);
-		}
-      }
-    }
+  strcat(cmdLine, " -ai ");
+  switch (compTanks) {
+  case aiNone:
+    strcat(cmdLine, "no ");
+    break;
+  case aiYes:
+    strcat(cmdLine, "yes ");
+    break;
+  default:
+    /* Yes with an advantage */
+    strcat(cmdLine, "yesAdv ");
+    break;
+  }
+  strcat(cmdLine, " -delay ");
+  if (startDelay > 0) {
+    l = startDelay;
+    l /= GAME_NUMGAMETICKS_SEC;
+  }
+  else {
+    l = 0;
+  }
+  sprintf(tmp, "%d ", l);
+  strcat(cmdLine, tmp);
+
+  strcat(cmdLine, " -limit ");
+  if (timeLen > 0) {
+    l = timeLen;
+    l /= NUM_SECONDS;
+    l /= GAME_NUMGAMETICKS_SEC;
+  }
+  else {
+    l = timeLen;
+  }
+  sprintf(tmp, "%d ", l);
+  strcat(cmdLine, tmp);
+  if (gameFrontTrackerEnabled == TRUE && dlgState != openLanSetup) {
+    /* Add on the tracker info */
+    strcat(cmdLine, "-tracker ");
+    sprintf(tmp, "%s:%d ", gameFrontTrackerAddr, gameFrontTrackerPort);
+    strcat(cmdLine, tmp);
+  }
+  if (password[0] != '\0') {
+    strcat(cmdLine, " -password ");
+    strcat(cmdLine, password);
+  }
+  strcpy(tmp, "WinBoloDS.exe ");
+  strcat(tmp, cmdLine);
+
+#if 0
+  /* Set the bInheritHandle flag so pipe handles are inherited. */
+  ZeroMemory(&sa, sizeof(sa));
+  sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+  sa.bInheritHandle = TRUE;
+  sa.lpSecurityDescriptor = NULL;
+#endif
+
+  ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
+  ZeroMemory(&si, sizeof(STARTUPINFO));
+  si.cb = sizeof(STARTUPINFO);
+  si.dwFlags = STARTF_USESHOWWINDOW;
+  si.wShowWindow = SW_HIDE;
+#if 0
+
+  hSaveStdin = GetStdHandle(STD_INPUT_HANDLE);
+
+  // Create a pipe for the child process's STDIN. 
+
+  if (CreatePipe(&hChildStdinRd, &hChildStdinWr, &sa, 0) == 0) {
+    returnValue = FALSE; //ErrorExit("Stdin pipe creation failed\n"); 
+  }
+
+  // Set a read handle to the pipe to be STDIN. 
+
+  if (SetStdHandle(STD_INPUT_HANDLE, hChildStdinRd) == 0) {
+    returnValue = FALSE;// ("Redirecting Stdin failed"); 
+  }
+
+  //Duplicate the write handle to the pipe so it is not inherited. 
+
+  ret = DuplicateHandle(GetCurrentProcess(), hChildStdinWr, GetCurrentProcess(), &hChildStdinWrDup, 0, FALSE, DUPLICATE_SAME_ACCESS); //FALSE
+  if (ret == 0) {
+    returnValue = FALSE; //ErrorExit("DuplicateHandle failed"); 
+  }
+
+  CloseHandle(hChildStdinWr);
+
+
+  if (returnValue == FALSE) {
+    return FALSE;
   }
 
 
-  if (returnValue == TRUE) {
-    if (serverNetCreate(gameFrontTargetUdp, password, compTanks, gameFrontTrackerAddr, gameFrontTrackerPort, gameFrontTrackerEnabled, NULL, 0) == FALSE) {
-      MessageBoxA(NULL,"Error starting Network. Is the port in use?", DIALOG_BOX_TITLE, MB_OK);
-      serverNetDestroy();
-      serverCoreDestroy();
-      returnValue = FALSE;
-    }
+  si.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+  si.hStdError = GetStdHandle(STD_OUTPUT_HANDLE);
+  si.hStdInput = hChildStdinRd;
+#endif
+
+  ret = CreateProcess(NULL, tmp, NULL, NULL, TRUE, NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
+  if (ret == FALSE) {
+    returnValue = FALSE;
   }
-
-  if (returnValue == TRUE && gameFrontWbnUse == TRUE) {
-    char mapName[255];
-    serverCoreGetMapName(mapName);
-    winbolonetCreateServer(mapName, gameFrontTargetUdp, (BYTE) gametype, (BYTE) compTanks, serverCoreGetAllowHiddenMines(), (BYTE) (password[0] == 0 ? FALSE : TRUE), screenNumBases(), screenNumPills(), serverCoreGetNumNeutralBases(), serverCoreGetNumNeutralPills(), serverCoreGetNumPlayers(), serverCoreGetTimeGameCreated());
-  }
-  threadsSetContext(FALSE);
-
-
-  if (threadsCreate(TRUE) == FALSE) {
-    threadsDestroy();
-    serverNetDestroy();
-    serverCoreDestroy();
-	  returnValue = FALSE;
-  } 
-  
-  if (returnValue == TRUE) {
+  else {
+    DWORD a;
     isServer = TRUE;
-    serverOldTick = winboloTimer();
-    serverTimerGameID = timeSetEvent(SERVER_TICK_LENGTH, 10000, serverGameTimer, 0, TIME_PERIODIC);
+    Sleep(2000);
+    GetExitCodeProcess(pi.hProcess, &a);
+    if (a != STILL_ACTIVE) {
+      returnValue = FALSE;
+    }
   }
- 
-  return returnValue;;
+
+  return returnValue;
 }
 
 /*********************************************************

@@ -538,7 +538,7 @@ BEGIN
     STR_NETCLIENTERR_TRACKERDNSFAIL 
                             "Error finding tracker (DNS lookup failure)"
     STR_NETCLIENTERR_TRACKERCONNECTFAIL "Error Connecting to tracker"
-    STR_NETCLIENTERR_TRACKERNOBLOCK "Error setting socket to be noblocking"
+    STR_NETCLIENTERR_TRACKERNOBLOCK "Error setting socket to be nonblocking"
     STR_NETCLIENT_TRACKERGETRESPONSE "Receiving game info..."
     STR_NETCLIENT_TRACKERPROCESSRESPONSE "Processing tracker data..."
 END

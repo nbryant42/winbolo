@@ -816,7 +816,10 @@ bool netJoinInit(char *ip, unsigned short port, bool usCreate, char *gamePasswor
   memset(&pn, 0, sizeof(pn));
   netMakePacketHeader(&bh, BOLOPACKET_INFOREQUEST);
   memcpy(buff, &bh, sizeof(bh));
-  returnValue = netClientUdpPing(buff, &packetLen, ip, port, FALSE, FALSE);
+  for (int i = 0; i < 5; i++) {
+    returnValue = netClientUdpPing(buff, &packetLen, ip, port, FALSE, FALSE);
+    if (returnValue) break;
+  }
   if (packetLen != sizeof(inf) || (strncmp((char *) buff, BOLO_SIGNITURE, BOLO_SIGNITURE_SIZE) != 0) || buff[BOLO_VERSION_MAJORPOS] != BOLO_VERSION_MAJOR || buff[BOLO_VERSION_MINORPOS] != BOLO_VERSION_MINOR || buff[BOLO_VERSION_REVISIONPOS] != BOLO_VERSION_REVISION || buff[BOLOPACKET_REQUEST_TYPEPOS] != BOLOPACKET_INFORESPONSE) {
 #ifdef _WIN32
 	  int i = sizeof(inf);
