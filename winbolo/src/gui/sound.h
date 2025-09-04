@@ -104,14 +104,13 @@ void soundPlayEffect(sndEffects value);
 *CREATION DATE: 29/12/98
 *LAST MODIFIED: 29/12/98
 *PURPOSE:
-*  ISA Sound cards waste CPU cycles switching the sound
-*  mixer on or off. This can be compensatated by constantly
-*  plays silence on the primary buffer.
+*  Some AV receivers go to sleep if we don't output a
+*  constant data stream, especially with Spatial Audio.
 *
 *ARGUMENTS:
 *  value - TRUE to turn on FALSE to turn off.
 *********************************************************/
-void soundISASoundCard(bool value);
+void soundKeepalive(bool value);
 
 /*********************************************************
 *NAME:          soundIsPlayable

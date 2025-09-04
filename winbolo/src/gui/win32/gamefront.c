@@ -131,7 +131,7 @@ extern int frameRate;
 extern bool showGunsight;
 extern bool soundEffects;
 extern bool backgroundSound;
-extern bool isISASoundCard;
+extern bool useSoundKeepalive;
 extern bool showNewswireMessages;
 extern bool showAssistantMessages;
 extern bool showAIMessages;
@@ -935,8 +935,8 @@ bool gameFrontGetPrefs(keyItems *keys, bool *useAutoslow, bool *useAutohide) {
   soundEffects = YESNO_TO_TRUEFALSE(buff[0]);
   GetPrivateProfileStringA("MENU", "Allow Background Sound", "Yes", buff, FILENAME_MAX, PREFERENCE_FILE);
   backgroundSound = YESNO_TO_TRUEFALSE(buff[0]);
-  GetPrivateProfileStringA("MENU", "ISA Sound Card", "No", buff, FILENAME_MAX, PREFERENCE_FILE);
-  isISASoundCard = YESNO_TO_TRUEFALSE(buff[0]);
+  GetPrivateProfileStringA("MENU", "Sound keepalive", "No", buff, FILENAME_MAX, PREFERENCE_FILE);
+  useSoundKeepalive = YESNO_TO_TRUEFALSE(buff[0]);
   GetPrivateProfileStringA("MENU", "Show Gunsight", "No", buff, FILENAME_MAX, PREFERENCE_FILE);
   showGunsight = YESNO_TO_TRUEFALSE(buff[0]);
   GetPrivateProfileStringA("MENU", "Show Newswire Messages", "Yes", buff, FILENAME_MAX, PREFERENCE_FILE);
@@ -1119,7 +1119,7 @@ void gameFrontPutPrefs(keyItems *keys) {
   WritePrivateProfileStringA("MENU", "Sound Effects", TRUEFALSE_TO_STR(soundEffects), PREFERENCE_FILE);
 
   WritePrivateProfileStringA("MENU", "Allow Background Sound", TRUEFALSE_TO_STR(backgroundSound), PREFERENCE_FILE);
-  WritePrivateProfileStringA("MENU", "ISA Sound Card", TRUEFALSE_TO_STR(isISASoundCard), PREFERENCE_FILE);
+  WritePrivateProfileStringA("MENU", "Sound keepalive", TRUEFALSE_TO_STR(useSoundKeepalive), PREFERENCE_FILE);
   WritePrivateProfileStringA("MENU", "Show Gunsight", TRUEFALSE_TO_STR(showGunsight), PREFERENCE_FILE);
   WritePrivateProfileStringA("MENU", "Show Newswire Messages", TRUEFALSE_TO_STR(showNewswireMessages), PREFERENCE_FILE);
   WritePrivateProfileStringA("MENU", "Show Assistant Messages", TRUEFALSE_TO_STR(showAssistantMessages), PREFERENCE_FILE);

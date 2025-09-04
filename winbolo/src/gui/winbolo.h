@@ -319,17 +319,17 @@ void windowSoundEffects(HWND hWnd);
 void windowDisableSound();
 
 /*********************************************************
-*NAME:          windowISASoundCard
+*NAME:          windowSoundKeepalive
 *AUTHOR:        John Morrison
 *CREATION DATE: 29/12/98
 *LAST MODIFIED: 29/12/98
 *PURPOSE:
-* Switches the state of the ISA Sound Card Menu Item
+* Switches the state of the Sound keepalive Menu Item
 *
 *ARGUMENTS:
 *
 *********************************************************/
-void windowISASoundCard();
+void windowSoundKeepalive();
 
 /*********************************************************
 *NAME:          windowMenuAllowNewPlayers

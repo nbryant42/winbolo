@@ -84,8 +84,8 @@ bool soundEffects = TRUE;
 /* Do we play background sound */
 bool backgroundSound = TRUE;
 
-/* Is the sound card of the ISA variety */
-bool isISASoundCard = TRUE;
+/* Is Sound Keepalive enabled */
+bool useSoundKeepalive = TRUE;
 
 /* 
  new players */
@@ -212,7 +212,7 @@ int PASCAL WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, LPSTR szCmdLine, int nC
 
     /* Set up Timers */
     if (soundEffects == TRUE) {
-      soundISASoundCard(isISASoundCard);
+      soundKeepalive(useSoundKeepalive);
     }
     Sleep(500);
     oldTick = winboloTimer();
@@ -576,8 +576,8 @@ LRESULT CALLBACK ExWindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case ID_BOLOMENU_BACKGROUNDSOUND:
       windowBackgroundSoundChange(hWnd, TRUE);
       break;
-    case ID_BOLOMENU_ISASOUNDCARD:
-      windowISASoundCard();
+    case ID_BOLOMENU_SOUNDKEEPALIVE:
+      windowSoundKeepalive();
       break;
     case ID_BOLOMENU_NEWSWIREMESSAGES:
       windowMenuNewswire(hWnd);
@@ -1132,12 +1132,12 @@ void windowSoundEffects(HWND hWnd) {
     soundEffects = FALSE;
     CheckMenuItem(hMenu, ID_BOLOMENU_SOUNDEFFECTS, MF_UNCHECKED);
     EnableMenuItem(hMenu, ID_BOLOMENU_BACKGROUNDSOUND, MF_GRAYED);  
-    EnableMenuItem(hMenu, ID_BOLOMENU_ISASOUNDCARD, MF_GRAYED);
+    EnableMenuItem(hMenu, ID_BOLOMENU_SOUNDKEEPALIVE, MF_GRAYED);
   } else {
     soundEffects = TRUE;
     CheckMenuItem(hMenu, ID_BOLOMENU_SOUNDEFFECTS, MF_CHECKED);
     EnableMenuItem(hMenu, ID_BOLOMENU_BACKGROUNDSOUND, MF_ENABLED);
-    EnableMenuItem(hMenu, ID_BOLOMENU_ISASOUNDCARD, MF_ENABLED);
+    EnableMenuItem(hMenu, ID_BOLOMENU_SOUNDKEEPALIVE, MF_ENABLED);
   }
 }
 
@@ -1222,40 +1222,40 @@ void windowDisableSound() {
   
   hMenu = GetMenu(appWnd);
   soundEffects = FALSE;
-  isISASoundCard = FALSE;
+  useSoundKeepalive = FALSE;
   CheckMenuItem(hMenu, ID_BOLOMENU_SOUNDEFFECTS, MF_UNCHECKED);
   CheckMenuItem(hMenu, ID_BOLOMENU_BACKGROUNDSOUND, MF_UNCHECKED);
-  CheckMenuItem(hMenu, ID_BOLOMENU_ISASOUNDCARD, MF_UNCHECKED);
+  CheckMenuItem(hMenu, ID_BOLOMENU_SOUNDKEEPALIVE, MF_UNCHECKED);
   EnableMenuItem(hMenu, ID_BOLOMENU_SOUNDEFFECTS, MF_GRAYED);
   EnableMenuItem(hMenu, ID_BOLOMENU_BACKGROUNDSOUND, MF_GRAYED);  
-  EnableMenuItem(hMenu, ID_BOLOMENU_ISASOUNDCARD, MF_GRAYED);
+  EnableMenuItem(hMenu, ID_BOLOMENU_SOUNDKEEPALIVE, MF_GRAYED);
 }
 
 
 /*********************************************************
-*NAME:          windowISASoundCard
+*NAME:          windowSoundKeepalive
 *AUTHOR:        John Morrison
 *CREATION DATE: 29/12/98
 *LAST MODIFIED: 29/12/98
 *PURPOSE:
-* Switches the state of the ISA Sound Card Menu Item
+* Switches the state of the Sound keepalive Menu Item
 *
 *ARGUMENTS:
 *
 *********************************************************/
-void windowISASoundCard() {
+void windowSoundKeepalive() {
   HMENU hMenu; /* Handle to the Menu */
 
   hMenu = GetMenu(appWnd);
-  if (isISASoundCard == TRUE) {
-    CheckMenuItem(hMenu, ID_BOLOMENU_ISASOUNDCARD, MF_UNCHECKED);
-    isISASoundCard = FALSE;
+  if (useSoundKeepalive == TRUE) {
+    CheckMenuItem(hMenu, ID_BOLOMENU_SOUNDKEEPALIVE, MF_UNCHECKED);
+    useSoundKeepalive = FALSE;
   } else {
-    CheckMenuItem(hMenu, ID_BOLOMENU_ISASOUNDCARD, MF_CHECKED);
-    isISASoundCard = TRUE;
+    CheckMenuItem(hMenu, ID_BOLOMENU_SOUNDKEEPALIVE, MF_CHECKED);
+    useSoundKeepalive = TRUE;
   }
   if (soundEffects == TRUE && soundIsPlayable() == TRUE) {
-    soundISASoundCard(isISASoundCard);
+    soundKeepalive(useSoundKeepalive);
   }
 }
 
@@ -3237,8 +3237,8 @@ void windowApplyMenuChecks() {
     windowSoundEffects(appWnd);
     backgroundSound = !backgroundSound;
     windowBackgroundSoundChange(appWnd, FALSE);
-    isISASoundCard = !isISASoundCard;
-    windowISASoundCard();
+    useSoundKeepalive = !useSoundKeepalive;
+    windowSoundKeepalive();
   }
   showNewswireMessages = !showNewswireMessages;
   showAssistantMessages = !showAssistantMessages;

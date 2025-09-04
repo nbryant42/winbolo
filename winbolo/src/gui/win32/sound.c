@@ -67,10 +67,37 @@ LPDIRECTSOUNDBUFFER lpDSShotTreeFar = NULL;
 LPDIRECTSOUNDBUFFER lpDSShotTreeNear = NULL;
 LPDIRECTSOUNDBUFFER lpDSTankSinkingFar = NULL;
 LPDIRECTSOUNDBUFFER lpDSTankSinkingNear = NULL;
+LPDIRECTSOUNDBUFFER lpDSKeepalive = NULL;
 
 bool isPlayable;
 /* Module Handle to the Bolo Sounds DLL */
 HMODULE boloSounds = NULL;
+
+static void soundCreateKeepalive(void) {
+  WAVEFORMATEX mix = { .wFormatTag = WAVE_FORMAT_PCM, .nChannels = 2, .nSamplesPerSec = 48000, .wBitsPerSample = 16 };
+  mix.nBlockAlign = (mix.nChannels * mix.wBitsPerSample) / 8;
+  mix.nAvgBytesPerSec = mix.nSamplesPerSec * mix.nBlockAlign;
+
+  DSBUFFERDESC desc = {
+    .dwSize = sizeof(desc),
+    .dwFlags = DSBCAPS_STATIC | (windowGetBackgroundSound() ? DSBCAPS_STICKYFOCUS : 0),
+    .dwBufferBytes = (mix.nAvgBytesPerSec / 10),
+    .lpwfxFormat = &mix
+  };
+
+  HRESULT hr = lpDS->lpVtbl->CreateSoundBuffer(lpDS, &desc, &lpDSKeepalive, NULL);
+  if (hr != DS_OK && hr != DS_NO_VIRTUALIZATION) return;
+  void* p1; DWORD b1; void* p2; DWORD b2;
+  if (lpDSKeepalive->lpVtbl->Lock(lpDSKeepalive, 0, desc.dwBufferBytes, &p1, &b1, &p2, &b2, 0) != DS_OK) goto failed;
+  memset(p1, 0, b1); if (p2) memset(p2, 0, b2);
+
+  if (lpDSKeepalive->lpVtbl->Unlock(lpDSKeepalive, p1, b1, p2, b2) != DS_OK) {
+    failed:
+    lpDSKeepalive->lpVtbl->Release(lpDSKeepalive);
+    lpDSKeepalive = NULL;
+    return;
+  }
+}
 
 /*********************************************************
 *NAME:          soundSetup
@@ -178,6 +205,7 @@ bool soundSetup(HINSTANCE appInst, HWND appWnd) {
     lpDSShotTreeFar = soundLoadSound(lpDS,boloSounds,IDW_SHOT_TREE_FAR, "shoot_tree_far.wav");
     lpDSShotTreeNear = soundLoadSound(lpDS,boloSounds, IDW_SHOT_TREE_NEAR, "shoot_tree_near.wav");
     lpDSTankSinkingFar = soundLoadSound(lpDS,boloSounds, IDW_TANK_SINKING_FAR, "tank_sink_far.wav");
+    soundCreateKeepalive();
     
     if (lpDSBigExplosionFar == NULL || lpDSBigExplosionNear == NULL || lpDSBubbles == NULL || lpDSFarmingTreeFar == NULL || lpDSFarmingTreeNear == NULL || lpDSHitTankFar == NULL || lpDSHitTankNear == NULL || lpDSHitTankSelf == NULL || lpDSManBuildingFar == NULL || lpDSManBuildingNear == NULL || lpDSManDyingFar == NULL || lpDSManDyingNear == NULL || lpDSMineExplosionFar == NULL || lpDSMineExplosionNear == NULL || lpDSShootFar == NULL || lpDSShootNear == NULL || lpDSShootSelf == NULL || lpDSShotBuildingFar == NULL || lpDSShotBuildingNear == NULL || lpDSShotTreeFar == NULL || lpDSShotTreeNear == NULL || lpDSTankSinkingFar == NULL || lpDSManLayingMineNear == NULL || lpDSTankSinkingNear == NULL) {
       returnValue = FALSE;
@@ -443,23 +471,25 @@ void soundPlayEffect(sndEffects value) {
 }
 
 /*********************************************************
-*NAME:          soundISASoundCard
+*NAME:          soundKeepalive
 *AUTHOR:        John Morrison
 *CREATION DATE: 29/12/98
 *LAST MODIFIED: 29/12/98
 *PURPOSE:
-*  ISA Sound cards waste CPU cycles switching the sound
-*  mixer on or off. This can be compensatated by constantly
-*  plays silence on the primary buffer.
+*  Some AV receivers go to sleep if we don't output a
+*  constant data stream, especially with Spatial Audio.
 *
 *ARGUMENTS:
 *  value - TRUE to turn on FALSE to turn off.
 *********************************************************/
-void soundISASoundCard(bool value) {
-  if (value == TRUE) {
-    lpDSPrimary->lpVtbl->Play(lpDSPrimary, 0, 0, DSBPLAY_LOOPING);
-  } else {
-    lpDSPrimary->lpVtbl->Stop(lpDSPrimary);
+void soundKeepalive(bool value) {
+  if (lpDSKeepalive) {
+    if (value == TRUE) {
+      lpDSKeepalive->lpVtbl->Play(lpDSKeepalive, 0, 0, DSBPLAY_LOOPING);
+    }
+    else {
+      lpDSKeepalive->lpVtbl->Stop(lpDSKeepalive);
+    }
   }
 }
 

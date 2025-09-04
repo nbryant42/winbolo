@@ -144,8 +144,8 @@ bool soundEffects = FALSE;
 /* Do we play background sound */
 bool backgroundSound = TRUE;
 
-/* Is the sound card of the ISA variety */
-bool isISASoundCard = TRUE;
+/* Is sound keepalive enabled */
+bool useSoundKeepalive = TRUE;
 bool doneInitTutorial = FALSE;
 
 /* 
@@ -2189,8 +2189,8 @@ bool gameFrontGetPrefs(keyItems *keys, bool *useAutoslow, bool *useAutohide) {
   soundEffects = YESNO_TO_TRUEFALSE(buff[0]);
   GetPrivateProfileString("MENU", "Allow Background Sound", "Yes", buff, FILENAME_MAX, prefs);
   backgroundSound = YESNO_TO_TRUEFALSE(buff[0]);
-  GetPrivateProfileString("MENU", "ISA Sound Card", "No", buff, FILENAME_MAX, prefs);
-  isISASoundCard = YESNO_TO_TRUEFALSE(buff[0]);
+  GetPrivateProfileString("MENU", "Sound keepalive", "No", buff, FILENAME_MAX, prefs);
+  useSoundKeepalive = YESNO_TO_TRUEFALSE(buff[0]);
   GetPrivateProfileString("MENU", "Show Gunsight", "No", buff, FILENAME_MAX, prefs);
   showGunsight = YESNO_TO_TRUEFALSE(buff[0]);
   GetPrivateProfileString("MENU", "Show Newswire Messages", "Yes", buff, FILENAME_MAX, prefs);
@@ -2346,7 +2346,7 @@ void gameFrontPutPrefs(keyItems *keys) {
   WritePrivateProfileString("MENU", "Sound Effects", TRUEFALSE_TO_STR(soundEffects), prefs);
 
   WritePrivateProfileString("MENU", "Allow Background Sound", TRUEFALSE_TO_STR(backgroundSound), prefs);
-  WritePrivateProfileString("MENU", "ISA Sound Card", TRUEFALSE_TO_STR(isISASoundCard), prefs);
+  WritePrivateProfileString("MENU", "Sound keepalive", TRUEFALSE_TO_STR(useSoundKeepalive), prefs);
   WritePrivateProfileString("MENU", "Show Gunsight", TRUEFALSE_TO_STR(showGunsight), prefs);
   WritePrivateProfileString("MENU", "Show Newswire Messages", TRUEFALSE_TO_STR(showNewswireMessages), prefs);
   WritePrivateProfileString("MENU", "Show Assistant Messages", TRUEFALSE_TO_STR(showAssistantMessages), prefs);

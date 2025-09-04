@@ -65,7 +65,7 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Sound Effects",              ID_BOLOMENU_SOUNDEFFECTS
         MENUITEM "Background Sound",            ID_BOLOMENU_BACKGROUNDSOUND
-        MENUITEM "&ISA Sound Card",             ID_BOLOMENU_ISASOUNDCARD
+        MENUITEM "Sound keepalive",             ID_BOLOMENU_SOUNDKEEPALIVE
         MENUITEM SEPARATOR
         MENUITEM "Newswire Messages",           ID_BOLOMENU_NEWSWIREMESSAGES
         , CHECKED
