@@ -87,6 +87,10 @@ int drawPosY[255];
 int drawPlayerLens[MAX_TANKS][3];
 static char lastPlayerName[MAX_TANKS][MAX_PATH];
 
+static void invalidateTankLabels(void) {
+  memset(lastPlayerName, 0, sizeof(lastPlayerName));
+}
+
 // Sets SRCCOLORKEY to "pure green" for whatever pixel format this surface actually has. Works for truecolor
 // (565/555/888/8888). Palette mode not supported. The thinking is we let the driver pick the format for each new
 // surface (may differ based on SYSTEMMEMORY flag) and adapt to it after the fact; trying to force a particular format
@@ -772,16 +776,16 @@ void drawCleanup(void) {
     lpDD->lpVtbl->Release(lpDD);
     lpDD = NULL;
   }
-  memset(lastPlayerName, 0, sizeof(lastPlayerName));
+  invalidateTankLabels();
 }
 
 /*********************************************************
-*NAME:          drawPillInView
+*NAME:          drawNetFailed
 *AUTHOR:        John Morrison
 *CREATION DATE:  3/2/98
 *LAST MODIFIED: 29/4/00
 *PURPOSE:
-*  Draws the "Pillbox View" label
+*  Draws the "Network Failed" label
 *
 *ARGUMENTS:
 *
@@ -803,7 +807,7 @@ void drawNetFailed() {
 
   if (SUCCEEDED(lpDDSTankLabels->lpVtbl->GetDC(lpDDSTankLabels, &hDC))) {
     /* Draw it on the back buffer */
-    fontSelect(hDC);
+    fontSelectNoAA(hDC);
     SetBkColor(hDC, RGB(0,255,0));
     SetTextColor(hDC, RGB(255, 255, 255));
     text = "Network Failed - Resyncing";
@@ -811,11 +815,12 @@ void drawNetFailed() {
     DrawTextA(hDC, text, textLen, &textRect, (DT_LEFT | DT_NOCLIP | DT_CALCRECT | DT_NOPREFIX | DT_SINGLELINE));
     DrawTextA(hDC, text, textLen, &textRect, (DT_LEFT | DT_NOCLIP | DT_NOPREFIX | DT_SINGLELINE));
     if (FAILED(lpDDSTankLabels->lpVtbl->ReleaseDC(lpDDSTankLabels, hDC))) {
-      MessageBoxA(NULL, "This should never happen - Error Releasing DC for drawing Pillbox view", DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);
+      MessageBoxA(NULL, "This should never happen - Error Releasing DC for drawing Net Failed label", DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);
     }
     x = zoomFactor * 3 * TILE_SIZE_X;
     y = zoomFactor * 8 * TILE_SIZE_Y;
     lpDDSBackBuffer->lpVtbl->BltFast(lpDDSBackBuffer, x, y, lpDDSTankLabels, &textRect, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+    invalidateTankLabels();
   }
 }
 
@@ -3504,7 +3509,7 @@ void drawPillInView() {
 
   if (SUCCEEDED(lpDDSTankLabels->lpVtbl->GetDC(lpDDSTankLabels, &hDC))) {
     /* Draw it on the back buffer */
-    fontSelect(hDC);
+    fontSelectNoAA(hDC);
     SetBkColor(hDC, RGB(0,255,0));
     SetTextColor(hDC, RGB(255, 255, 255));
     text = langGetText(STR_DRAW_PILLBOXVIEW);
@@ -3517,6 +3522,7 @@ void drawPillInView() {
     x = zoomFactor * TILE_SIZE_X;
     y = zoomFactor * MAIN_SCREEN_SIZE_Y * TILE_SIZE_Y;
     lpDDSBackBuffer->lpVtbl->BltFast(lpDDSBackBuffer, x, y, lpDDSTankLabels, &textRect, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+    invalidateTankLabels();
   }
 }
 
@@ -3651,6 +3657,7 @@ void drawRestore(void) {
 
     /* Tank Labels */
     lpDDSTankLabels->lpVtbl->Restore(lpDDSTankLabels);
+	invalidateTankLabels();
 
     /* Tank Status */
     /* Fill the surface black */
