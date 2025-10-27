@@ -30,6 +30,7 @@
 #include "font.h"
 
 HFONT hBoloFont = NULL; /* The Bolo Font */
+HFONT hBoloFontNoAA = NULL; /* The Bolo Font (antialiasing turned off to avoid green fringes on tank labels */
 HFONT hTinyFont = NULL; /* Pillbox status stuff */
 
 /*********************************************************
@@ -64,6 +65,8 @@ bool fontSetup(HINSTANCE appInst, HWND appWnd) {
   if (tempDC != NULL) {
     nHeight = fontPointToHeight(height, tempDC);
     hBoloFont = CreateFont(nHeight, 0, 0, 0, FALSE, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, FONT_NAME);
+    hBoloFontNoAA = CreateFont(nHeight, 0, 0, 0, FALSE, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
+      CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH, FONT_NAME);
     DeleteDC(tempDC);
   }
 
@@ -121,6 +124,10 @@ void fontCleanup(void) {
 *********************************************************/
 void fontSelect(HDC hDC) {   
   SelectObject(hDC,hBoloFont);
+}
+
+void fontSelectNoAA(HDC hDC) {
+  SelectObject(hDC, hBoloFontNoAA);
 }
 
 /*********************************************************

@@ -31,6 +31,7 @@
 
 /* Includes */
 #include "global.h"
+#include "../bolo/types.h"
 
 /* Defines */
 #define MAX_STARTS 16
@@ -38,19 +39,7 @@
 
 /* Typedefs */
 
-typedef struct {
-  BYTE x;   /* Co-ordinates on the map */
-  BYTE y;
-  BYTE dir;  /* Direction towards land from this start. Range 0-15 */
-} start;
-
-
 typedef struct startsObj *starts;
-
-struct startsObj {
-  start item[MAX_STARTS];
-  BYTE numStarts;
-};
 
 /* Prototypes */
 

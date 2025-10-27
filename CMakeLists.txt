@@ -27,7 +27,8 @@ add_compile_options(
     /wd4996                     # - unsafe/deprecated function
     /guard:cf                   # Control Flow Guard
     /GL                         # Whole-program optimization
-    $<$<CONFIG:Debug>:/RTC1>)   # Runtime checks
+    $<$<CONFIG:Debug>:/RTC1>    # Runtime checks
+    /D_USE_32BIT_TIME_T)        # Force 32-bit time_t for compatibility with log files
 add_link_options(/GUARD:CF /INCREMENTAL:NO /LTCG)
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -248,6 +249,41 @@ target_link_libraries(WinBoloDS PRIVATE
 )
 target_link_options(WinBoloDS PRIVATE "/SUBSYSTEM:CONSOLE,10.0")
 
+###
+# Log Viewer
+#
+
+file(GLOB LOGVIEWER_SOURCES
+    winbolo/src/logviewer/*.c
+)
+
+add_executable(LogViewer
+    ${LOGVIEWER_SOURCES}
+)
+
+target_sources(LogViewer PRIVATE winbolo/src/logviewer/Script1.rc)
+
+set_target_properties(LogViewer PROPERTIES
+    WIN32_EXECUTABLE TRUE
+)
+
+# Link Windows libraries
+target_link_libraries(LogViewer PRIVATE
+    ws2_32
+    winmm
+    comctl32
+    ddraw
+    dsound
+    zlib
+)
+target_link_options(LogViewer PRIVATE "/SUBSYSTEM:WINDOWS,10.0")
+
+set_target_properties(LogViewer PROPERTIES
+    OUTPUT_NAME "Log Viewer"
+)
+
+### end log viewer
+
 
 # get output in the correct locations under msbuild (not necessary with ninja)
 
@@ -279,6 +315,7 @@ set_flat_output(StandardAutopilot   "${brain_out}")
 set_flat_output(WinBolo             "${CMAKE_BINARY_DIR}")
 set_flat_output(WinBoloDS           "${CMAKE_BINARY_DIR}")
 set_flat_output(BoloSounds          "${CMAKE_BINARY_DIR}")
+set_flat_output(LogViewer           "${CMAKE_BINARY_DIR}")
 
 # --- Patch release zip via WSL -------------------------------------------------
 # Produces: <build>/winbolo-patch.zip containing:
@@ -290,13 +327,14 @@ set_flat_output(BoloSounds          "${CMAKE_BINARY_DIR}")
 set(RELEASE_ZIP "${CMAKE_BINARY_DIR}/winbolo-patch.zip")
 
 add_custom_target(PatchZip ALL
-  DEPENDS WinBolo WinBoloDS StandardAutopilot Ryan2
+  DEPENDS WinBolo WinBoloDS StandardAutopilot Ryan2 LogViewer
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
   COMMAND ${CMAKE_COMMAND} -E echo "Creating ${RELEASE_ZIP} via WSL zip"
   COMMAND ${CMAKE_COMMAND} -E rm -f "${RELEASE_ZIP}"
   COMMAND bash -c "exec zip winbolo-patch.zip \
       WinBolo.exe \
       WinBoloDS.exe \
+      'Log Viewer.exe' \
       'Brains/Standard Autopilot.brn' \
       Brains/Ryan2.brn"
   BYPRODUCTS "${RELEASE_ZIP}"

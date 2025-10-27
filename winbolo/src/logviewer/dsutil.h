@@ -124,6 +124,7 @@ BOOL DSGetWaveResource(HMODULE hModule, LPCTSTR lpName,
 
 BOOL DSFillSoundBuffer(IDirectSoundBuffer *pDSB, BYTE *pbWaveData, DWORD dwWaveSize);
 BOOL DSParseWaveResource(void *pvRes, WAVEFORMATEX **ppWaveHeader, BYTE **ppbWaveData, DWORD *pdwWaveSize);
+IDirectSoundBuffer* DSLoadSoundBufferResource(IDirectSound* pDS, HMODULE hModule, LPCTSTR lpName);
 
 #ifdef __cplusplus
 }

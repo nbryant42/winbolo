@@ -31,28 +31,14 @@
 
 /* Includes */
 #include "global.h"
+#include "../bolo/types.h"
 /* Defines */
 #define MAX_BASES 16
 
 
 /* Typedefs */
 
-typedef struct {
-  BYTE x;     /* Co-ordinates on the map */
-  BYTE y;
-  BYTE owner;  /* should be 0xFF except in speciality maps */
-  BYTE armour; /* initial stocks of base. Maximum value 90 */
-  BYTE shells; /* initial stocks of base. Maximum value 90 */
-  BYTE mines;  /* initial stocks of base. Maximum value 90 */
-} base;
-
-
 typedef struct basesObj *bases;
-
-struct basesObj {
-  base item[MAX_BASES];
-  BYTE numBases;
-};
 
 /* Determines the base type, good, netral or evil */
 

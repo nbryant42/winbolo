@@ -30,6 +30,7 @@
 
 
 /* Includes */
+#include "../bolo/types.h"
 #include "global.h"
 
 
@@ -50,22 +51,7 @@ typedef enum {
 
 /* Typedefs */
 
-typedef struct {
-  BYTE x;     /* Co-ordinates on the map */
-  BYTE y;
-  BYTE owner;  /* should be 0xFF except in speciality maps */
-  BYTE armour; /* range 0-15 (dead pillbox = 0, full strength = 15) */
-  BYTE speed;  /* typically 50. Time between shots, in 20ms units */
-               /* Lower values makes the pillbox start off 'angry' */
-  bool inTank; /* Is the pillbox in the tank? */
-} pillbox;
-
 typedef struct pillsObj *pillboxes;
-
-struct pillsObj {
-  pillbox item[MAX_PILLS];
-  BYTE numPills;
-};
 
 /* Prototypes */
 

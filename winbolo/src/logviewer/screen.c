@@ -769,7 +769,7 @@ bool screenLogTick() {
   BYTE top;
   BYTE bottom;
   unsigned short us;
-  unsigned short len;
+  unsigned short len = 0;
 
   bool process = FALSE;
   timeRunning += 20; /* Add 20 ms */  
@@ -1021,7 +1021,7 @@ bool logLoad(char *fileName, int memoryBufferSize) {
   }
 
   /* Read map name */
-  if (returnValue = TRUE) {
+  if (returnValue == TRUE) {
     logReadBytes(&dataLen, 1);
     len = logReadBytes(mapName, dataLen);
     mapName[dataLen] = '\0';

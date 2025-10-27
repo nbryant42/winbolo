@@ -80,7 +80,7 @@ DWORD g_dwFrameTotal = 0;
 int drawPosX[255];
 int drawPosY[255];
 
-int drawLast[100][100];
+int drawLast[124][100];
 
 extern BYTE tc[17];
 extern bool useTeamColours;
@@ -132,13 +132,13 @@ long FAR PASCAL windowFullScreenProc( HWND hWnd, UINT message, WPARAM wParam, LP
 * appWnd  - Main Window Handle (Required for clipper)
 *********************************************************/
 bool drawSetup(HINSTANCE appInst, HWND appWnd) {
-  bool returnValue;       /* Value to return */
-  HRESULT res;            /* Direct Draw Function returns */
-  DDSURFACEDESC primDesc; /* Surface description */
-  HBITMAP hTiles = NULL;  /* The tile file bitmap resource */
-  HDC hTilesDC = NULL;    /* The tile file resource DC */
-  HDC hDDSTilesDC = NULL; /* Temp DC of a DDS use to copy tile file into */
-  DDPIXELFORMAT ddpf;     /* DD Pixel Format to get green */
+  bool returnValue;         /* Value to return */
+  HRESULT res;              /* Direct Draw Function returns */
+  DDSURFACEDESC primDesc;   /* Surface description */
+  HBITMAP hTiles = NULL;    /* The tile file bitmap resource */
+  HDC hTilesDC = NULL;      /* The tile file resource DC */
+  HDC hDDSTilesDC = NULL;   /* Temp DC of a DDS use to copy tile file into */
+  DDPIXELFORMAT ddpf = {0}; /* DD Pixel Format to get green */
 
 
   /* Palette Checking */
@@ -279,7 +279,7 @@ bool drawSetup(HINSTANCE appInst, HWND appWnd) {
       primDesc.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
       primDesc.dwWidth = screenGetSizeX() * TILE_SIZE_X;
       primDesc.dwHeight = screenGetSizeY() * TILE_SIZE_Y;
-      primDesc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+      primDesc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
       res = lpDD->lpVtbl->CreateSurface(lpDD, &primDesc, &lpDDSBackBuffer, NULL);
     } else {
       DDSCAPS ddscaps;
@@ -303,7 +303,7 @@ bool drawSetup(HINSTANCE appInst, HWND appWnd) {
     primDesc.ddckCKSrcBlt.dwColorSpaceHighValue = ddpf.dwGBitMask;
     primDesc.dwWidth = TILE_FILE_X;
     primDesc.dwHeight =TILE_FILE_Y;
-    primDesc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+    primDesc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
     res = lpDD->lpVtbl->CreateSurface(lpDD, &primDesc, &lpDDSTiles, NULL);
     if (FAILED(res)) {
       drawCleanup();
@@ -343,7 +343,7 @@ bool drawSetup(HINSTANCE appInst, HWND appWnd) {
     primDesc.ddckCKSrcBlt.dwColorSpaceHighValue = ddpf.dwGBitMask;
     primDesc.dwWidth = TEAM_IMAGE_SIZE_X;
     primDesc.dwHeight = TEAM_IMAGE_SIZE_Y;
-    primDesc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+    primDesc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
     res = lpDD->lpVtbl->CreateSurface(lpDD, &primDesc, &lpDDSTanks, NULL);
     if (FAILED(res)) {
       drawCleanup();
@@ -384,7 +384,7 @@ bool drawSetup(HINSTANCE appInst, HWND appWnd) {
     primDesc.ddckCKSrcBlt.dwColorSpaceHighValue = ddpf.dwGBitMask;
     primDesc.dwWidth = TEAM_IMAGE_SIZE_X;
     primDesc.dwHeight = TEAM_IMAGE_SIZE_Y;
-    primDesc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+    primDesc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
     res = lpDD->lpVtbl->CreateSurface(lpDD, &primDesc, &lpDDSBoats, NULL);
     if (FAILED(res)) {
       drawCleanup();
@@ -425,7 +425,7 @@ bool drawSetup(HINSTANCE appInst, HWND appWnd) {
     primDesc.ddckCKSrcBlt.dwColorSpaceHighValue = ddpf.dwGBitMask;
     primDesc.dwWidth = ITEM_IMAGE_SIZE_X;
     primDesc.dwHeight = ITEM_IMAGE_SIZE_Y;
-    primDesc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+    primDesc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
     res = lpDD->lpVtbl->CreateSurface(lpDD, &primDesc, &lpDDSItems, NULL);
     if (FAILED(res)) {
       drawCleanup();
@@ -466,7 +466,7 @@ bool drawSetup(HINSTANCE appInst, HWND appWnd) {
     primDesc.ddckCKSrcBlt.dwColorSpaceHighValue = ddpf.dwGBitMask;
     primDesc.dwWidth = screenGetSizeX() * TILE_SIZE_X; //zoomFactor * TANK_LABEL_WIDTH;
     primDesc.dwHeight = (2* TANK_LABEL_HEIGHT - 20);
-    primDesc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+    primDesc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
     res = lpDD->lpVtbl->CreateSurface(lpDD, &primDesc, &lpDDSTankLabels, NULL);
     if (FAILED(res)) {
       drawCleanup();
@@ -799,7 +799,7 @@ void drawMainScreen(screen *value, screenMines *mineView, screenTanks *tks, scre
   if (useFullscreen == FALSE) {
     res = lpDDSPrimary->lpVtbl->Blt(lpDDSPrimary, rcWindow, lpDDSBackBuffer, &output, DDBLT_WAIT, NULL);
   } else {
-    lpDDSPrimary->lpVtbl->Flip( lpDDSPrimary, NULL, DDFLIP_WAIT );
+    res = lpDDSPrimary->lpVtbl->Flip( lpDDSPrimary, NULL, DDFLIP_WAIT );
   }
   if (res != DD_OK) {
     switch (res) {
@@ -1651,7 +1651,7 @@ void drawTankLabel(char *str, int mx, int my, BYTE px, BYTE py) {
   if (len > 0) {
     if (SUCCEEDED(lpDDSTankLabels->lpVtbl->GetDC(lpDDSTankLabels, &hDC))) {
       /* Draw it on the back buffer */
-      fontSelect(hDC);
+      fontSelectNoAA(hDC);
       SetBkColor(hDC, RGB(0,255,0));
       SetTextColor(hDC, RGB(255, 255, 255));
       DrawText(hDC, str, len, &textRect, (DT_LEFT | DT_NOCLIP | DT_CALCRECT | DT_NOPREFIX | DT_SINGLELINE));

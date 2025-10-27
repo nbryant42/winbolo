@@ -58,7 +58,6 @@ void windowPlay();
 void windowPause();
 void windowStop(bool corruptLog);
 void screenTankCentred(bool enabled);
-void start();
 BOOL CALLBACK dialogWindowTeamColoursCallback( HWND hWnd, unsigned uMsg, WPARAM wParam, LPARAM lParam );
 void controlsEnable(int state);
 void controlEnable(int id, bool state, UINT menuId);
@@ -272,7 +271,7 @@ void updateSecond() {
   }
 }
 
-void frontEndSetGameInformation(bool clear, BYTE versionMajor, BYTE versionMinor, BYTE versionRevision, char *mapName, BYTE gameType, bool hiddenMines, BYTE aiType, long startDelay, long timeLimit, BYTE *wbnKey, long startTime) {
+void frontEndSetGameInformation(bool clear, BYTE versionMajor, BYTE versionMinor, BYTE versionRevision, char *mapName, BYTE gameType, bool hiddenMines, BYTE aiType, long startDelay, long timeLimit, BYTE *wbnKey, time_t startTime) {
   char line[256];
   char *timestring, *ptr;     /* Pointers to print out game time things */
 
@@ -484,6 +483,7 @@ BOOL CALLBACK copyClipboardCallback(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
     switch (LOWORD (wParam)) {
     case ID_COPY_SELECTALL:
       hCtlWnd = GetDlgItem(hGameEventsWnd, IDC_LIST);
+      numItems = SendMessage(hCtlWnd, LB_GETCOUNT, 0, 0);
       SendMessage(hCtlWnd, LB_SELITEMRANGE, TRUE, MAKELPARAM(0,  numItems-1));
       break;
     case ID_COPY_COPY:
@@ -680,7 +680,7 @@ void windowRewind() {
 //    LONG lSelection - Sets the selection; use 0 to ignore.
 //    BOOL bRedraw - Redraw flag: TRUE to redraw; otherwise, FALSE.
 //
-HWND myCreateTrackBar ( HWND hWndParent, DWORD dwStyles, WORD wID, HINSTANCE 
+HWND myCreateTrackBar ( HWND hWndParent, DWORD dwStyles, HMENU wID, HINSTANCE 
    hInst, RECT rclTrack, LONG lPageSize, LONG lPosition, LONG lRange, 
    LONG lFreq, LONG lSelection, BOOL bRedraw)
 {
@@ -696,7 +696,7 @@ HWND myCreateTrackBar ( HWND hWndParent, DWORD dwStyles, WORD wID, HINSTANCE
     WS_CHILD | WS_VISIBLE | dwStyles,   // Window styles.
     rclTrack.left, rclTrack.top, rclTrack.right, rclTrack.bottom,   // Size and position.
     hWndParent,      // Parent window handle.
-    (HMENU)wID,      // ID for the trackbar.
+    wID,             // ID for the trackbar.
     hInst,           // Current instance.
     NULL);           // No class data.
 
@@ -805,7 +805,7 @@ BOOL CALLBACK dialogControlsCallback(HWND hWnd, unsigned uMsg, WPARAM wParam, LP
     r.bottom = 40;
     r.left = 100;
     r.right = 200;
-    hScroll = myCreateTrackBar ( hWnd, TBS_AUTOTICKS | TBS_BOTTOM , IDC_SLIDER1, appInst, r, 1, 1, MAKELONG(1,9), 1, MAKELONG(5,20), TRUE);
+    hScroll = myCreateTrackBar ( hWnd, TBS_AUTOTICKS | TBS_BOTTOM , (HMENU)IDC_SLIDER1, appInst, r, 1, 1, MAKELONG(1,9), 1, MAKELONG(5,20), TRUE);
 
     break;
   case WM_PAINT:

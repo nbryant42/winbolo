@@ -430,6 +430,7 @@ void messageAddItem(char *top, char *bottom) {
 *ARGUMENTS:
 *
 *********************************************************/
+#if 0
 void messageUpdate(void) {
   message q;  /* temp Pointer */
   BYTE count; /* Looping variable */
@@ -459,6 +460,7 @@ void messageUpdate(void) {
     windowAddEvent(topLine,bottomLine);
   }
 }
+#endif
 
 /*********************************************************
 *NAME:          messageGetMessage

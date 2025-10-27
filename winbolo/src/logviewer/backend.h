@@ -471,7 +471,6 @@ void screenSetSizeX(BYTE x);
 void screenSetSizeY(BYTE y);
 
 void windowAddEvent(int eventType, char *msg);
-void messageAdd(char *messageStr);
 void finished();
 
 void screenMouseCentreClick(int xPos, int yPos);
