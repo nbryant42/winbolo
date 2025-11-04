@@ -30,7 +30,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources (must precede any LANGUAGE statements)
+// Manifest resource (must precede any LANGUAGE statements)
 
 CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "app.manifest"
 
