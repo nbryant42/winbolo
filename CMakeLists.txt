@@ -86,6 +86,7 @@ file(GLOB CLIENT_SOURCES
     winbolo/src/server/BigDigits/*.c
     winbolo/src/server/win32/servertransport.c
     winbolo/src/winbolonet/*.c
+    winbolo/src/common/*.c
 )
 
 # TODO: handle langdll/
@@ -120,7 +121,7 @@ target_link_libraries(WinBolo PRIVATE
     zlib
     shcore
 )
-target_link_options(WinBolo PRIVATE "/SUBSYSTEM:WINDOWS,10.0")
+target_link_options(WinBolo PRIVATE "/SUBSYSTEM:WINDOWS,10.0" "/MANIFEST:NO")
 
 # Brain Template.brn
 
@@ -255,6 +256,7 @@ target_link_options(WinBoloDS PRIVATE "/SUBSYSTEM:CONSOLE,10.0")
 
 file(GLOB LOGVIEWER_SOURCES
     winbolo/src/logviewer/*.c
+    winbolo/src/common/*.c
 )
 
 add_executable(LogViewer
@@ -276,7 +278,7 @@ target_link_libraries(LogViewer PRIVATE
     dsound
     zlib
 )
-target_link_options(LogViewer PRIVATE "/SUBSYSTEM:WINDOWS,10.0")
+target_link_options(LogViewer PRIVATE "/SUBSYSTEM:WINDOWS,10.0" "/MANIFEST:NO")
 
 set_target_properties(LogViewer PROPERTIES
     OUTPUT_NAME "Log Viewer"

@@ -249,22 +249,6 @@ int PASCAL WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, LPSTR szCmdLine, int nC
   return 0;
 }
 
-// set window size while accounting for how DPI affects the size of the non-client area.
-static BOOL SizeWindowForClient(HWND hWnd, int clientW, int clientH, UINT flags) {
-    RECT rc = { 0, 0, clientW, clientH };
-    DWORD style = (DWORD)GetWindowLongPtr(hWnd, GWL_STYLE);
-    DWORD ex = (DWORD)GetWindowLongPtr(hWnd, GWL_EXSTYLE);
-    BOOL  hasMenu = (GetMenu(hWnd) != NULL);
-
-    UINT dpi = GetDpiForWindow(hWnd);
-    if (!AdjustWindowRectExForDpi(&rc, style, hasMenu, ex, dpi)) {
-        // failed; fall back to the old, hardcoded logic.
-        return SetWindowPos(hWnd, HWND_NOTOPMOST, 0, 0, clientW + 4, clientH + 42, flags);
-    }
-
-    return SetWindowPos(hWnd, HWND_NOTOPMOST, 0, 0, rc.right - rc.left, rc.bottom - rc.top, flags);
-}
-
 /*********************************************************
 *NAME:          windowCreate
 *AUTHOR:        John Morrison

@@ -36,6 +36,7 @@
 #include "dns.h"
 #include "positions.h"
 #include "resource.h"
+#include "../common/util.h"
 
 
 #define UWM_ADDSTRING (WM_APP + 1)
@@ -536,7 +537,8 @@ BOOL CALLBACK copyClipboardCallback(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
   return CallWindowProc((WNDPROC)oldWndProc, hWnd, uMsg, wParam, lParam);
 }
 
-
+#define ceilDiv(a, b) (((a) + (b) - 1) / (b))
+#define pix2screen(px) (max(5, min(99, ceilDiv((px), 16))))
 
 BOOL CALLBACK dialogGameInfoCallback(HWND hWnd, unsigned uMsg, WPARAM wParam, LPARAM lParam) {
   HDC hDC;
@@ -1011,13 +1013,13 @@ void windowKeyPressed(int keyCode) {
 *********************************************************/
 void frontEndDrawMainScreen(screen *value, screenMines *mineView, screenTanks *tks, screenGunsight *gs, screenBullets *sBullet, screenLgm *lgms, long srtDelay, bool isPillView, int edgeX, int edgeY) {
   RECT rcWindow;
-  clientMutexRelease();
   if (GetClientRect(hMainWnd, &rcWindow )) {
     /* Convert the coordinates from client relative to screen relative. */
     if (ClientToScreen(hMainWnd, (LPPOINT) &rcWindow )) {
       drawMainScreen(value,mineView,tks, gs, sBullet, lgms, &rcWindow, FALSE, FALSE, srtDelay, isPillView, edgeX, edgeY, FALSE, 0, 0);
     }
   }
+  clientMutexRelease();
 }
 
 void CALLBACK windowFrameTimer(UINT uID, UINT uMsg, DWORD dwUser, DWORD dw1, DWORD dw2) {
@@ -1439,6 +1441,27 @@ LRESULT CALLBACK ExWindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
       clientMutexRelease();
     }
     break;
+  case WM_GETMINMAXINFO:
+    {
+	  RECT windowRect = { 0 };
+	  GetWindowRect(hWnd, &windowRect);
+
+	  RECT clientRect = { 0 };
+	  GetClientRect(hWnd, &clientRect);
+
+      LPMINMAXINFO lpMMI = (LPMINMAXINFO) lParam;
+      lpMMI->ptMaxTrackSize.x = 99 * 16 + windowRect.right - windowRect.left - clientRect.right;
+      lpMMI->ptMaxTrackSize.y = 99 * 16 + windowRect.bottom - windowRect.top - clientRect.bottom;
+    }
+	break;
+  case WM_SIZE:
+    clientMutexWaitFor();
+    screenSetSizeX(pix2screen(LOWORD(lParam)));
+    screenSetSizeY(pix2screen(HIWORD(lParam)));
+    drawCleanup();
+    drawSetup(appInst, hMainWnd);
+    clientMutexRelease();
+    break;
   case WM_COMMAND:
     switch (LOWORD (wParam)) {
     case ID_FILE_EXIT:
@@ -1677,7 +1700,7 @@ HWND windowCreate(HINSTANCE hInst, int nCmdShow) {
   wc.cbWndExtra     = 0;
   wc.hbrBackground  = 0;
 
-  // Get the screen size from the log file
+  // Get the screen size from the INI file
   GetPrivateProfileString("LOGVIEWER", "ScreenSizeX", "50", line, 256, PREFERENCE_FILE);
   sizeX = atoi(line);
   if (sizeX < 5 || sizeX > 99) {
@@ -1698,7 +1721,7 @@ HWND windowCreate(HINSTANCE hInst, int nCmdShow) {
     returnValue = CreateWindow(
      "LOGVIEW",                 /* Class name */
      "Log Viewer",                     /* Caption */ 
-    (WS_OVERLAPPED + WS_CAPTION + WS_SYSMENU + WS_MINIMIZEBOX), /* Style */
+    (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_SIZEBOX), /* Style */
      CW_USEDEFAULT, CW_USEDEFAULT,   /* Position */
      sizeX* 16 + 4, sizeY * 16 + 42,   /* Size */
      NULL,							             /* No parent */
@@ -2218,7 +2241,7 @@ int PASCAL WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, LPSTR szCmdLine, int nC
 
 void windowResize() {
   clientMutexWaitFor();
-  SetWindowPos(hMainWnd, NULL, 0, 0, screenGetSizeX()* 16 + 4, screenGetSizeY()* 16 + 42, SWP_NOMOVE);
+  SizeWindowForClient(hMainWnd, screenGetSizeX() * 16, screenGetSizeY() * 16, SWP_NOMOVE);
   drawCleanup();
   drawSetup(appInst, hMainWnd );
   clientMutexRelease();

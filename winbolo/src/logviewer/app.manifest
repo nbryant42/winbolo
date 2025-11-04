@@ -2,7 +2,7 @@
 <assembly manifestVersion="1.0"
           xmlns="urn:schemas-microsoft-com:asm.v1"
           xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
-	<asmv3:assemblyIdentity version="1.0.1.8" name="WinBolo"/>
+	<asmv3:assemblyIdentity version="1.0.0.1" name="WinBolo.LogViewer"/>
 	<asmv3:trustInfo>
 		<asmv3:security>
 			<asmv3:requestedPrivileges>
