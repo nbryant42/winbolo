@@ -487,7 +487,7 @@ void screenSetPos(BYTE xValue, BYTE yValue, BYTE terrain) {
 BYTE screenGetPos(screen *value,BYTE xValue, BYTE yValue) {
   BYTE returnValue = DEEP_SEA; /* Value to return */
 
-  if (xValue < screenGetSizeX() && yValue < screenGetSizeX()) {
+  if (xValue < screenGetSizeX() && yValue < screenGetSizeY()) {
       returnValue = *((*view).screenItem+(yValue*screenGetSizeX()+xValue));
   }
   return returnValue;
