@@ -140,12 +140,6 @@ set_target_properties(BrainTemplate PROPERTIES
     SUFFIX ".brn"
 )
 
-# make default calling conv stdcall, and keep undecorated export name
-if (MSVC)
-  target_compile_options(BrainTemplate PRIVATE /Gz)
-  target_link_options(BrainTemplate PRIVATE "/EXPORT:BrainMain=_BrainMain@4")
-endif()
-
 # Ryan2.brn
 
 file(GLOB RYAN2_SOURCES
@@ -167,12 +161,6 @@ target_link_libraries(Ryan2 PRIVATE
     ws2_32
 )
 
-# make default calling conv stdcall, and keep undecorated export name
-if (MSVC)
-  target_compile_options(Ryan2 PRIVATE /Gz)
-  target_link_options(Ryan2 PRIVATE "/EXPORT:BrainMain=_BrainMain@4")
-endif()
-
 # Standard Autopilo.brn
 
 file(GLOB STANDARD_AUTOPILOT_SOURCES
@@ -190,13 +178,6 @@ set_target_properties(StandardAutopilot PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Brains"
     SUFFIX ".brn"
 )
-
-# make default calling conv stdcall, and keep undecorated export name
-if (MSVC)
-  target_compile_options(StandardAutopilot PRIVATE /Gz)
-  target_link_options(StandardAutopilot PRIVATE "/EXPORT:BrainMain=_BrainMain@4")
-endif()
-
 
 # BoloSounds.bsd (DLL containing only WAV resources)
 

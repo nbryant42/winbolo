@@ -51,7 +51,7 @@ int brainsNum; /* Number of brains */
 bool brainsRunning; /* Is a brain running */
 UINT brainsRunningId; /* The ID Number of the brain */
 HINSTANCE brainsInst; /* Brains Instance */
-FARPROC brainsProc;   /* The brains Proceedure */
+int (*brainsProc)();   /* The brains Proceedure */
 bool bIsFirst;        /* Is this the first time a brain will be called */
 bool brainsProcExecuting = FALSE; /* Is the brain proc in execution */
 BrainInfo bInfo; /* The Brain Info */
@@ -258,7 +258,7 @@ bool brainsHandlerStart(HWND hWnd, char *str, char *name) {
   }
 
   if (returnValue == TRUE) {
-    brainsProc = GetProcAddress(brainsInst, BRAINMAIN_PROC);
+    brainsProc = (int(*)())GetProcAddress(brainsInst, BRAINMAIN_PROC);
     if (brainsProc == NULL) {
       MessageBoxA(hWnd, langGetText(STR_BRAINERR_LAUNCHMAIN), DIALOG_BOX_TITLE, MB_ICONEXCLAMATION);
       returnValue = FALSE;
