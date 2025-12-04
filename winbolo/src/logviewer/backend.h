@@ -470,6 +470,9 @@ BYTE screenGetSizeY();
 void screenSetSizeX(BYTE x);
 void screenSetSizeY(BYTE y);
 
+void screenGetOffsets(BYTE *x, BYTE *y);
+void screenPanToOffsets(BYTE newXOffset, BYTE newYOffset);
+
 void windowAddEvent(int eventType, char *msg);
 void finished();
 

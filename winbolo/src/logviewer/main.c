@@ -54,6 +54,7 @@
    0 and 1's for checked arguments */
 #define MENU_CHECK_WIN32(X) ((X==0) ? (MF_UNCHECKED) : (MF_CHECKED))
 #define MENU_ENABLE_WIN32(X) ((X==0) ? (MF_GRAYED) : (MF_ENABLED))
+#define DRAG_THRESHOLD 4
 
 void windowPlay();
 void windowPause();
@@ -96,6 +97,11 @@ bool useTeamColours = FALSE;
 BYTE speed;
 bool useFullscreen;
 int timerSleep;
+bool isDragging = FALSE;
+bool isMouseDown = FALSE;
+POINT dragStartPos = { 0 };
+BYTE dragStartOffsetX = 0;
+BYTE dragStartOffsetY = 0;
 
 void frontEndPlaySound(sndEffects value) {
   if (isSoundsPlaying == TRUE) {
@@ -1412,18 +1418,67 @@ LRESULT CALLBACK ExWindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
   case WM_LBUTTONDOWN:
     xPos = LOWORD(lParam);  // horizontal position of cursor 
     yPos = HIWORD(lParam);  // vertical position of cursor 
-
+    isMouseDown = TRUE;
+    isDragging = FALSE;
+    dragStartPos.x = xPos;
+    dragStartPos.y = yPos;
     clientMutexWaitFor();
-    if (GetMenuState(GetMenu(hWnd), ID_OPTIONS_MODE_SELECTTEAM, MF_BYCOMMAND) == MF_CHECKED) {
-      screenMouseClick(xPos, yPos);
-    } else {
-      screenMouseInformationClick(xPos, yPos);
-    }
-    if (playIsPlaying == FALSE && isLoaded == TRUE) {
-      windowNeedRedraw(hWnd);
-    }
-
+    screenGetOffsets(&dragStartOffsetX, &dragStartOffsetY);
     clientMutexRelease();
+    SetCapture(hWnd);
+    break;
+  case WM_MOUSEMOVE:
+    if (isMouseDown == TRUE) {
+      xPos = LOWORD(lParam);
+      yPos = HIWORD(lParam);
+      {
+        int deltaX = xPos - dragStartPos.x;
+        int deltaY = yPos - dragStartPos.y;
+        if (isDragging == FALSE) {
+          if (deltaX >= DRAG_THRESHOLD || deltaX <= -DRAG_THRESHOLD || deltaY >= DRAG_THRESHOLD || deltaY <= -DRAG_THRESHOLD) {
+            isDragging = TRUE;
+          }
+        }
+        if (isDragging == TRUE && isLoaded == TRUE) {
+          int tileDeltaX = deltaX / 16;
+          int tileDeltaY = deltaY / 16;
+          BYTE newXOffset = (BYTE) (dragStartOffsetX - tileDeltaX);
+          BYTE newYOffset = (BYTE) (dragStartOffsetY - tileDeltaY);
+          clientMutexWaitFor();
+          screenPanToOffsets(newXOffset, newYOffset);
+          clientMutexRelease();
+        }
+      }
+    }
+    break;
+  case WM_LBUTTONUP:
+    xPos = LOWORD(lParam);  // horizontal position of cursor 
+    yPos = HIWORD(lParam);  // vertical position of cursor 
+    if (isMouseDown == TRUE) {
+      if (isDragging == TRUE && isLoaded == TRUE) {
+        int deltaX = xPos - dragStartPos.x;
+        int deltaY = yPos - dragStartPos.y;
+        BYTE newXOffset = (BYTE) (dragStartOffsetX - (deltaX / 16));
+        BYTE newYOffset = (BYTE) (dragStartOffsetY - (deltaY / 16));
+        clientMutexWaitFor();
+        screenPanToOffsets(newXOffset, newYOffset);
+        clientMutexRelease();
+      } else {
+        clientMutexWaitFor();
+        if (GetMenuState(GetMenu(hWnd), ID_OPTIONS_MODE_SELECTTEAM, MF_BYCOMMAND) == MF_CHECKED) {
+          screenMouseClick(xPos, yPos);
+        } else {
+          screenMouseInformationClick(xPos, yPos);
+        }
+        if (playIsPlaying == FALSE && isLoaded == TRUE) {
+          windowNeedRedraw(hWnd);
+        }
+        clientMutexRelease();
+      }
+      isMouseDown = FALSE;
+      isDragging = FALSE;
+      ReleaseCapture();
+    }
     break;
   case WM_RBUTTONDOWN:
     xPos = LOWORD(lParam);  // horizontal position of cursor 

@@ -1294,6 +1294,27 @@ void screenSetSizeY(BYTE y) {
 
 }
 
+void screenGetOffsets(BYTE *x, BYTE *y) {
+  if (x != NULL) {
+    *x = xOffset;
+  }
+  if (y != NULL) {
+    *y = yOffset;
+  }
+}
+
+void screenPanToOffsets(BYTE newXOffset, BYTE newYOffset) {
+  if (logLoaded == FALSE) {
+    return;
+  }
+  if (newXOffset == xOffset && newYOffset == yOffset) {
+    return;
+  }
+  xOffset = newXOffset;
+  yOffset = newYOffset;
+  screenUpdate(redraw);
+}
+
 void messageAdd(char *messageStr) {
   windowAddEvent(0, messageStr);
 }
