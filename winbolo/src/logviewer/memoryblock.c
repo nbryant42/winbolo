@@ -197,7 +197,7 @@ unsigned long mbPutData(memoryblock *value, BYTE *buff, unsigned long start, uns
   unsigned long count = 0;
   unsigned long startOffset = start - (*value)->start;
 
-  if (start - (*value)->start >= 0 && startOffset < (*value)->start + (*value)->size) {
+  if (start >= (*value)->start && startOffset < (*value)->size) {
     while (count < len && (*value)->end < (*value)->size) {
       (*value)->mem[count+startOffset] = buff[count];
       (*value)->end++;
